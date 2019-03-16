@@ -1,10 +1,9 @@
 cmake_minimum_required(VERSION 3.10)
 project(raytracer)
 
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_FLAGS "-Ofast -Wall -Wextra -fopenmp -ffast-math")# -funroll-loops")
 
-include_directories(include/glm)
 include_directories(include/sdl/include/SDL2)
 include_directories(Source)
 
@@ -17,9 +16,8 @@ add_executable(raytracer
         Source/triangle.h
         Source/utils.cpp
         Source/utils.h
-        Source/vectors.h)
+        Source/vector_type.h Source/math_utils.h Source/ray.h Source/camera.h)
 
 find_library(SDL_LIB libsdl2 HINTS include/sdl/lib)
 target_link_libraries(raytracer PUBLIC ${SDL_LIB})
 
-#set_target_properties(raytracer PROPERTIES COMPILE_FLAGS "-save-temps")

@@ -3,8 +3,8 @@
 
 #include "triangle.h"
 #include "utils.h"
-
-#include <glm/glm.hpp>
+#include "vector_type.h"
+#include "ray.h"
 
 #include <vector>
 
@@ -12,9 +12,8 @@ namespace scg
 {
 
 bool getClosestIntersection(
-    glm::vec4 start,
-    glm::vec4 dir,
-    const std::vector <Triangle> &triangles,
+    Ray const& ray,
+    std::vector <Triangle> const& triangles,
     Intersection &closestIntersection);
 
 }

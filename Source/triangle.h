@@ -1,7 +1,7 @@
 #ifndef RAYTRACER_TRIANGLE_H
 #define RAYTRACER_TRIANGLE_H
 
-#include <glm/glm.hpp>
+#include "vector_type.h"
 
 namespace scg
 {
@@ -10,13 +10,13 @@ namespace scg
 class Triangle
 {
 public:
-    glm::vec4 v0;
-    glm::vec4 v1;
-    glm::vec4 v2;
-    glm::vec4 normal;
-    glm::vec3 color;
+    Vec3f v0;
+    Vec3f v1;
+    Vec3f v2;
+    Vec3f normal;
+    Vec3f color;
 
-    Triangle(glm::vec4 v0, glm::vec4 v1, glm::vec4 v2, glm::vec3 color);
+    Triangle(Vec3f v0, Vec3f v1, Vec3f v2, Vec3f color);
 
     void ComputeNormal();
 };

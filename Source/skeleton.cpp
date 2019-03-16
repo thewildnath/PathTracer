@@ -1,18 +1,20 @@
+#include "camera.h"
+#include "ray.h"
 #include "raytrace.h"
 #include "SDLauxiliary.h"
 #include "triangle.h"
 #include "utils.h"
-#include "vectors.h"
+#include "vector_type.h"
 
-#include <glm/glm.hpp>
 #include <SDL.h>
 
 #include <iostream>
 #include <cstdint>
 
-#define RES 400
-#define SCREEN_WIDTH RES
+#define RES 750
+#define SCREEN_WIDTH  RES
 #define SCREEN_HEIGHT RES
+#define FOCAL_LENGTH  RES
 #define FULLSCREEN_MODE false
 
 #undef main // Bloody hell, hope it doesn't come back and haunt me
@@ -22,13 +24,13 @@
 bool Update();
 void Draw(screen *screen);
 
+scg::Camera camera{
+    {0, 0, -3.2},
+    SCREEN_WIDTH,
+    SCREEN_HEIGHT,
+    FOCAL_LENGTH};
+
 std::vector<scg::Triangle> triangles;
-
-int focalLength = RES;
-glm::vec4 cameraPos(0, 0, -3.2, 1);
-
-float fovH = 1;
-float fovV = 1;
 
 int main(int argc, char *argv[])
 {
@@ -59,15 +61,12 @@ void Draw(screen *screen)
     {
         for (int x = 0; x < SCREEN_WIDTH; ++x)
         {
-            glm::vec4 dir(
-                ((float)x - SCREEN_WIDTH / 2) * fovH,
-                ((float)y - SCREEN_HEIGHT / 2) * fovV,
-                focalLength, 1);
+            scg::Ray ray = camera.getRay(x, y);
 
             scg::Intersection closestIntersection;
-            if (getClosestIntersection(cameraPos, dir, triangles, closestIntersection))
+            if (getClosestIntersection(ray, triangles, closestIntersection))
             {
-                glm::vec3 colour = triangles[closestIntersection.triangleIndex].color;
+                scg::Vec3f colour = triangles[closestIntersection.triangleIndex].color;
                 PutPixelSDL(screen, x, y, scg::Vec3f(colour.r, colour.g, colour.b));
             }
         }
@@ -98,19 +97,19 @@ bool Update()
             {
                 case SDLK_UP:
                     /* Move camera forward */
-                    cameraPos.z += 0.2f;
+                    camera.position.z += 0.2f;
                     break;
                 case SDLK_DOWN:
                     /* Move camera backwards */
-                    cameraPos.z -= 0.2f;
+                    camera.position.z -= 0.2f;
                     break;
                 case SDLK_LEFT:
                     /* Move camera left */
-                    cameraPos.x -= 0.2f;
+                    camera.position.x -= 0.2f;
                     break;
                 case SDLK_RIGHT:
                     /* Move camera right */
-                    cameraPos.x += 0.2f;
+                    camera.position.x += 0.2f;
                     break;
                 case SDLK_ESCAPE:
                     /* Move camera quit */

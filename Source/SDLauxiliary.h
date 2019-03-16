@@ -1,7 +1,8 @@
 #ifndef SDL_AUXILIARY_H
 #define SDL_AUXILIARY_H
 
-#include "vectors.h"
+#include "math_utils.h"
+#include "vector_type.h"
 
 #include "SDL.h"
 
@@ -155,9 +156,9 @@ void PutPixelSDL(screen* s, int x, int y, scg::Vec3f colour)
         std::cout << "apa" << std::endl;
         return;
     }
-    uint32_t r = uint32_t( glm::clamp( 255*colour.r, 0.f, 255.f ) );
-    uint32_t g = uint32_t( glm::clamp( 255*colour.g, 0.f, 255.f ) );
-    uint32_t b = uint32_t( glm::clamp( 255*colour.b, 0.f, 255.f ) );
+    uint32_t r = uint32_t( clamp( 255*colour.r, 0.f, 255.f ) );
+    uint32_t g = uint32_t( clamp( 255*colour.g, 0.f, 255.f ) );
+    uint32_t b = uint32_t( clamp( 255*colour.b, 0.f, 255.f ) );
 
     s->buffer[y*s->width+x] = (128<<24) + (r<<16) + (g<<8) + b;
 }

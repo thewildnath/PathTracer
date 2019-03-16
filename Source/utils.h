@@ -3,7 +3,7 @@
 
 #include "triangle.h"
 
-#include <glm/glm.hpp>
+#include "vector_type.h"
 
 #include <vector>
 
@@ -12,7 +12,7 @@ namespace scg
 
 struct Intersection
 {
-    glm::vec4 position;
+    Vec3f position;
     float distance;
     int triangleIndex;
 };
