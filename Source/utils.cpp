@@ -10,7 +10,7 @@ namespace scg
 
 void LoadTestModel(std::vector <Triangle> &triangles)
 {
-    // Defines colors:
+    // Defines colours:
     Vec3f red(0.75f, 0.15f, 0.15f);
     Vec3f yellow(0.75f, 0.75f, 0.15f);
     Vec3f green(0.15f, 0.75f, 0.15f);

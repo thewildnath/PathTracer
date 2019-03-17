@@ -14,9 +14,9 @@ public:
     Vec3f v1;
     Vec3f v2;
     Vec3f normal;
-    Vec3f color;
+    Vec3f colour;
 
-    Triangle(Vec3f v0, Vec3f v1, Vec3f v2, Vec3f color);
+    Triangle(Vec3f v0, Vec3f v1, Vec3f v2, Vec3f colour);
 
     void ComputeNormal();
 };

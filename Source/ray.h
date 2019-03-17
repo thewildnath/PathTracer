@@ -15,7 +15,7 @@ public:
     Ray() = default;
 
     Ray(Vec3f const& origin, Vec3f const& direction):
-        origin(origin), direction(direction) {};
+        origin(origin), direction(normalise(direction)) {};
 
     inline Vec3f operator()(float const t) const
     {

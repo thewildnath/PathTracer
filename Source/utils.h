@@ -10,13 +10,6 @@
 namespace scg
 {
 
-struct Intersection
-{
-    Vec3f position;
-    float distance;
-    int triangleIndex;
-};
-
 // Loads the Cornell Box. It is scaled to fill the volume:
 // -1 <= x <= +1
 // -1 <= y <= +1

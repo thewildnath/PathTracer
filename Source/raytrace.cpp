@@ -1,9 +1,8 @@
 #include "raytrace.h"
 
+#include "intersection.h"
 #include "vector_type.h"
 #include "ray.h"
-
-//#include "glm/glm.hpp"
 
 #include <limits>
 
@@ -12,7 +11,46 @@ namespace scg
 
 bool getClosestIntersection(
     Ray const& ray,
-    std::vector <Triangle> const& triangles,
+    std::vector<Object> const& objects,
+    Intersection &closestIntersection,
+    Material& material)
+{
+    float minDistance = std::numeric_limits<float>::max();
+    int index = -1;
+
+    for (int i = 0; i < (int)objects.size(); ++i)
+    {
+        Intersection intersection;
+
+        if (objects[i].getIntersection(ray, intersection))
+        {
+            if (intersection.distance < minDistance)
+            {
+                minDistance = intersection.distance;
+                index = i;
+                closestIntersection = intersection;
+            }
+        }
+    }
+
+    if (index == -1)
+    {
+        return false;
+    }
+
+    //closestIntersection.distance = minDistance;
+    //closestIntersection.position = ray(minDistance);
+    material = objects[index].material;
+
+    return true;
+}
+
+
+/*
+//Möller–Trumbore intersection algorithm
+bool getClosestIntersection(
+    Ray const& ray,
+    std::vector<Object> const& object,
     Intersection &closestIntersection)
 {
     float minDistance = std::numeric_limits<float>::max();
@@ -74,7 +112,7 @@ bool getClosestIntersection(
 
     return true;
 }
-
+*/
 /*
 bool getClosestIntersection(
     Vec3f start,

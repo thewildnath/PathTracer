@@ -1,6 +1,8 @@
 #ifndef RAYTRACER_VECTORS_H
 #define RAYTRACER_VECTORS_H
 
+#include "math_utils.h"
+
 #include <cmath>
 #include <iostream>
 #include <utility>
@@ -12,19 +14,27 @@ template<int DIM, typename T>
 class Vector
 {
 public:
-    union {
+    union
+    {
         // TODO: check order
-        struct {
+        struct
+        {
             T x;
             T y;
             T z;
             T w;
         };
-        struct {
+        struct
+        {
             T r;
             T g;
             T b;
             T a;
+        };
+        struct
+        {
+            T u;
+            T v;
         };
         T data[DIM];
     };
@@ -45,7 +55,7 @@ public:
 //    }
 
     template <typename... Args>
-    /*explicit*/ Vector(Args... args) : data{ T(args)... } {
+    Vector(Args... args) : data{ T(args)... } {
         static_assert(sizeof...(Args) == DIM, "Wrong number of arguments.");
     }
 
@@ -59,16 +69,6 @@ public:
         return std::sqrt(length);
     }
 
-    inline Vector& normalise()
-    {
-        T length = this->length();
-        for (int i = 0; i < DIM; ++i)
-        {
-            this->data[i] /= length;
-        }
-        return *this;
-    }
-
     friend std::ostream& operator<<(std::ostream& out, Vector const& arg)
     {
         out << "Vector{ ";
@@ -80,8 +80,8 @@ public:
         return out;
     }
 
-    inline T operator [](int i) const { return this->data[i]; }
-    inline T& operator [](int i) { return this->data[i]; }
+    //inline T operator [](int i) const { return this->data[i]; }
+    //inline T& operator [](int i) { return this->data[i]; }
 
     template<typename V>
     inline Vector operator +(V const& arg) const
@@ -262,16 +262,32 @@ public:
     }
 };
 
+// Useful types
 typedef Vector<2, int> Vec2i;
+typedef Vector<2, float> Vec2f;
 typedef Vector<3, float> Vec3f;
+
+// Vector methods
+template<int DIM, typename T>
+inline Vector<DIM, T> normalise(Vector<DIM, T> const& a)
+{
+    Vector<DIM, T> result;
+    T length = a.length();
+    for (int i = 0; i < DIM; ++i)
+    {
+        result.data[i] = a.data[i] / length;
+    }
+    return result;
+}
 
 template<typename T>
 inline Vector<3, T> cross(Vector<3, T> const& a, Vector<3, T> const& b)
 {
-    return Vector<3, T>(
+    return Vector<3, T>{
         a.y * b.z - b.y * a.z,
         a.z * b.x - b.z * a.x,
-        a.x * b.y - b.x * a.y);
+        a.x * b.y - b.x * a.y
+    };
 }
 
 template<int DIM, typename T>
@@ -283,6 +299,51 @@ inline T dot(Vector<DIM, T> const& a, Vector<DIM, T> const& b)
         result += a.data[i] * b.data[i];
     }
     return result;
+}
+
+template<typename T>
+inline Vector<3, T> rotateX(Vector<3, T> const& a, float radians)
+{
+    float sin = std::sin(radians);
+    float cos = std::cos(radians);
+
+    return Vector<3, T>{
+        a.x,
+        a.y * cos - a.z * sin,
+        a.y * sin + a.z * cos
+    };
+}
+
+template<typename T>
+inline Vector<3, T> rotateY(Vector<3, T> const& a, float radians)
+{
+    float sin = std::sin(radians);
+    float cos = std::cos(radians);
+
+    return Vector<3, T>{
+        a.x * cos + a.z * sin,
+        a.y,
+        -a.x * sin + a.z * cos
+    };
+}
+
+template<typename T>
+inline Vector<3, T> rotateZ(Vector<3, T> const& a, float radians)
+{
+    float sin = std::sin(radians);
+    float cos = std::cos(radians);
+
+    return Vector<3, T>(
+        a.x * cos - a.y * sin,
+        a.x * sin + a.y * cos,
+        a.z
+    );
+}
+
+template<typename T>
+inline Vector<3, T> rotate(Vector<3, T> const& a, Vector<3, T> const& rot)
+{
+    return rotateZ(rotateX(rotateY(a, toRadians(rot.y)), toRadians(rot.x)), toRadians(rot.z));
 }
 
 }

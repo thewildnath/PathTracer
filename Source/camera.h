@@ -10,13 +10,13 @@ class Camera
 {
 public:
     Vec3f position;
-    //Vec3f rotation;
+    Vec3f rotation;
 
     int width;
     int height;
     float focalLength;
 
-    Camera() = default;
+    //Camera() = default;
 
     Ray getRay(int const x, int const y) const
     {
@@ -24,6 +24,7 @@ public:
             ((float)x - width / 2),
             ((float)y - height / 2),
             focalLength};
+        dir = rotate(dir, rotation);
 
         return Ray{position, dir};
     }
