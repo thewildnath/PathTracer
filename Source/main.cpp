@@ -27,28 +27,34 @@ bool Update();
 void Draw(screen *screen);
 
 scg::Camera camera{
-    {0, 0, -3.2},
-    {0, 0, 0},
+    scg::Vec3f(0, 0, -3.2),
+    scg::Vec3f(0, 0, 0),
     SCREEN_WIDTH,
     SCREEN_HEIGHT,
     FOCAL_LENGTH};
 
-//std::vector<scg::Triangle> triangles;
 std::vector<scg::Object> objects;
 
 int main(int argc, char *argv[])
 {
     screen *screen = InitializeSDL(SCREEN_WIDTH, SCREEN_HEIGHT, FULLSCREEN_MODE);
 
-    //scg::LoadTestModel(triangles);
+    scg::Mesh mesh;
+    scg::LoadTestModel(mesh.triangles);
+
+    objects.emplace_back(scg::Object(
+        scg::Vec3f(0, 0, 0),
+        scg::Material({1, 1, 1}),
+        *(new scg::Mesh(mesh.triangles)))); // TODO: why doesn't this work?
+        //mesh));
     objects.emplace_back(scg::Object(
         scg::Vec3f(0, 0, 0),
         scg::Material({0, 0, 1}),
-        scg::Sphere(0.5f)));
+        *(new scg::Sphere(0.5f)))); // TODO: why doesn't this work?
     objects.emplace_back(scg::Object(
         scg::Vec3f(1, 0.5f, 2),
         scg::Material({1, 0, 0}),
-        scg::Sphere(1)));
+        *(new scg::Sphere(1)))); // TODO: why doesn't this work?
 
     while (Update())
     {
@@ -68,7 +74,7 @@ void Draw(screen *screen)
     /* Clear buffer */
     memset(screen->buffer, 0, screen->height * screen->width * sizeof(uint32_t));
 
-    #pragma omp parallel for schedule(dynamic) collapse(2)
+    #pragma omp parallel for schedule(dynamic)// collapse(2)
     for (int y = 0; y < SCREEN_HEIGHT; ++y)
     {
         for (int x = 0; x < SCREEN_WIDTH; ++x)
@@ -78,9 +84,13 @@ void Draw(screen *screen)
             scg::Intersection intersection;
             scg::Material material;
 
-            if (getClosestIntersection(ray, objects, intersection, material))
+            if (scg::getClosestIntersection(ray, objects, intersection, material))
             {
-                scg::Vec3f colour  = material.getColor(intersection.uv);
+                scg::Vec3f colour = material.getColor(intersection.uv);
+
+                float light = scg::dot(intersection.normal, scg::normalise(scg::Vec3f(0, 0, 1)));
+                colour *= light;
+
                 PutPixelSDL(screen, x, y, scg::Vec3f(colour.r, colour.g, colour.b));
             }
         }

@@ -21,8 +21,8 @@ public:
     Ray getRay(int const x, int const y) const
     {
         Vec3f dir{
-            ((float)x - width / 2),
-            ((float)y - height / 2),
+            ((float)x - width / 2.0f),
+            ((float)y - height / 2.0f),
             focalLength};
         dir = rotate(dir, rotation);
 

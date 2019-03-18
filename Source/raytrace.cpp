@@ -38,81 +38,11 @@ bool getClosestIntersection(
         return false;
     }
 
-    //closestIntersection.distance = minDistance;
-    //closestIntersection.position = ray(minDistance);
     material = objects[index].material;
 
     return true;
 }
 
-
-/*
-//Möller–Trumbore intersection algorithm
-bool getClosestIntersection(
-    Ray const& ray,
-    std::vector<Object> const& object,
-    Intersection &closestIntersection)
-{
-    float minDistance = std::numeric_limits<float>::max();
-    int index = -1;
-
-    for (int i = 0; i < (int)triangles.size(); ++i)
-    {
-        const float EPSILON = 0.0000001f;
-        Vec3f vertex0 = triangles[i].v0;
-        Vec3f vertex1 = triangles[i].v1;
-        Vec3f vertex2 = triangles[i].v2;
-        Vec3f edge1, edge2, h, s, q;
-        float a, f, u, v;
-
-        edge1 = vertex1 - vertex0;
-        edge2 = vertex2 - vertex0;
-
-        h = cross(ray.direction, edge2);
-        a = dot(edge1, h);
-
-        if (a > -EPSILON && a < EPSILON)
-            continue;
-
-        f = 1.0f / a;
-        s = ray.origin - vertex0;
-        u = f * (dot(s, h));
-
-        if (u < 0.0 || u > 1.0)
-            continue;
-
-        q = cross(s, edge1);
-        v = f * dot(ray.direction, q);
-
-        if (v < 0.0 || u + v > 1.0)
-            continue;
-
-        // At this stage we can compute t to find out where the intersection point is on the line.
-        float t = f * dot(edge2, q);
-
-        if (t > EPSILON) // Ray intersection
-        {
-            if (t < minDistance)
-            {
-                minDistance = t;
-                index = i;
-            }
-        }
-        // else: it means that there is a line intersection but not a ray intersection.
-    }
-
-    if (index == -1)
-    {
-        return false;
-    }
-
-    closestIntersection.distance = minDistance;
-    closestIntersection.position = ray(minDistance);
-    closestIntersection.triangleIndex = index;
-
-    return true;
-}
-*/
 /*
 bool getClosestIntersection(
     Vec3f start,

@@ -39,7 +39,7 @@ public:
         T data[DIM];
     };
 
-    Vector(){};
+    /*Vector(){};
 
     Vector(Vector const& arg)
     {
@@ -47,15 +47,20 @@ public:
         {
             this->data[i] = arg.data[i];
         }
-    }
+    }//*/
 
-//    template<typename... Args>
-//    explicit Vector(Args&&... args) : data{std::forward<T>(args)...} {
-//        static_assert(sizeof...(Args) == DIM, "You must provide N arguments.");
-//    }
+    /*Vector(Vector&& arg) noexcept
+    {
+        for (int i = 0; i < DIM; ++i)
+        {
+            this->data[i] = arg.data[i];
+        }
+    }*/
+    Vector() = default;
+    Vector(Vector const& arg) = default;
 
     template <typename... Args>
-    Vector(Args... args) : data{ T(args)... } {
+    /*explicit*/ Vector(Args... args) : data{ T(args)... } {
         static_assert(sizeof...(Args) == DIM, "Wrong number of arguments.");
     }
 
