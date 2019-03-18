@@ -88,7 +88,7 @@ void Draw(screen *screen)
             {
                 scg::Vec3f colour = material.getColor(intersection.uv);
 
-                float light = scg::dot(intersection.normal, scg::normalise(scg::Vec3f(0, 0, 1)));
+                float light = std::max(scg::dot(intersection.normal, scg::normalise(-ray.direction)), 0.1f);
                 colour *= light;
 
                 PutPixelSDL(screen, x, y, scg::Vec3f(colour.r, colour.g, colour.b));

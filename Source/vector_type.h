@@ -88,6 +88,18 @@ public:
     //inline T operator [](int i) const { return this->data[i]; }
     //inline T& operator [](int i) { return this->data[i]; }
 
+    // Unary operators
+    inline Vector operator -() const
+    {
+        Vector result;
+        for (int i = 0; i < DIM; ++i)
+        {
+            result.data[i] = -this->data[i];
+        }
+        return result;
+    }
+
+    // Binary operators
     template<typename V>
     inline Vector operator +(V const& arg) const
     {
