@@ -12,6 +12,7 @@
 #include <iostream>
 #include <cstdint>
 #include <cstring>
+#include <memory>
 
 #define RES 400
 #define SCREEN_WIDTH  RES
@@ -39,23 +40,19 @@ int main(int argc, char *argv[])
 {
     screen *screen = InitializeSDL(SCREEN_WIDTH, SCREEN_HEIGHT, FULLSCREEN_MODE);
 
-    scg::Mesh mesh;
-    scg::LoadTestModel(mesh.triangles);
+    std::vector<scg::Triangle> triangles;
+    scg::LoadTestModel(triangles);
 
-    objects.emplace_back(scg::Object(
-        scg::Vec3f(0, 0, 0),
-        scg::Material({1, 1, 1}),
-        *(new scg::Mesh(mesh.triangles)))); // TODO: why doesn't inplace work?
-        //mesh));
-    objects.emplace_back(scg::Object(
-        scg::Vec3f(0, 0, 0),
-        scg::Material({1, 1, 1}),
-        *(new scg::Sphere(0.5f))));
-    objects[1].material.emission = 10000;
-    /*objects.emplace_back(scg::Object(
-        scg::Vec3f(1, 0.5f, 2),
-        scg::Material({1, 0, 0}),
-        *(new scg::Sphere(1))));*/
+    objects.emplace_back(scg::Object{
+        {0, 0, 0},
+        {scg::Material{{1, 1, 1}}},
+        std::make_shared<scg::Mesh>(scg::Mesh(triangles))
+    });
+    objects.emplace_back(scg::Object{
+        {0, 0, 0},
+        {scg::Material{{1, 1, 1}, 10000}},
+        std::make_shared<scg::Sphere>(scg::Sphere(0.5f))
+    });
 
     while (Update())
     {

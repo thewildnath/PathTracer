@@ -38,7 +38,7 @@ bool getClosestIntersection(
         return false;
     }
 
-    material = objects[index].material;
+    material = objects[index].materials[0];
 
     return true;
 }

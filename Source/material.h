@@ -17,6 +17,9 @@ public:
     Material(Vec3f const& color):
         color(color) {};
 
+    Material(Vec3f const& color, float emission):
+        color(color), emission(emission) {};
+
     Vec3f getColour(Vec2f const& uv) const
     {
         return color;
