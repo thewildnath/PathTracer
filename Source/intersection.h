@@ -15,7 +15,8 @@ struct Intersection
     // Geometry normal at intersection point
     Vec3f normal;
 
-    // Texture UV coordinates for intersection point
+    // Material information
+    int materialID;
     Vec2f uv;
 };
 

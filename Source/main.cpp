@@ -82,10 +82,9 @@ void Draw(screen *screen)
         {
             scg::Ray ray = camera.getRay(x, y);
 
-            scg::Vec3f colour = scg::trace(ray, objects, 1);
-
-            PutPixelSDL(screen, x, y, scg::Vec3f(colour.r, colour.g, colour.b));
-            /*
+            //scg::Vec3f colour = scg::trace(ray, objects, 1);
+            //PutPixelSDL(screen, x, y, scg::Vec3f(colour.r, colour.g, colour.b));
+            //*
             scg::Intersection intersection;
             scg::Material material;
 
@@ -97,7 +96,7 @@ void Draw(screen *screen)
 
                 PutPixelSDL(screen, x, y, scg::Vec3f(colour.r, colour.g, colour.b));
             }
-            */
+            //*/
         }
     }
 }
