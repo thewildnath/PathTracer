@@ -15,13 +15,14 @@ class Material
 {
 public:
     Vec3f color;
+    double emission;
 
     Material() = default;
 
     Material(Vec3f const& color):
         color(color) {};
 
-    Vec3f getColor(Vec2f const& uv) const
+    Vec3f getColour(Vec2f const& uv) const
     {
         return color;
     }

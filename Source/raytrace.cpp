@@ -43,55 +43,86 @@ bool getClosestIntersection(
     return true;
 }
 
-/*
-bool getClosestIntersection(
-    Vec3f start,
-    Vec3f dir,
-    const std::vector <Triangle> &triangles,
-    Intersection &closestIntersection)
+// Uniform sampling on a hemisphere to produce outgoing ray directions.
+// courtesy of http://www.rorydriscoll.com/2009/01/07/better-sampling/
+Vec3f hemisphere(float u1, float u2)
 {
-    float minDistance = std::numeric_limits<float>::max();
-    int index = -1;
-
-    for (int i = 0; i < triangles.size(); ++i)
-    {
-        Triangle triangle = triangles[i];
-
-        Vec3f v0 = triangle.v0;
-        Vec3f v1 = triangle.v1;
-        Vec3f v2 = triangle.v2;
-
-        glm::vec3 d = glm::vec3(dir.x, dir.y, dir.z);
-        glm::vec3 e1 = glm::vec3(v1.x - v0.x, v1.y - v0.y, v1.z - v0.z);
-        glm::vec3 e2 = glm::vec3(v2.x - v0.x, v2.y - v0.y, v2.z - v0.z);
-        glm::vec3 b = glm::vec3(start.x - v0.x, start.y - v0.y, start.z - v0.z);
-        glm::mat3 A(-d, e1, e2);
-        glm::vec3 x = glm::inverse(A) * b;
-
-        float t = x.x;
-        float u = x.y;
-        float v = x.z;
-
-        if (0 <= u && 0 <= v && u + v <= 1)
-        {
-            if (t < minDistance)
-            {
-                minDistance = t;
-                index = i;
-            }
-        }
-    }
-
-    if (index == -1)
-    {
-        return false;
-    }
-
-    closestIntersection.distance = minDistance;
-    closestIntersection.position = start + dir * minDistance;
-    closestIntersection.triangleIndex = index;
-
-    return true;
+    const float r = std::sqrt(1.0f - u1 * u1);
+    const float phi = 2.0f * (float)M_PI * u2;
+    return Vec3f(std::cos(phi) * r, std::sin(phi) * r, u1);
 }
-*/
+
+void ons(Vec3f const& v1, Vec3f& v2, Vec3f& v3)
+{
+    if (std::abs(v1.x) > std::abs(v1.y)) {
+        // project to the y = 0 plane and construct a normalized orthogonal vector in this plane
+        float invLen = 1.0f / sqrtf(v1.x * v1.x + v1.z * v1.z);
+        v2 = Vec3f(-v1.z * invLen, 0.0f, v1.x * invLen);
+    } else {
+        // project to the x = 0 plane and construct a normalized orthogonal vector in this plane
+        float invLen = 1.0f / sqrtf(v1.y * v1.y + v1.z * v1.z);
+        v2 = Vec3f(0.0f, v1.z * invLen, -v1.y * invLen);
+    }
+
+    v3 = Vec3f(
+        v1.y * v2.z - v1.z * v2.y,
+        v1.z * v2.x - v1.x * v2.z,
+        v1.x * v2.y - v1.y * v2.x);
+}
+
+Vec3f trace(
+    Ray const& ray,
+    std::vector<Object> const& objects,
+    int depth)
+{
+    if (depth <= 0)
+    {
+        Ray newRay(ray.origin, objects[1].position - ray.origin);
+
+        Intersection intersection;
+        Material material;
+
+        if (!getClosestIntersection(newRay, objects, intersection, material))
+        {
+            return material.getColour(intersection.uv) * material.emission;
+        }
+
+        return Vec3f(0, 0, 0); // Ambient
+    }
+
+    Intersection intersection;
+    Material material;
+
+    if (!getClosestIntersection(ray, objects, intersection, material))
+    {
+        return Vec3f(0, 0, 0); // Ambient
+    }
+
+    Vec3f colour = material.getColour(intersection.uv) * material.emission;
+    Vec3f const& normal = intersection.normal;
+
+    // Diffuse
+    Vec3f rotX, rotY;
+    ons(normal, rotX, rotY);
+    Vec3f sampledDir(1, 1, 1);//= hemisphere(RND2,RND2);
+    Vec3f rotatedDir;
+    rotatedDir.x = dot(Vec3f(rotX.x, rotY.x, normal.x), sampledDir);
+    rotatedDir.y = dot(Vec3f(rotX.y, rotY.y, normal.y), sampledDir);
+    rotatedDir.z = dot(Vec3f(rotX.z, rotY.z, normal.z), sampledDir);
+
+    rotatedDir = normalise(rotatedDir); // TODO: remove?
+
+    Ray newRay;
+    newRay.origin = intersection.position + intersection.normal * 0.001f;
+    newRay.direction = normal; //rotatedDir;	// already normalized
+
+    double cost = dot(newRay.direction, normal);
+
+    Vec3f tmp = trace(newRay, objects, depth - 1);
+
+    colour = colour + multiply(tmp, material.getColour(intersection.uv)) * cost * 0.1f;
+
+    return colour;
+}
+
 }

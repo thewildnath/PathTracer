@@ -45,16 +45,17 @@ int main(int argc, char *argv[])
     objects.emplace_back(scg::Object(
         scg::Vec3f(0, 0, 0),
         scg::Material({1, 1, 1}),
-        *(new scg::Mesh(mesh.triangles)))); // TODO: why doesn't this work?
+        *(new scg::Mesh(mesh.triangles)))); // TODO: why doesn't inplace work?
         //mesh));
     objects.emplace_back(scg::Object(
         scg::Vec3f(0, 0, 0),
-        scg::Material({0, 0, 1}),
-        *(new scg::Sphere(0.5f)))); // TODO: why doesn't this work?
-    objects.emplace_back(scg::Object(
+        scg::Material({1, 1, 1}),
+        *(new scg::Sphere(0.5f))));
+    objects[1].material.emission = 10000;
+    /*objects.emplace_back(scg::Object(
         scg::Vec3f(1, 0.5f, 2),
         scg::Material({1, 0, 0}),
-        *(new scg::Sphere(1)))); // TODO: why doesn't this work?
+        *(new scg::Sphere(1))));*/
 
     while (Update())
     {
@@ -81,18 +82,22 @@ void Draw(screen *screen)
         {
             scg::Ray ray = camera.getRay(x, y);
 
+            scg::Vec3f colour = scg::trace(ray, objects, 1);
+
+            PutPixelSDL(screen, x, y, scg::Vec3f(colour.r, colour.g, colour.b));
+            /*
             scg::Intersection intersection;
             scg::Material material;
 
             if (scg::getClosestIntersection(ray, objects, intersection, material))
             {
-                scg::Vec3f colour = material.getColor(intersection.uv);
-
+                scg::Vec3f colour = material.getColour(intersection.uv);
                 float light = std::max(scg::dot(intersection.normal, scg::normalise(-ray.direction)), 0.1f);
                 colour *= light;
 
                 PutPixelSDL(screen, x, y, scg::Vec3f(colour.r, colour.g, colour.b));
             }
+            */
         }
     }
 }

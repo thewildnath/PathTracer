@@ -18,6 +18,10 @@ bool getClosestIntersection(
     Intersection &closestIntersection,
     Material& material);
 
+Vec3f trace(
+    Ray const& ray,
+    std::vector<Object> const& objects,
+    int depth);
 }
 
 #endif //RAYTRACE_H

@@ -39,23 +39,6 @@ public:
         T data[DIM];
     };
 
-    /*Vector(){};
-
-    Vector(Vector const& arg)
-    {
-        for (int i = 0; i < DIM; ++i)
-        {
-            this->data[i] = arg.data[i];
-        }
-    }//*/
-
-    /*Vector(Vector&& arg) noexcept
-    {
-        for (int i = 0; i < DIM; ++i)
-        {
-            this->data[i] = arg.data[i];
-        }
-    }*/
     Vector() = default;
     Vector(Vector const& arg) = default;
 
@@ -314,6 +297,17 @@ inline T dot(Vector<DIM, T> const& a, Vector<DIM, T> const& b)
     for (int i = 0; i < DIM; ++i)
     {
         result += a.data[i] * b.data[i];
+    }
+    return result;
+}
+
+template<int DIM, typename T>
+inline Vector<DIM, T> multiply(Vector<DIM, T> const& a, Vector<DIM, T> const& b)
+{
+    Vector<DIM, T> result;
+    for (int i = 0; i < DIM; ++i)
+    {
+        result.data[i] = a.data[i] * b.data[i];
     }
     return result;
 }
