@@ -12,8 +12,7 @@ namespace scg
 bool getClosestIntersection(
     Ray const& ray,
     std::vector<Object> const& objects,
-    Intersection &closestIntersection,
-    Material& material)
+    Intersection &closestIntersection)
 {
     float minDistance = std::numeric_limits<float>::max();
     int index = -1;
@@ -38,7 +37,7 @@ bool getClosestIntersection(
         return false;
     }
 
-    material = objects[index].materials[0];
+    closestIntersection.objectID = index;
 
     return true;
 }
@@ -82,7 +81,7 @@ Vec3f trace(
         Intersection intersection;
         Material material;
 
-        if (!getClosestIntersection(newRay, objects, intersection, material))
+        if (!getClosestIntersection(newRay, objects, intersection))
         {
             return material.getColour(intersection.uv) * material.emission;
         }
@@ -91,14 +90,13 @@ Vec3f trace(
     }
 
     Intersection intersection;
-    Material material;
 
-    if (!getClosestIntersection(ray, objects, intersection, material))
+    if (!getClosestIntersection(ray, objects, intersection))
     {
         return Vec3f(0, 0, 0); // Ambient
     }
 
-    Vec3f colour = material.getColour(intersection.uv) * material.emission;
+    //Vec3f colour = material.getColour(intersection.uv) * material.emission;
     Vec3f const& normal = intersection.normal;
 
     // Diffuse
@@ -120,9 +118,9 @@ Vec3f trace(
 
     Vec3f tmp = trace(newRay, objects, depth - 1);
 
-    colour = colour + multiply(tmp, material.getColour(intersection.uv)) * cost * 0.1f;
+    //colour = colour + multiply(tmp, material.getColour(intersection.uv)) * cost * 0.1f;
 
-    return colour;
+    return scg::Vec3f(1, 1, 1);//colour;
 }
 
 }

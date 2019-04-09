@@ -8,6 +8,8 @@ namespace scg
 
 struct Intersection
 {
+    int objectID;
+
     // Intersection position
     Vec3f position;
     float distance;

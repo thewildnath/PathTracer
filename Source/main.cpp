@@ -79,16 +79,25 @@ void Draw(screen *screen)
         {
             scg::Ray ray = camera.getRay(x, y);
 
-            //scg::Vec3f colour = scg::trace(ray, objects, 1);
-            //PutPixelSDL(screen, x, y, scg::Vec3f(colour.r, colour.g, colour.b));
             //*
+            scg::Vec3f colour = scg::trace(ray, objects, 1);
+            PutPixelSDL(screen, x, y, scg::Vec3f(colour.r, colour.g, colour.b));
+            //*/
+            /*
             scg::Intersection intersection;
-            scg::Material material;
 
-            if (scg::getClosestIntersection(ray, objects, intersection, material))
+            if (scg::getClosestIntersection(ray, objects, intersection))
             {
-                scg::Vec3f colour = material.getColour(intersection.uv);
-                float light = std::max(scg::dot(intersection.normal, scg::normalise(-ray.direction)), 0.1f);
+                scg::Ray shadowRay(intersection.position + intersection.normal * 0.01f, objects[0].position - intersection.position);
+                scg::Intersection shadowIntersection;
+
+                scg::Vec3f colour = scg::Vec3f(1, 1, 1);//material.getColour(intersection.uv);
+                float light = std::max(scg::dot(intersection.normal, scg::normalise(shadowRay.direction)), 0.1f);
+                if (scg::getClosestIntersection(shadowRay, objects, shadowIntersection) && shadowIntersection.objectID == 1)
+                    light *= (1.0f / shadowIntersection.distance * shadowIntersection.distance);
+                else
+                    light *= 0.1f;
+
                 colour *= light;
 
                 PutPixelSDL(screen, x, y, scg::Vec3f(colour.r, colour.g, colour.b));

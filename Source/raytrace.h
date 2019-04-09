@@ -15,8 +15,7 @@ namespace scg
 bool getClosestIntersection(
     Ray const& ray,
     std::vector<Object> const& objects,
-    Intersection &closestIntersection,
-    Material& material);
+    Intersection &closestIntersection);
 
 Vec3f trace(
     Ray const& ray,
