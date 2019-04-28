@@ -8,9 +8,8 @@ namespace scg
 
 struct Intersection
 {
+    // Intersection information
     int objectID;
-
-    // Intersection position
     Vec3f position;
     float distance;
 
@@ -18,7 +17,7 @@ struct Intersection
     Vec3f normal;
 
     // Material information
-    int materialID;
+    size_t materialID;
     Vec2f uv;
 };
 

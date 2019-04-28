@@ -1,7 +1,9 @@
 #include "camera.h"
+#include "light.h"
 #include "object.h"
 #include "ray.h"
 #include "raytrace.h"
+#include "scene.h"
 #include "SDLauxiliary.h"
 #include "triangle.h"
 #include "utils.h"
@@ -13,6 +15,7 @@
 #include <cstdint>
 #include <cstring>
 #include <memory>
+#include <random>
 
 #define RES 400
 #define SCREEN_WIDTH  RES
@@ -26,33 +29,41 @@
 /* FUNCTIONS                                                                   */
 bool Update();
 void Draw(screen *screen);
+void InitialiseBuffer();
+
+std::default_random_engine generator;
+std::uniform_real_distribution<float> distribution(0, 1);
 
 scg::Camera camera{
-    scg::Vec3f(0, 0, -3.2),
+    scg::Vec3f(0, 0, -3),
     scg::Vec3f(0, 0, 0),
     SCREEN_WIDTH,
     SCREEN_HEIGHT,
     FOCAL_LENGTH};
 
-std::vector<scg::Object> objects;
+scg::Scene scene;
+
+int samples;
+scg::Vec3f buffer[SCREEN_HEIGHT][SCREEN_WIDTH];
 
 int main(int argc, char *argv[])
 {
+    InitialiseBuffer();
+
     screen *screen = InitializeSDL(SCREEN_WIDTH, SCREEN_HEIGHT, FULLSCREEN_MODE);
 
-    std::vector<scg::Triangle> triangles;
-    scg::LoadTestModel(triangles);
+    scene = scg::LoadTestModel();
 
-    objects.emplace_back(scg::Object{
+    /*
+    scene.materials.emplace_back(scg::Material{{1, 1, 1}, 1});
+    scene.objects.emplace_back(scg::Object{
         {0, 0, 0},
-        {scg::Material{{1, 1, 1}}},
-        std::make_shared<scg::Mesh>(scg::Mesh(triangles))
-    });
-    objects.emplace_back(scg::Object{
-        {0, 0, 0},
-        {scg::Material{{1, 1, 1}, 10000}},
-        std::make_shared<scg::Sphere>(scg::Sphere(0.5f))
-    });
+        std::make_shared<scg::Sphere>(scg::Sphere(0.5f, scene.materials.size() - 1))
+    });*/
+    //scene.lights.emplace_back(std::make_shared<scg::PointLight>(scg::PointLight{{255, 255, 255}, 20, {0, -0.75, 0}}));
+    scene.lights.emplace_back(std::make_shared<scg::PointLight>(scg::PointLight{{255, 255, 255}, 20, {-0.5, -0.75, 0}}));
+    scene.lights.emplace_back(std::make_shared<scg::PointLight>(scg::PointLight{{255, 255, 255}, 20, {0.5, -0.75, 0}}));
+    //scene.lights.emplace_back(std::make_shared<scg::DirectionalLight>(scg::DirectionalLight{{255, 255, 255}, 1, {0, 0.5, 0.5}}));
 
     while (Update())
     {
@@ -69,40 +80,22 @@ int main(int argc, char *argv[])
 /*Place your drawing here*/
 void Draw(screen *screen)
 {
-    /* Clear buffer */
-    memset(screen->buffer, 0, screen->height * screen->width * sizeof(uint32_t));
+    ++samples;
 
-    #pragma omp parallel for schedule(dynamic)// collapse(2)
+    /* Clear buffer */
+    //memset(screen->buffer, 0, screen->height * screen->width * sizeof(uint32_t));
+
+    #pragma omp parallel for schedule(dynamic) collapse(2) firstprivate(generator, distribution)
     for (int y = 0; y < SCREEN_HEIGHT; ++y)
     {
         for (int x = 0; x < SCREEN_WIDTH; ++x)
         {
             scg::Ray ray = camera.getRay(x, y);
 
-            //*
-            scg::Vec3f colour = scg::trace(ray, objects, 1);
-            PutPixelSDL(screen, x, y, scg::Vec3f(colour.r, colour.g, colour.b));
-            //*/
-            /*
-            scg::Intersection intersection;
+            scg::Vec3f colour = scg::trace(scene, ray, 1, generator, distribution);
+            buffer[y][x] += colour; // TODO: clamp value
 
-            if (scg::getClosestIntersection(ray, objects, intersection))
-            {
-                scg::Ray shadowRay(intersection.position + intersection.normal * 0.01f, objects[0].position - intersection.position);
-                scg::Intersection shadowIntersection;
-
-                scg::Vec3f colour = scg::Vec3f(1, 1, 1);//material.getColour(intersection.uv);
-                float light = std::max(scg::dot(intersection.normal, scg::normalise(shadowRay.direction)), 0.1f);
-                if (scg::getClosestIntersection(shadowRay, objects, shadowIntersection) && shadowIntersection.objectID == 1)
-                    light *= (1.0f / shadowIntersection.distance * shadowIntersection.distance);
-                else
-                    light *= 0.1f;
-
-                colour *= light;
-
-                PutPixelSDL(screen, x, y, scg::Vec3f(colour.r, colour.g, colour.b));
-            }
-            //*/
+            PutPixelSDL(screen, x, y, buffer[y][x] / samples);//colour);
         }
     }
 }
@@ -116,7 +109,7 @@ bool Update()
     float dt = float(t2 - t);
     t = t2;
     /*Good idea to remove this*/
-    std::cout << "Render time: " << dt << " ms." << std::endl;
+    std::cout << "Iteration: " << samples << ". Render time: " << dt << " ms." << std::endl;
 
     SDL_Event e;
     while (SDL_PollEvent(&e))
@@ -148,6 +141,9 @@ bool Update()
                     /* Move camera right */
                     camera.position.x += 0.2f;
                     break;
+                case SDLK_r:
+                    InitialiseBuffer();
+                    break;
                 case SDLK_UP:
                     /* Move rotate up */
                     camera.rotation.x += 5;
@@ -168,4 +164,10 @@ bool Update()
         }
     }
     return true;
+}
+
+void InitialiseBuffer()
+{
+    samples = 0;
+    memset(buffer, 0, sizeof(buffer));
 }

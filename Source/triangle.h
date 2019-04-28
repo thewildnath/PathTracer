@@ -14,9 +14,10 @@ public:
     Vec3f v1;
     Vec3f v2;
     Vec3f normal;
-    Vec3f colour;
 
-    Triangle(Vec3f v0, Vec3f v1, Vec3f v2, Vec3f colour);
+    size_t materialID;
+
+    Triangle(Vec3f v0, Vec3f v1, Vec3f v2, size_t materialID);
 
     void ComputeNormal();
 };

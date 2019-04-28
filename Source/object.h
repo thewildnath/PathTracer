@@ -18,14 +18,12 @@ class Object
 public:
     Vec3f position;
 
-    std::vector<Material> materials;
     std::shared_ptr<Geometry> geometry;
 
     Object(
         Vec3f const& position,
-        std::vector<Material> materials,
         std::shared_ptr<Geometry> geometry):
-        position(position), materials(std::move(materials)), geometry(std::move(geometry)) {};
+        position(position), geometry(std::move(geometry)) {};
 
     bool getIntersection(Ray ray, Intersection& intersection) const
     {

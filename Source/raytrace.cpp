@@ -5,23 +5,24 @@
 #include "ray.h"
 
 #include <limits>
+#include <random>
 
 namespace scg
 {
 
 bool getClosestIntersection(
+    Scene const& scene,
     Ray const& ray,
-    std::vector<Object> const& objects,
     Intersection &closestIntersection)
 {
     float minDistance = std::numeric_limits<float>::max();
     int index = -1;
 
-    for (int i = 0; i < (int)objects.size(); ++i)
+    for (int i = 0; i < (int)scene.objects.size(); ++i)
     {
         Intersection intersection;
 
-        if (objects[i].getIntersection(ray, intersection))
+        if (scene.objects[i].getIntersection(ray, intersection))
         {
             if (intersection.distance < minDistance)
             {
@@ -42,85 +43,84 @@ bool getClosestIntersection(
     return true;
 }
 
-// Uniform sampling on a hemisphere to produce outgoing ray directions.
-// courtesy of http://www.rorydriscoll.com/2009/01/07/better-sampling/
-Vec3f hemisphere(float u1, float u2)
-{
-    const float r = std::sqrt(1.0f - u1 * u1);
-    const float phi = 2.0f * (float)M_PI * u2;
-    return Vec3f(std::cos(phi) * r, std::sin(phi) * r, u1);
-}
-
-void ons(Vec3f const& v1, Vec3f& v2, Vec3f& v3)
-{
-    if (std::abs(v1.x) > std::abs(v1.y)) {
-        // project to the y = 0 plane and construct a normalized orthogonal vector in this plane
-        float invLen = 1.0f / sqrtf(v1.x * v1.x + v1.z * v1.z);
-        v2 = Vec3f(-v1.z * invLen, 0.0f, v1.x * invLen);
-    } else {
-        // project to the x = 0 plane and construct a normalized orthogonal vector in this plane
-        float invLen = 1.0f / sqrtf(v1.y * v1.y + v1.z * v1.z);
-        v2 = Vec3f(0.0f, v1.z * invLen, -v1.y * invLen);
-    }
-
-    v3 = Vec3f(
-        v1.y * v2.z - v1.z * v2.y,
-        v1.z * v2.x - v1.x * v2.z,
-        v1.x * v2.y - v1.y * v2.x);
-}
 
 Vec3f trace(
+    Scene const& scene,
     Ray const& ray,
-    std::vector<Object> const& objects,
-    int depth)
+    int depth,
+    std::default_random_engine &generator,
+    std::uniform_real_distribution<float> &distribution)
 {
+    // Check for recursion end
     if (depth <= 0)
     {
-        Ray newRay(ray.origin, objects[1].position - ray.origin);
-
-        Intersection intersection;
-        Material material;
-
-        if (!getClosestIntersection(newRay, objects, intersection))
-        {
-            return material.getColour(intersection.uv) * material.emission;
-        }
-
         return Vec3f(0, 0, 0); // Ambient
     }
 
-    Intersection intersection;
+    // Intersect the scene
+    Intersection intersection{};
 
-    if (!getClosestIntersection(ray, objects, intersection))
+    if (!getClosestIntersection(scene, ray, intersection))
     {
-        return Vec3f(0, 0, 0); // Ambient
+        return Vec3f(0, 0, 0); // Ambient //TODO: skybox
     }
 
-    //Vec3f colour = material.getColour(intersection.uv) * material.emission;
     Vec3f const& normal = intersection.normal;
+    Material const& material = scene.materials[intersection.materialID];
+    Vec3f colour = material.getColour(intersection.uv);
 
-    // Diffuse
-    Vec3f rotX, rotY;
-    ons(normal, rotX, rotY);
-    Vec3f sampledDir(1, 1, 1);//= hemisphere(RND2,RND2);
-    Vec3f rotatedDir;
-    rotatedDir.x = dot(Vec3f(rotX.x, rotY.x, normal.x), sampledDir);
-    rotatedDir.y = dot(Vec3f(rotX.y, rotY.y, normal.y), sampledDir);
-    rotatedDir.z = dot(Vec3f(rotX.z, rotY.z, normal.z), sampledDir);
+    // Calculate interaction(safe point for light calculation and next ray trace)
+    Interaction interaction{
+        intersection.position + normal * 0.01f,
+        normal};
 
-    rotatedDir = normalise(rotatedDir); // TODO: remove?
+    //if (diffuse)
+    {
+        // Calculate direct light
+        float directLight = 0;
 
-    Ray newRay;
-    newRay.origin = intersection.position + intersection.normal * 0.001f;
-    newRay.direction = normal; //rotatedDir;	// already normalized
+        float num = distribution(generator) * scene.lights.size();
+        int index = (int)std::floor(num);
+        if (index < scene.lights.size())
+        {
+            std::shared_ptr<Light> light = scene.lights[index];
+            LightType lightType = light->getType();
+            LightHit lightHit = light->illuminate(interaction);
 
-    double cost = dot(newRay.direction, normal);
+            switch (lightType)
+            {
+                case LightType_Abstract:
+                {
+                    float directLightPartial = lightHit.intensity * std::max(0.0f, dot(normal, lightHit.direction));
+                    directLight += directLightPartial;
 
-    Vec3f tmp = trace(newRay, objects, depth - 1);
+                    break;
+                }
+                case LightType_Point:
+                case LightType_Directional:
+                case LightType_Surface:
+                {
+                    Ray lightRay{interaction.position, lightHit.direction};
+                    Intersection lightIntersection{};
 
-    //colour = colour + multiply(tmp, material.getColour(intersection.uv)) * cost * 0.1f;
+                    // Check for objects blocking the path
+                    if (!scg::getClosestIntersection(scene, lightRay, lightIntersection) ||
+                        lightIntersection.distance >= lightHit.distance + EPS)
+                    {
+                        float directLightPartial =
+                            lightHit.intensity * std::max(0.0f, dot(normal, lightHit.direction));
+                        directLight += directLightPartial;
+                    }
 
-    return scg::Vec3f(1, 1, 1);//colour;
+                    break;
+                }
+            }
+        }
+        // Calculate indirect light
+
+        // Finalise and return
+        return colour * directLight;
+    }
 }
 
 }

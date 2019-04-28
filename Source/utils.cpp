@@ -1,5 +1,8 @@
 #include "utils.h"
 
+#include "geometry.h"
+#include "material.h"
+#include "scene.h"
 #include "triangle.h"
 #include "vector_type.h"
 
@@ -8,18 +11,27 @@
 namespace scg
 {
 
-void LoadTestModel(std::vector <Triangle> &triangles)
+Scene LoadTestModel()
 {
     // Defines colours:
-    Vec3f red(0.75f, 0.15f, 0.15f);
-    Vec3f yellow(0.75f, 0.75f, 0.15f);
-    Vec3f green(0.15f, 0.75f, 0.15f);
-    Vec3f cyan(0.15f, 0.75f, 0.75f);
-    Vec3f blue(0.15f, 0.15f, 0.75f);
-    Vec3f purple(0.75f, 0.15f, 0.75f);
-    Vec3f white(0.75f, 0.75f, 0.75f);
+    Material red(Vec3f(0.75f, 0.15f, 0.15f));
+    Material yellow(Vec3f(0.75f, 0.75f, 0.15f));
+    Material green(Vec3f(0.15f, 0.75f, 0.15f));
+    Material cyan(Vec3f(0.15f, 0.75f, 0.75f));
+    Material blue(Vec3f(0.15f, 0.15f, 0.75f));
+    Material purple(Vec3f(0.75f, 0.15f, 0.75f));
+    Material white(Vec3f(0.75f, 0.75f, 0.75f));
 
-    triangles.clear();
+    std::vector<Material> materials;
+    materials.push_back(red);    // 0
+    materials.push_back(yellow); // 1
+    materials.push_back(green);  // 2
+    materials.push_back(cyan);   // 3
+    materials.push_back(blue);   // 4
+    materials.push_back(purple); // 5
+    materials.push_back(white);  // 6
+
+    std::vector<Triangle> triangles;
     triangles.reserve(5 * 2 * 3);
 
     // ---------------------------------------------------------------------------
@@ -38,24 +50,24 @@ void LoadTestModel(std::vector <Triangle> &triangles)
     Vec3f H(0, L, L);
 
     // Floor:
-    triangles.emplace_back(Triangle(C, B, A, green));
-    triangles.emplace_back(Triangle(C, D, B, green));
+    triangles.emplace_back(Triangle(C, B, A, 2));
+    triangles.emplace_back(Triangle(C, D, B, 2));
 
     // Left wall
-    triangles.emplace_back(Triangle(A, E, C, purple));
-    triangles.emplace_back(Triangle(C, E, G, purple));
+    triangles.emplace_back(Triangle(A, E, C, 5));
+    triangles.emplace_back(Triangle(C, E, G, 5));
 
     // Right wall
-    triangles.emplace_back(Triangle(F, B, D, yellow));
-    triangles.emplace_back(Triangle(H, F, D, yellow));
+    triangles.emplace_back(Triangle(F, B, D, 1));
+    triangles.emplace_back(Triangle(H, F, D, 1));
 
     // Ceiling
-    triangles.emplace_back(Triangle(E, F, G, cyan));
-    triangles.emplace_back(Triangle(F, H, G, cyan));
+    triangles.emplace_back(Triangle(E, F, G, 3));
+    triangles.emplace_back(Triangle(F, H, G, 3));
 
     // Back wall
-    triangles.emplace_back(Triangle(G, D, C, white));
-    triangles.emplace_back(Triangle(G, H, D, white));
+    triangles.emplace_back(Triangle(G, D, C, 6));
+    triangles.emplace_back(Triangle(G, H, D, 6));
 
     // ---------------------------------------------------------------------------
     // Short block
@@ -71,24 +83,24 @@ void LoadTestModel(std::vector <Triangle> &triangles)
     H = Vec3f(82, 165, 225);
 
     // Front
-    triangles.emplace_back(Triangle(E, B, A, red));
-    triangles.emplace_back(Triangle(E, F, B, red));
+    triangles.emplace_back(Triangle(E, B, A, 0));
+    triangles.emplace_back(Triangle(E, F, B, 0));
 
     // Front
-    triangles.emplace_back(Triangle(F, D, B, red));
-    triangles.emplace_back(Triangle(F, H, D, red));
+    triangles.emplace_back(Triangle(F, D, B, 0));
+    triangles.emplace_back(Triangle(F, H, D, 0));
 
     // BACK
-    triangles.emplace_back(Triangle(H, C, D, red));
-    triangles.emplace_back(Triangle(H, G, C, red));
+    triangles.emplace_back(Triangle(H, C, D, 0));
+    triangles.emplace_back(Triangle(H, G, C, 0));
 
     // LEFT
-    triangles.emplace_back(Triangle(G, E, C, red));
-    triangles.emplace_back(Triangle(E, A, C, red));
+    triangles.emplace_back(Triangle(G, E, C, 0));
+    triangles.emplace_back(Triangle(E, A, C, 0));
 
     // TOP
-    triangles.emplace_back(Triangle(G, F, E, red));
-    triangles.emplace_back(Triangle(G, H, F, red));
+    triangles.emplace_back(Triangle(G, F, E, 0));
+    triangles.emplace_back(Triangle(G, H, F, 0));
 
     // ---------------------------------------------------------------------------
     // Tall block
@@ -104,25 +116,24 @@ void LoadTestModel(std::vector <Triangle> &triangles)
     H = Vec3f(314, 330, 456);
 
     // Front
-    triangles.emplace_back(Triangle(E, B, A, blue));
-    triangles.emplace_back(Triangle(E, F, B, blue));
+    triangles.emplace_back(Triangle(E, B, A, 4));
+    triangles.emplace_back(Triangle(E, F, B, 4));
 
     // Front
-    triangles.emplace_back(Triangle(F, D, B, blue));
-    triangles.emplace_back(Triangle(F, H, D, blue));
+    triangles.emplace_back(Triangle(F, D, B, 4));
+    triangles.emplace_back(Triangle(F, H, D, 4));
 
     // BACK
-    triangles.emplace_back(Triangle(H, C, D, blue));
-    triangles.emplace_back(Triangle(H, G, C, blue));
+    triangles.emplace_back(Triangle(H, C, D, 4));
+    triangles.emplace_back(Triangle(H, G, C, 4));
 
     // LEFT
-    triangles.emplace_back(Triangle(G, E, C, blue));
-    triangles.emplace_back(Triangle(E, A, C, blue));
+    triangles.emplace_back(Triangle(G, E, C, 4));
+    triangles.emplace_back(Triangle(E, A, C, 4));
 
     // TOP
-    triangles.emplace_back(Triangle(G, F, E, blue));
-    triangles.emplace_back(Triangle(G, H, F, blue));
-
+    triangles.emplace_back(Triangle(G, F, E, 4));
+    triangles.emplace_back(Triangle(G, H, F, 4));
 
     // ----------------------------------------------
     // Scale to the volume [-1,1]^3
@@ -151,6 +162,15 @@ void LoadTestModel(std::vector <Triangle> &triangles)
 
         triangle.ComputeNormal();
     }
+
+    Scene scene;
+    scene.materials = materials;
+    scene.objects.push_back(scg::Object{
+        {0, 0, 0},
+        std::make_shared<scg::Mesh>(scg::Mesh(triangles))
+    });
+
+    return scene;
 }
 
 }

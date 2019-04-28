@@ -21,8 +21,10 @@ class Sphere : public Geometry
 public:
     float radius;
 
-    Sphere(float radius):
-        radius(radius) {};
+    size_t materialID;
+
+    Sphere(float radius, size_t materialID):
+        radius(radius), materialID(materialID) {};
 
     bool getIntersection(Ray const& ray, Intersection& intersection) const override
     {
@@ -46,10 +48,11 @@ public:
         else
             return false;
 
-        intersection.position = ray(t);
-        intersection.distance = t;
-        intersection.normal   = normalise(intersection.position);
-        intersection.uv       = Vec2f(0, 0);
+        intersection.position   = ray(t);
+        intersection.distance   = t;
+        intersection.normal     = normalise(intersection.position);
+        intersection.materialID = materialID;
+        intersection.uv         = Vec2f(0, 0);
 
         return true;
     }
@@ -122,10 +125,11 @@ public:
             return false;
         }
 
-        intersection.position = ray(minDistance);
-        intersection.distance = minDistance;
-        intersection.normal   = triangles[index].normal;
-        intersection.uv       = Vec2f(0, 0);
+        intersection.position   = ray(minDistance);
+        intersection.distance   = minDistance;
+        intersection.normal     = triangles[index].normal;
+        intersection.materialID = triangles[index].materialID;
+        intersection.uv         = Vec2f(0, 0);
 
         return true;
     }
