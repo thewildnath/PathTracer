@@ -39,8 +39,24 @@ public:
         T data[DIM];
     };
 
-    Vector() = default;
+    Vector()
+    {
+        for (int i = 0; i < DIM; ++i)
+        {
+            this->data[i] = 0;
+        }
+    };
+
     Vector(Vector const& arg) = default;
+
+    template<typename V>
+    Vector(V arg)
+    {
+        for (int i = 0; i < DIM; ++i)
+        {
+            this->data[i] = static_cast<T>(arg);
+        }
+    }
 
     template <typename... Args>
     /*explicit*/ Vector(Args... args) : data{ T(args)... } {

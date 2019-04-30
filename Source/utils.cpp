@@ -50,24 +50,24 @@ Scene LoadTestModel()
     Vec3f H(0, L, L);
 
     // Floor:
-    triangles.emplace_back(Triangle(C, B, A, 2));
-    triangles.emplace_back(Triangle(C, D, B, 2));
+    triangles.emplace_back(Triangle(C, B, A, 6));//2));
+    triangles.emplace_back(Triangle(C, D, B, 6));//2));
 
     // Left wall
-    triangles.emplace_back(Triangle(A, E, C, 5));
-    triangles.emplace_back(Triangle(C, E, G, 5));
+    triangles.emplace_back(Triangle(A, E, C, 6));//5));
+    triangles.emplace_back(Triangle(C, E, G, 6));//5));
 
     // Right wall
-    triangles.emplace_back(Triangle(F, B, D, 1));
-    triangles.emplace_back(Triangle(H, F, D, 1));
+    triangles.emplace_back(Triangle(F, B, D, 6));//1));
+    triangles.emplace_back(Triangle(H, F, D, 6));//1));
 
     // Ceiling
-    triangles.emplace_back(Triangle(E, F, G, 3));
-    triangles.emplace_back(Triangle(F, H, G, 3));
+    triangles.emplace_back(Triangle(E, F, G, 6));//3));
+    triangles.emplace_back(Triangle(F, H, G, 6));//3));
 
     // Back wall
-    triangles.emplace_back(Triangle(G, D, C, 6));
-    triangles.emplace_back(Triangle(G, H, D, 6));
+    triangles.emplace_back(Triangle(G, D, C, 6));//6));
+    triangles.emplace_back(Triangle(G, H, D, 6));//6));
 
     // ---------------------------------------------------------------------------
     // Short block
@@ -83,24 +83,24 @@ Scene LoadTestModel()
     H = Vec3f(82, 165, 225);
 
     // Front
-    triangles.emplace_back(Triangle(E, B, A, 0));
-    triangles.emplace_back(Triangle(E, F, B, 0));
+    triangles.emplace_back(Triangle(E, B, A, 6));//0));
+    triangles.emplace_back(Triangle(E, F, B, 6));//0));
 
     // Front
-    triangles.emplace_back(Triangle(F, D, B, 0));
-    triangles.emplace_back(Triangle(F, H, D, 0));
+    triangles.emplace_back(Triangle(F, D, B, 6));//0));
+    triangles.emplace_back(Triangle(F, H, D, 6));//0));
 
     // BACK
-    triangles.emplace_back(Triangle(H, C, D, 0));
-    triangles.emplace_back(Triangle(H, G, C, 0));
+    triangles.emplace_back(Triangle(H, C, D, 6));//0));
+    triangles.emplace_back(Triangle(H, G, C, 6));//0));
 
     // LEFT
-    triangles.emplace_back(Triangle(G, E, C, 0));
-    triangles.emplace_back(Triangle(E, A, C, 0));
+    triangles.emplace_back(Triangle(G, E, C, 6));//0));
+    triangles.emplace_back(Triangle(E, A, C, 6));//0));
 
     // TOP
-    triangles.emplace_back(Triangle(G, F, E, 0));
-    triangles.emplace_back(Triangle(G, H, F, 0));
+    triangles.emplace_back(Triangle(G, F, E, 6));//0));
+    triangles.emplace_back(Triangle(G, H, F, 6));//0));
 
     // ---------------------------------------------------------------------------
     // Tall block
@@ -155,10 +155,6 @@ Scene LoadTestModel()
         triangle.v0.y *= -1;
         triangle.v1.y *= -1;
         triangle.v2.y *= -1;
-
-        triangle.v0.w = 1.0;
-        triangle.v1.w = 1.0;
-        triangle.v2.w = 1.0;
 
         triangle.ComputeNormal();
     }

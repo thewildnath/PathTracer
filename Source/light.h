@@ -1,7 +1,10 @@
 #ifndef RAYTRACER_LIGHT_H
 #define RAYTRACER_LIGHT_H
 
+#include "geometry.h"
 #include "vector_type.h"
+
+#include <memory>
 
 namespace scg
 {
@@ -34,7 +37,7 @@ enum LightType {
     LightType_Abstract,
     LightType_Point,
     LightType_Directional,
-    LightType_Surface
+    LightType_Object
 };
 
 // Base Light class.
@@ -49,6 +52,11 @@ public:
         colour(colour), intensity(intensity) {};
 
     virtual LightHit illuminate(Interaction const& interaction) const = 0;
+
+    virtual Vec3f getEmittance()
+    {
+        return colour * intensity;
+    }
 
     virtual LightType getType() const = 0;
 };
@@ -99,11 +107,10 @@ public:
         lightHit.colour = colour;
 
         lightHit.direction = this->position - interaction.position;
-        float distance2 = lightHit.direction.length();
-        lightHit.distance = std::sqrt(distance2);
+        lightHit.distance = lightHit.direction.length();
         lightHit.direction /= lightHit.distance;
 
-        lightHit.intensity = intensity / (float)(4 * M_PI * distance2);
+        lightHit.intensity = intensity / (float)(4 * M_PI * lightHit.distance * lightHit.distance);
 
         return lightHit;
     }
@@ -124,7 +131,7 @@ public:
     DirectionalLight(Vec3f const& colour, float intensity, Vec3f const& direction):
         Light(colour, intensity), direction(normalise(direction)) {};
 
-    LightHit illuminate(Interaction const& interaction) const override
+    LightHit illuminate(Interaction const&) const override
     {
         LightHit lightHit;
 
@@ -141,6 +148,30 @@ public:
     LightType getType() const override
     {
         return LightType_Directional;
+    }
+};
+
+class ObjectLight : public Light
+{
+private:
+    std::shared_ptr<Geometry> geometry;
+
+public:
+    ObjectLight(Vec3f const& colour, float intensity, std::shared_ptr<Geometry> geometry):
+        Light(colour, intensity), geometry(geometry) {};
+
+    LightHit illuminate(Interaction const&) const override
+    {
+        LightHit lightHit;
+
+
+
+        return lightHit;
+    }
+
+    LightType getType() const override
+    {
+        return LightType_Object;
     }
 };
 

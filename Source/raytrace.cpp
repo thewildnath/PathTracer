@@ -43,6 +43,25 @@ bool getClosestIntersection(
     return true;
 }
 
+void createCoordinateSystem(Vec3f const& N, Vec3f &Nt, Vec3f &Nb)
+{
+    if (std::fabs(N.x) > std::fabs(N.y))
+        Nt = Vec3f(N.z, 0, -N.x) / std::sqrt(N.x * N.x + N.z * N.z);
+    else
+        Nt = Vec3f(0, -N.z, N.y) / std::sqrt(N.y * N.y + N.z * N.z);
+    Nb = cross(N, Nt);
+}
+
+Vec3f uniformSampleHemisphere(const float &r1, const float &r2)
+{
+    // cos(theta) = u1 = y
+    // cos^2(theta) + sin^2(theta) = 1 -> sin(theta) = srtf(1 - cos^2(theta))
+    float sinTheta = sqrtf(1 - r1 * r1);
+    float phi = 2 * (float)M_PI * r2;
+    float x = sinTheta * cosf(phi);
+    float z = sinTheta * sinf(phi);
+    return Vec3f(x, r1, z);
+}
 
 Vec3f trace(
     Scene const& scene,
@@ -71,16 +90,16 @@ Vec3f trace(
 
     // Calculate interaction(safe point for light calculation and next ray trace)
     Interaction interaction{
-        intersection.position + normal * 0.01f,
+        intersection.position + normal * EPS,
         normal};
 
     //if (diffuse)
     {
         // Calculate direct light
-        float directLight = 0;
+        Vec3f directLight;
 
         float num = distribution(generator) * scene.lights.size();
-        int index = (int)std::floor(num);
+        size_t index = (size_t)std::floor(num);
         if (index < scene.lights.size())
         {
             std::shared_ptr<Light> light = scene.lights[index];
@@ -91,34 +110,58 @@ Vec3f trace(
             {
                 case LightType_Abstract:
                 {
-                    float directLightPartial = lightHit.intensity * std::max(0.0f, dot(normal, lightHit.direction));
-                    directLight += directLightPartial;
+                    float intensity = lightHit.intensity * std::max(0.0f, dot(normal, lightHit.direction));
+                    directLight += lightHit.colour * intensity;
 
                     break;
                 }
                 case LightType_Point:
                 case LightType_Directional:
-                case LightType_Surface:
+                case LightType_Object:
                 {
                     Ray lightRay{interaction.position, lightHit.direction};
                     Intersection lightIntersection{};
 
                     // Check for objects blocking the path
                     if (!scg::getClosestIntersection(scene, lightRay, lightIntersection) ||
-                        lightIntersection.distance >= lightHit.distance + EPS)
+                        lightIntersection.distance >= lightHit.distance)
                     {
-                        float directLightPartial =
+                        float intensity =
                             lightHit.intensity * std::max(0.0f, dot(normal, lightHit.direction));
-                        directLight += directLightPartial;
+                        directLight += lightHit.colour * intensity;
                     }
 
                     break;
                 }
             }
         }
+
+        directLight /= 255;
+
         // Calculate indirect light
+        /*
+        Vec3f indirectLight;
+
+        Vec3f Nt, Nb;
+        createCoordinateSystem(normal, Nt, Nb);
+
+        float pdf = 1 / (2 * (float)M_PI);
+        float r1 = distribution(generator);
+        float r2 = distribution(generator);
+        Vec3f sample = uniformSampleHemisphere(r1, r2);
+        Vec3f nextDirection(
+            sample.x * Nb.x + sample.y * normal.x + sample.z * Nt.x,
+            sample.x * Nb.y + sample.y * normal.y + sample.z * Nt.y,
+            sample.x * Nb.z + sample.y * normal.z + sample.z * Nt.z);
+        Ray nextRay{interaction.position, nextDirection};
+        // don't forget to divide by PDF and multiply by cos(theta)
+        indirectLight = trace(scene, nextRay, depth - 1, generator, distribution) * r1 / pdf;
+        //indirectLight /= 255;
 
         // Finalise and return
+        //return (directLight / M_PI + indirectLight * 2) * colour;
+        float coef = 0.8;
+        return colour * (directLight * coef + indirectLight * (1 - coef));//*/
         return colour * directLight;
     }
 }

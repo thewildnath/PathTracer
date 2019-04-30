@@ -23,12 +23,20 @@ public:
     Object(
         Vec3f const& position,
         std::shared_ptr<Geometry> geometry):
-        position(position), geometry(std::move(geometry)) {};
+        position(position), geometry(geometry) {};
 
     bool getIntersection(Ray ray, Intersection& intersection) const
     {
         ray.origin -= position;
-        return geometry->getIntersection(ray, intersection);
+
+        if (!geometry->getIntersection(ray, intersection))
+        {
+            return false;
+        }
+
+        intersection.position += position;
+
+        return true;
     }
 };
 

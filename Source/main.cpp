@@ -52,18 +52,36 @@ int main(int argc, char *argv[])
 
     screen *screen = InitializeSDL(SCREEN_WIDTH, SCREEN_HEIGHT, FULLSCREEN_MODE);
 
+    // Load scene and lights
     scene = scg::LoadTestModel();
 
-    /*
-    scene.materials.emplace_back(scg::Material{{1, 1, 1}, 1});
-    scene.objects.emplace_back(scg::Object{
-        {0, 0, 0},
-        std::make_shared<scg::Sphere>(scg::Sphere(0.5f, scene.materials.size() - 1))
-    });*/
-    //scene.lights.emplace_back(std::make_shared<scg::PointLight>(scg::PointLight{{255, 255, 255}, 20, {0, -0.75, 0}}));
+    // Point lights
+    //scene.lights.emplace_back(std::make_shared<scg::PointLight>(scg::PointLight{{255, 255, 255}, 20, {0, -0.98, 0}}));
     scene.lights.emplace_back(std::make_shared<scg::PointLight>(scg::PointLight{{255, 255, 255}, 20, {-0.5, -0.75, 0}}));
     scene.lights.emplace_back(std::make_shared<scg::PointLight>(scg::PointLight{{255, 255, 255}, 20, {0.5, -0.75, 0}}));
+    // Directional lights
     //scene.lights.emplace_back(std::make_shared<scg::DirectionalLight>(scg::DirectionalLight{{255, 255, 255}, 1, {0, 0.5, 0.5}}));
+
+//*
+    // Ceiling light
+    float L = 1;
+    scg::Vec3f E(L / 2, 0, -L / 2);
+    scg::Vec3f F(-L / 2, 0, -L / 2);
+    scg::Vec3f G(L / 2, 0, L / 2);
+    scg::Vec3f H(-L / 2, 0, L / 2);
+    std::vector<scg::Triangle> triangles{
+        scg::Triangle(G, F, E, 0),
+        scg::Triangle(G, H, F, 0)
+    };
+
+    scene.objects.emplace_back(scg::Object{
+        { 0, -0.99, 0},
+        std::make_shared<scg::Mesh>(triangles)
+    });
+//*/
+
+
+
 
     while (Update())
     {
@@ -85,17 +103,19 @@ void Draw(screen *screen)
     /* Clear buffer */
     //memset(screen->buffer, 0, screen->height * screen->width * sizeof(uint32_t));
 
-    #pragma omp parallel for schedule(dynamic) collapse(2) firstprivate(generator, distribution)
+    // TODO: reseed generator
+    #pragma omp parallel for schedule(dynamic) collapse(2)// firstprivate(generator, distribution)
     for (int y = 0; y < SCREEN_HEIGHT; ++y)
     {
         for (int x = 0; x < SCREEN_WIDTH; ++x)
         {
             scg::Ray ray = camera.getRay(x, y);
 
-            scg::Vec3f colour = scg::trace(scene, ray, 1, generator, distribution);
+            int depth = 4;
+            scg::Vec3f colour = scg::trace(scene, ray, depth, generator, distribution);
             buffer[y][x] += colour; // TODO: clamp value
 
-            PutPixelSDL(screen, x, y, buffer[y][x] / samples);//colour);
+            PutPixelSDL(screen, x, y, buffer[y][x] / samples);
         }
     }
 }
