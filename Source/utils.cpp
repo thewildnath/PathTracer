@@ -22,14 +22,14 @@ Scene LoadTestModel()
     Material purple(Vec3f(0.75f, 0.15f, 0.75f));
     Material white(Vec3f(0.75f, 0.75f, 0.75f));
 
-    std::vector<Material> materials;
-    materials.push_back(red);    // 0
-    materials.push_back(yellow); // 1
-    materials.push_back(green);  // 2
-    materials.push_back(cyan);   // 3
-    materials.push_back(blue);   // 4
-    materials.push_back(purple); // 5
-    materials.push_back(white);  // 6
+    std::vector<std::shared_ptr<Material>> materials;
+    materials.push_back(std::make_shared<Material>(red));    // 0
+    materials.push_back(std::make_shared<Material>(yellow)); // 1
+    materials.push_back(std::make_shared<Material>(green));  // 2
+    materials.push_back(std::make_shared<Material>(cyan));   // 3
+    materials.push_back(std::make_shared<Material>(blue));   // 4
+    materials.push_back(std::make_shared<Material>(purple)); // 5
+    materials.push_back(std::make_shared<Material>(white));  // 6
 
     std::vector<Triangle> triangles;
     triangles.reserve(5 * 2 * 3);
@@ -161,10 +161,10 @@ Scene LoadTestModel()
 
     Scene scene;
     scene.materials = materials;
-    scene.objects.push_back(scg::Object{
+    scene.objects.push_back(std::make_shared<Object>(Object{
         {0, 0, 0},
-        std::make_shared<scg::Mesh>(scg::Mesh(triangles))
-    });
+        std::make_shared<Mesh>(Mesh(triangles))
+    }));
 
     return scene;
 }

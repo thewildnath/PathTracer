@@ -1,15 +1,16 @@
 #ifndef RAYTRACER_LIGHT_H
 #define RAYTRACER_LIGHT_H
 
-#include "geometry.h"
+#include "object.h"
 #include "vector_type.h"
 
 #include <memory>
+#include <random>
 
 namespace scg
 {
 
-// Information regarding the position which needs to be illuminated
+// Similar to an intersection, but should be initialised with a safe position(i.e. position + normal * EPS)
 class Interaction
 {
 public:
@@ -51,7 +52,7 @@ public:
     Light(Vec3f const& colour, float intensity):
         colour(colour), intensity(intensity) {};
 
-    virtual LightHit illuminate(Interaction const& interaction) const = 0;
+    virtual LightHit illuminate(Interaction const&, std::default_random_engine&, std::uniform_real_distribution<float>&) const = 0;
 
     virtual Vec3f getEmittance()
     {
@@ -73,7 +74,7 @@ public:
     AbstractLight(Vec3f const& colour, float intensity):
         Light(colour, intensity) {};
 
-    LightHit illuminate(Interaction const& interaction) const override
+    LightHit illuminate(Interaction const& interaction, std::default_random_engine&, std::uniform_real_distribution<float>&) const override
     {
         LightHit lightHit;
 
@@ -100,7 +101,7 @@ public:
     PointLight(Vec3f const& colour, float intensity, Vec3f const& position):
         Light(colour, intensity), position(position) {};
 
-    LightHit illuminate(Interaction const& interaction) const override
+    LightHit illuminate(Interaction const& interaction, std::default_random_engine&, std::uniform_real_distribution<float>&) const override
     {
         LightHit lightHit;
 
@@ -131,7 +132,7 @@ public:
     DirectionalLight(Vec3f const& colour, float intensity, Vec3f const& direction):
         Light(colour, intensity), direction(normalise(direction)) {};
 
-    LightHit illuminate(Interaction const&) const override
+    LightHit illuminate(Interaction const&, std::default_random_engine&, std::uniform_real_distribution<float>&) const override
     {
         LightHit lightHit;
 
@@ -154,17 +155,27 @@ public:
 class ObjectLight : public Light
 {
 private:
-    std::shared_ptr<Geometry> geometry;
+    std::shared_ptr<Object> object;
 
 public:
-    ObjectLight(Vec3f const& colour, float intensity, std::shared_ptr<Geometry> geometry):
-        Light(colour, intensity), geometry(geometry) {};
+    ObjectLight(Vec3f const& colour, float intensity, std::shared_ptr<Object> object):
+        Light(colour, intensity), object(object) {};
 
-    LightHit illuminate(Interaction const&) const override
+    LightHit illuminate(Interaction const &interaction, std::default_random_engine &generator, std::uniform_real_distribution<float> &distribution) const override
     {
         LightHit lightHit;
 
+        Vec3f position = object->sampleSurface(generator, distribution);
 
+        lightHit.colour = colour;
+
+        lightHit.direction = position - interaction.position;
+        lightHit.distance = lightHit.direction.length();
+        lightHit.direction /= lightHit.distance;
+
+        lightHit.intensity = intensity / (float)(4 * M_PI * lightHit.distance * lightHit.distance);
+
+        return lightHit;
 
         return lightHit;
     }

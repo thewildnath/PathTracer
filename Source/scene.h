@@ -14,8 +14,8 @@ class Scene
 {
 public:
     std::vector<std::shared_ptr<Light>> lights;
-    std::vector<Material> materials;
-    std::vector<Object> objects;
+    std::vector<std::shared_ptr<Material>> materials;
+    std::vector<std::shared_ptr<Object>> objects;
 };
 
 }

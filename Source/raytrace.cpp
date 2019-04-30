@@ -4,6 +4,7 @@
 #include "vector_type.h"
 #include "ray.h"
 
+#include <cassert>
 #include <limits>
 #include <random>
 
@@ -22,7 +23,7 @@ bool getClosestIntersection(
     {
         Intersection intersection;
 
-        if (scene.objects[i].getIntersection(ray, intersection))
+        if (scene.objects[i]->getIntersection(ray, intersection))
         {
             if (intersection.distance < minDistance)
             {
@@ -85,8 +86,16 @@ Vec3f trace(
     }
 
     Vec3f const& normal = intersection.normal;
-    Material const& material = scene.materials[intersection.materialID];
-    Vec3f colour = material.getColour(intersection.uv);
+    auto const& material = scene.materials[intersection.materialID];
+    auto const& lightPtr = material->lightPtr;
+    Vec3f colour = material->getColour(intersection.uv);
+
+    Vec3f directLight;
+
+    if (lightPtr != nullptr)
+    {
+        directLight = lightPtr->getEmittance();
+    }
 
     // Calculate interaction(safe point for light calculation and next ray trace)
     Interaction interaction{
@@ -96,47 +105,44 @@ Vec3f trace(
     //if (diffuse)
     {
         // Calculate direct light
-        Vec3f directLight;
-
         float num = distribution(generator) * scene.lights.size();
         size_t index = (size_t)std::floor(num);
-        if (index < scene.lights.size())
+
+        assert(num < scene.lights.size());
+
+        std::shared_ptr<Light> light = scene.lights[index];
+        LightType lightType = light->getType();
+        LightHit lightHit = light->illuminate(interaction, generator, distribution);
+
+        if (light != lightPtr)
+        switch (lightType)
         {
-            std::shared_ptr<Light> light = scene.lights[index];
-            LightType lightType = light->getType();
-            LightHit lightHit = light->illuminate(interaction);
-
-            switch (lightType)
+            case LightType_Abstract:
             {
-                case LightType_Abstract:
+                float intensity = lightHit.intensity * std::max(0.0f, dot(normal, lightHit.direction));
+                directLight += lightHit.colour * intensity;
+
+                break;
+            }
+            case LightType_Point:
+            case LightType_Directional:
+            case LightType_Object:
+            {
+                Ray lightRay{interaction.position, lightHit.direction};
+                Intersection lightIntersection{};
+
+                // Check for objects blocking the path
+                if (!scg::getClosestIntersection(scene, lightRay, lightIntersection) ||
+                    lightIntersection.distance + EPS >= lightHit.distance)
                 {
-                    float intensity = lightHit.intensity * std::max(0.0f, dot(normal, lightHit.direction));
+                    float intensity =
+                        lightHit.intensity * std::max(0.0f, dot(normal, lightHit.direction));
                     directLight += lightHit.colour * intensity;
-
-                    break;
                 }
-                case LightType_Point:
-                case LightType_Directional:
-                case LightType_Object:
-                {
-                    Ray lightRay{interaction.position, lightHit.direction};
-                    Intersection lightIntersection{};
 
-                    // Check for objects blocking the path
-                    if (!scg::getClosestIntersection(scene, lightRay, lightIntersection) ||
-                        lightIntersection.distance >= lightHit.distance)
-                    {
-                        float intensity =
-                            lightHit.intensity * std::max(0.0f, dot(normal, lightHit.direction));
-                        directLight += lightHit.colour * intensity;
-                    }
-
-                    break;
-                }
+                break;
             }
         }
-
-        directLight /= 255;
 
         // Calculate indirect light
         /*

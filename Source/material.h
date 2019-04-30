@@ -11,11 +11,10 @@ namespace scg
 
 class Material
 {
-private:
+public:
     Vec3f color;
     std::shared_ptr<Light> lightPtr;
 
-public:
     Material() = default;
 
     Material(Vec3f const& color):

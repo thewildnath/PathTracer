@@ -5,6 +5,8 @@
 #include "ray.h"
 #include "triangle.h"
 
+#include <cassert>
+#include <random>
 #include <vector>
 
 namespace scg
@@ -14,6 +16,7 @@ class Geometry
 {
 public:
     virtual bool getIntersection(Ray const&, Intersection&) const = 0;
+    virtual Vec3f sampleSurface(std::default_random_engine&, std::uniform_real_distribution<float>&) = 0;
 };
 
 class Sphere : public Geometry
@@ -55,6 +58,31 @@ public:
         intersection.uv         = Vec2f(0, 0);
 
         return true;
+    }
+
+    Vec3f sampleSurface(std::default_random_engine &generator, std::uniform_real_distribution<float> &distribution) override
+    {
+        // Mathsy version
+        /*
+        double theta = 2 * M_PI * uniform01(generator);
+        double phi = acos(1 - 2 * uniform01(generator));
+        double x = sin(phi) * cos(theta);
+        double y = sin(phi) * sin(theta);
+        double z = cos(phi);*/
+
+        // Engineer version
+        Vec3f point;
+
+        do
+        {
+            point.x = distribution(generator) - 0.5f;
+            point.y = distribution(generator) - 0.5f;
+            point.z = distribution(generator) - 0.5f;
+        } while (point.length() <= EPS); // Make sure that we don't divide by 0
+
+        point = normalise(point) * radius;
+
+        return point;
     }
 };
 
@@ -132,6 +160,22 @@ public:
         intersection.uv         = Vec2f(0, 0);
 
         return true;
+    }
+
+    Vec3f sampleSurface(std::default_random_engine &generator, std::uniform_real_distribution<float> &distribution) override
+    {
+        float num = distribution(generator) * triangles.size();
+        size_t index = (size_t)std::floor(num);
+
+        assert(index < triangles.size());
+
+        float r1 = std::sqrt(distribution(generator));
+        float r2 = distribution(generator);
+
+        Vec3f point = triangles[index].v0 * (1 - r1) + triangles[index].v1 * r1 * (1 - r2) + triangles[index].v2 * r1 * r2;
+        point += triangles[index].normal * EPS;
+
+        return point;
     }
 };
 

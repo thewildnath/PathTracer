@@ -3,11 +3,11 @@
 
 #include "intersection.h"
 #include "geometry.h"
-#include "material.h"
 #include "math_utils.h"
 #include "ray.h"
 
 #include <memory>
+#include <random>
 #include <vector>
 
 namespace scg
@@ -37,6 +37,12 @@ public:
         intersection.position += position;
 
         return true;
+    }
+
+    Vec3f sampleSurface(std::default_random_engine &generator, std::uniform_real_distribution<float> &distribution)
+    {
+        Vec3f point = geometry->sampleSurface(generator, distribution) + position;
+        return point;
     }
 };
 
