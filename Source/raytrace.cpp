@@ -146,7 +146,7 @@ Vec3f trace(
         }
 
         // Calculate indirect light
-        /*
+        //*
         Vec3f indirectLight;
 
         Vec3f Nt, Nb;
@@ -160,14 +160,14 @@ Vec3f trace(
             sample.x * Nb.x + sample.y * normal.x + sample.z * Nt.x,
             sample.x * Nb.y + sample.y * normal.y + sample.z * Nt.y,
             sample.x * Nb.z + sample.y * normal.z + sample.z * Nt.z);
-        //TODO: Ray nextRay{interaction.getSafePosition(), nextDirection};
+        Ray nextRay{interaction.getSafePosition(), nextDirection};
         // don't forget to divide by PDF and multiply by cos(theta)
         indirectLight = trace(scene, nextRay, depth - 1, generator, distribution) * r1 / pdf;
         //indirectLight /= 255;
 
         // Finalise and return
         //return (directLight / M_PI + indirectLight * 2) * colour;
-        float coef = 0.5;
+        float coef = 0.8;
         return colour * (directLight * coef + indirectLight * (1 - coef));//*/
         return colour * directLight;
     }

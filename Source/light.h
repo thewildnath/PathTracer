@@ -18,7 +18,6 @@ public:
     Vec3f colour;
     float intensity;
 
-    Vec3f source; // N/A for AbstractLight
     Vec3f direction; // Normalised vector pointing to the source. Equal to the normal in case of AbstractLight.
     float distance;
 };

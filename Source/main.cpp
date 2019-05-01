@@ -56,13 +56,13 @@ int main(int argc, char *argv[])
     scene = scg::LoadTestModel();
 
     // Point lights
-    //scene.lights.emplace_back(std::make_shared<scg::PointLight>(scg::PointLight{{1.0f, 1.0f, 1.0f}, 20, {0, -0.75, 0}}));
+    scene.lights.emplace_back(std::make_shared<scg::PointLight>(scg::PointLight{{1.0f, 1.0f, 1.0f}, 20, {0, -0.75, 0}}));
     //scene.lights.emplace_back(std::make_shared<scg::PointLight>(scg::PointLight{{1.0f, 1.0f, 1.0f}, 10, {-0.5, -0.75, 0}}));
     //scene.lights.emplace_back(std::make_shared<scg::PointLight>(scg::PointLight{{1.0f, 1.0f, 1.0f}, 10, {0.5, -0.75, 0}}));
     // Directional lights
-    //scene.lights.emplace_back(std::make_shared<scg::DirectionalLight>(scg::DirectionalLight{{1.0f, 1.0f, 1.0f}, 1, {0, 0.5, 0.5}}));
+    //scene.lights.emplace_back(std::make_shared<scg::DirectionalLight>(scg::DirectionalLight{{1.0f, 1.0f, 1.0f}, 5, {0, 0.5, 0.5}}));
 
-//*
+/*
     // Ceiling light
     size_t index = scene.materials.size();
 
@@ -123,7 +123,7 @@ void Draw(screen *screen)
         {
             scg::Ray ray = camera.getRay(x, y);
 
-            int depth = 4;
+            int depth = 3;
             scg::Vec3f colour = scg::trace(scene, ray, depth, generator, distribution);
             buffer[y][x] += colour; // TODO: clamp value
 
@@ -160,18 +160,22 @@ bool Update()
                 case SDLK_w:
                     /* Move camera forward */
                     camera.position.z += 0.2f;
+                    InitialiseBuffer();
                     break;
                 case SDLK_s:
                     /* Move camera backwards */
                     camera.position.z -= 0.2f;
+                    InitialiseBuffer();
                     break;
                 case SDLK_a:
                     /* Move camera left */
                     camera.position.x -= 0.2f;
+                    InitialiseBuffer();
                     break;
                 case SDLK_d:
                     /* Move camera right */
                     camera.position.x += 0.2f;
+                    InitialiseBuffer();
                     break;
                 case SDLK_r:
                     InitialiseBuffer();
@@ -179,18 +183,22 @@ bool Update()
                 case SDLK_UP:
                     /* Move rotate up */
                     camera.rotation.x += 5;
+                    InitialiseBuffer();
                     break;
                 case SDLK_DOWN:
                     /* Move rotate down */
                     camera.rotation.x -= 5;
+                    InitialiseBuffer();
                     break;
                 case SDLK_LEFT:
                     /* Move rotate left */
                     camera.rotation.y -= 5;
+                    InitialiseBuffer();
                     break;
                 case SDLK_RIGHT:
                     /* Move rotate right */
                     camera.rotation.y += 5;
+                    InitialiseBuffer();
                     break;
             }
         }
