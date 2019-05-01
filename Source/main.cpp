@@ -56,9 +56,9 @@ int main(int argc, char *argv[])
     scene = scg::LoadTestModel();
 
     // Point lights
-    //scene.lights.emplace_back(std::make_shared<scg::PointLight>(scg::PointLight{{1.0f, 1.0f, 1.0f}, 20, {0, -0.39, 0}}));
-    //scene.lights.emplace_back(std::make_shared<scg::PointLight>(scg::PointLight{{1.0f, 1.0f, 1.0f}, 20, {-0.5, -0.75, 0}}));
-    scene.lights.emplace_back(std::make_shared<scg::PointLight>(scg::PointLight{{1.0f, 1.0f, 1.0f}, 10, {0.5, -0.75, 0}}));
+    //scene.lights.emplace_back(std::make_shared<scg::PointLight>(scg::PointLight{{1.0f, 1.0f, 1.0f}, 20, {0, -0.75, 0}}));
+    //scene.lights.emplace_back(std::make_shared<scg::PointLight>(scg::PointLight{{1.0f, 1.0f, 1.0f}, 10, {-0.5, -0.75, 0}}));
+    //scene.lights.emplace_back(std::make_shared<scg::PointLight>(scg::PointLight{{1.0f, 1.0f, 1.0f}, 10, {0.5, -0.75, 0}}));
     // Directional lights
     //scene.lights.emplace_back(std::make_shared<scg::DirectionalLight>(scg::DirectionalLight{{1.0f, 1.0f, 1.0f}, 1, {0, 0.5, 0.5}}));
 
@@ -66,23 +66,23 @@ int main(int argc, char *argv[])
     // Ceiling light
     size_t index = scene.materials.size();
 
-//    float L = 1;
-//    scg::Vec3f E(L / 2, 0, -L / 2);
-//    scg::Vec3f F(-L / 2, 0, -L / 2);
-//    scg::Vec3f G(L / 2, 0, L / 2);
-//    scg::Vec3f H(-L / 2, 0, L / 2);
-//    std::vector<scg::Triangle> triangles{
-//        scg::Triangle(G, F, E, index),
-//        scg::Triangle(G, H, F, index)
-//    };
-//    std::shared_ptr<scg::Object> objectPtr = std::make_shared<scg::Object>(scg::Object{
-//        { 0, -0.99, 0},
-//        std::make_shared<scg::Mesh>(triangles)
-//    });
+    float L = 1;
+    scg::Vec3f E(L / 2, 0, -L / 2);
+    scg::Vec3f F(-L / 2, 0, -L / 2);
+    scg::Vec3f G(L / 2, 0, L / 2);
+    scg::Vec3f H(-L / 2, 0, L / 2);
+    std::vector<scg::Triangle> triangles{
+        scg::Triangle(G, F, E, index),
+        scg::Triangle(G, H, F, index)
+    };
     std::shared_ptr<scg::Object> objectPtr = std::make_shared<scg::Object>(scg::Object{
-        { 0, -0.7, 0},
-        std::make_shared<scg::Sphere>(0.2, index)
+        { 0, -0.99, 0},
+        std::make_shared<scg::Mesh>(triangles)
     });
+//    std::shared_ptr<scg::Object> objectPtr = std::make_shared<scg::Object>(scg::Object{
+//        { 0, -0.7, 0},
+//        std::make_shared<scg::Sphere>(0.2, index)
+//    });
     scene.objects.emplace_back(objectPtr);
     std::shared_ptr<scg::ObjectLight> lightPtr = std::make_shared<scg::ObjectLight>(scg::ObjectLight{
         {1.0f, 1.0f, 1.0f}, 40,

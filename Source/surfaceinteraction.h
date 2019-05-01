@@ -16,7 +16,7 @@ public:
     SurfaceInteraction(Vec3f const& position, Vec3f const& normal):
         position(position), normal(normal) {};
 
-    Vec3f getSafePosition()
+    Vec3f getSafePosition() const
     {
         return position + normal * EPS;
     }

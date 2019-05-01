@@ -109,7 +109,6 @@ public:
 
         for (int i = 0; i < (int)triangles.size(); ++i)
         {
-            const float EPSILON = 0.0000001f;
             Vec3f vertex0 = triangles[i].v0;
             Vec3f vertex1 = triangles[i].v1;
             Vec3f vertex2 = triangles[i].v2;
@@ -122,7 +121,7 @@ public:
             h = cross(ray.direction, edge2);
             a = dot(edge1, h);
 
-            if (a > -EPSILON && a < EPSILON)
+            if (a > -EPS && a < EPS)
                 continue;
 
             f = 1.0f / a;
@@ -141,7 +140,7 @@ public:
             // At this stage we can compute t to find out where the intersection point is on the line.
             float t = f * dot(edge2, q);
 
-            if (t > EPSILON) // Ray intersection
+            if (t > EPS) // Ray intersection
             {
                 if (ray.isInside(t) && t < minDistance)
                 {

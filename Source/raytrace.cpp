@@ -135,10 +135,9 @@ Vec3f trace(
 
                 // Check for objects blocking the path
                 if (!scg::getClosestIntersection(scene, lightRay, lightIntersection) ||
-                    lightIntersection.distance + 2 * EPS >= lightHit.distance)
+                    lightIntersection.distance + EPS >= lightHit.distance)
                 {
-                    float intensity =
-                        lightHit.intensity * std::max(0.0f, dot(normal, lightHit.direction));
+                    float intensity = lightHit.intensity * std::max(0.0f, dot(normal, lightHit.direction));
                     directLight += lightHit.colour * intensity;
                 }
 
@@ -161,14 +160,14 @@ Vec3f trace(
             sample.x * Nb.x + sample.y * normal.x + sample.z * Nt.x,
             sample.x * Nb.y + sample.y * normal.y + sample.z * Nt.y,
             sample.x * Nb.z + sample.y * normal.z + sample.z * Nt.z);
-        //TODO: Ray nextRay{interaction.position, nextDirection, EPS};
+        //TODO: Ray nextRay{interaction.getSafePosition(), nextDirection};
         // don't forget to divide by PDF and multiply by cos(theta)
         indirectLight = trace(scene, nextRay, depth - 1, generator, distribution) * r1 / pdf;
         //indirectLight /= 255;
 
         // Finalise and return
         //return (directLight / M_PI + indirectLight * 2) * colour;
-        float coef = 0.8;
+        float coef = 0.5;
         return colour * (directLight * coef + indirectLight * (1 - coef));//*/
         return colour * directLight;
     }
