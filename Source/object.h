@@ -5,6 +5,7 @@
 #include "geometry.h"
 #include "math_utils.h"
 #include "ray.h"
+#include "surfaceinteraction.h"
 
 #include <memory>
 #include <random>
@@ -39,10 +40,12 @@ public:
         return true;
     }
 
-    Vec3f sampleSurface(std::default_random_engine &generator, std::uniform_real_distribution<float> &distribution)
+    SurfaceInteraction sampleSurface(std::default_random_engine &generator, std::uniform_real_distribution<float> &distribution)
     {
-        Vec3f point = geometry->sampleSurface(generator, distribution) + position;
-        return point;
+        SurfaceInteraction interaction = geometry->sampleSurface(generator, distribution);
+        interaction.position += position;
+
+        return interaction;
     }
 };
 

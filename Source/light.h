@@ -2,6 +2,7 @@
 #define RAYTRACER_LIGHT_H
 
 #include "object.h"
+#include "surfaceinteraction.h"
 #include "vector_type.h"
 
 #include <memory>
@@ -9,17 +10,6 @@
 
 namespace scg
 {
-
-// Similar to an intersection, but should be initialised with a safe position(i.e. position + normal * EPS)
-class Interaction
-{
-public:
-    Vec3f position;
-    Vec3f normal;
-
-    Interaction(Vec3f const& position, Vec3f const& normal):
-        position(position), normal(normal) {};
-};
 
 // Information regarding the illuminance of a light at a certain position
 class LightHit
@@ -41,7 +31,7 @@ enum LightType {
     LightType_Object
 };
 
-// Base Light class.
+// Base Light class
 class Light
 {
 protected:
@@ -52,7 +42,7 @@ public:
     Light(Vec3f const& colour, float intensity):
         colour(colour), intensity(intensity) {};
 
-    virtual LightHit illuminate(Interaction const&, std::default_random_engine&, std::uniform_real_distribution<float>&) const = 0;
+    virtual LightHit illuminate(SurfaceInteraction const&, std::default_random_engine&, std::uniform_real_distribution<float>&) const = 0;
 
     virtual Vec3f getEmittance()
     {
@@ -62,8 +52,8 @@ public:
     virtual LightType getType() const = 0;
 };
 
-// An abstract light, assume it is located at the position where it is sampled.
-// Always returns maximum intensity.
+// An abstract light, assume it is located at the position where it is sampled
+// Always returns maximum intensity
 class AbstractLight : public Light
 {
 private:
@@ -74,7 +64,7 @@ public:
     AbstractLight(Vec3f const& colour, float intensity):
         Light(colour, intensity) {};
 
-    LightHit illuminate(Interaction const& interaction, std::default_random_engine&, std::uniform_real_distribution<float>&) const override
+    LightHit illuminate(SurfaceInteraction const& interaction, std::default_random_engine&, std::uniform_real_distribution<float>&) const override
     {
         LightHit lightHit;
 
@@ -101,7 +91,7 @@ public:
     PointLight(Vec3f const& colour, float intensity, Vec3f const& position):
         Light(colour, intensity), position(position) {};
 
-    LightHit illuminate(Interaction const& interaction, std::default_random_engine&, std::uniform_real_distribution<float>&) const override
+    LightHit illuminate(SurfaceInteraction const& interaction, std::default_random_engine&, std::uniform_real_distribution<float>&) const override
     {
         LightHit lightHit;
 
@@ -122,7 +112,7 @@ public:
     }
 };
 
-// A source of light at a particular position with no shape/body
+// A source of light in a particular direction with no shape/body and position
 class DirectionalLight : public Light
 {
 private:
@@ -132,7 +122,7 @@ public:
     DirectionalLight(Vec3f const& colour, float intensity, Vec3f const& direction):
         Light(colour, intensity), direction(normalise(direction)) {};
 
-    LightHit illuminate(Interaction const&, std::default_random_engine&, std::uniform_real_distribution<float>&) const override
+    LightHit illuminate(SurfaceInteraction const&, std::default_random_engine&, std::uniform_real_distribution<float>&) const override
     {
         LightHit lightHit;
 
@@ -161,21 +151,20 @@ public:
     ObjectLight(Vec3f const& colour, float intensity, std::shared_ptr<Object> object):
         Light(colour, intensity), object(object) {};
 
-    LightHit illuminate(Interaction const &interaction, std::default_random_engine &generator, std::uniform_real_distribution<float> &distribution) const override
+    LightHit illuminate(SurfaceInteraction const& interaction, std::default_random_engine &generator, std::uniform_real_distribution<float> &distribution) const override
     {
         LightHit lightHit;
 
-        Vec3f position = object->sampleSurface(generator, distribution);
+        SurfaceInteraction source = object->sampleSurface(generator, distribution);
 
         lightHit.colour = colour;
 
-        lightHit.direction = position - interaction.position;
+        lightHit.direction = source.position - interaction.position;
         lightHit.distance = lightHit.direction.length();
         lightHit.direction /= lightHit.distance;
 
         lightHit.intensity = intensity / (float)(4 * M_PI * lightHit.distance * lightHit.distance);
-
-        return lightHit;
+        lightHit.intensity = lightHit.intensity * std::max(0.0f, dot(source.normal, -lightHit.direction));
 
         return lightHit;
     }

@@ -1,6 +1,6 @@
 #include "raytrace.h"
 
-#include "intersection.h"
+#include "surfaceinteraction.h"
 #include "vector_type.h"
 #include "ray.h"
 
@@ -94,12 +94,14 @@ Vec3f trace(
 
     if (lightPtr != nullptr)
     {
-        directLight = lightPtr->getEmittance();
+        // Do not light on the back side
+        if (dot(normal, -ray.direction) >= 0)
+            directLight = lightPtr->getEmittance();
     }
 
     // Calculate interaction(safe point for light calculation and next ray trace)
-    Interaction interaction{
-        intersection.position + normal * EPS,
+    SurfaceInteraction interaction{
+        intersection.position,
         normal};
 
     //if (diffuse)
@@ -128,12 +130,12 @@ Vec3f trace(
             case LightType_Directional:
             case LightType_Object:
             {
-                Ray lightRay{interaction.position, lightHit.direction};
+                Ray lightRay{interaction.getSafePosition(), lightHit.direction};
                 Intersection lightIntersection{};
 
                 // Check for objects blocking the path
                 if (!scg::getClosestIntersection(scene, lightRay, lightIntersection) ||
-                    lightIntersection.distance + EPS >= lightHit.distance)
+                    lightIntersection.distance + 2 * EPS >= lightHit.distance)
                 {
                     float intensity =
                         lightHit.intensity * std::max(0.0f, dot(normal, lightHit.direction));
@@ -159,7 +161,7 @@ Vec3f trace(
             sample.x * Nb.x + sample.y * normal.x + sample.z * Nt.x,
             sample.x * Nb.y + sample.y * normal.y + sample.z * Nt.y,
             sample.x * Nb.z + sample.y * normal.z + sample.z * Nt.z);
-        Ray nextRay{interaction.position, nextDirection};
+        //TODO: Ray nextRay{interaction.position, nextDirection, EPS};
         // don't forget to divide by PDF and multiply by cos(theta)
         indirectLight = trace(scene, nextRay, depth - 1, generator, distribution) * r1 / pdf;
         //indirectLight /= 255;

@@ -23,7 +23,7 @@ public:
     Material(Vec3f const& color, std::shared_ptr<Light> lightPtr):
         color(color), lightPtr(lightPtr) {};
 
-    Vec3f getColour(Vec2f const& uv) const
+    Vec3f getColour(Vec2f const&) const
     {
         return color;
     }

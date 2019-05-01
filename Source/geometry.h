@@ -3,6 +3,7 @@
 
 #include "intersection.h"
 #include "ray.h"
+#include "surfaceinteraction.h"
 #include "triangle.h"
 
 #include <cassert>
@@ -16,7 +17,7 @@ class Geometry
 {
 public:
     virtual bool getIntersection(Ray const&, Intersection&) const = 0;
-    virtual Vec3f sampleSurface(std::default_random_engine&, std::uniform_real_distribution<float>&) = 0;
+    virtual SurfaceInteraction sampleSurface(std::default_random_engine&, std::uniform_real_distribution<float>&) = 0;
 };
 
 class Sphere : public Geometry
@@ -51,6 +52,9 @@ public:
         else
             return false;
 
+        if (!ray.isInside(t))
+            return false;
+
         intersection.position   = ray(t);
         intersection.distance   = t;
         intersection.normal     = normalise(intersection.position);
@@ -60,7 +64,7 @@ public:
         return true;
     }
 
-    Vec3f sampleSurface(std::default_random_engine &generator, std::uniform_real_distribution<float> &distribution) override
+    SurfaceInteraction sampleSurface(std::default_random_engine &generator, std::uniform_real_distribution<float> &distribution) override
     {
         // Mathsy version
         /*
@@ -80,9 +84,9 @@ public:
             point.z = distribution(generator) - 0.5f;
         } while (point.length() <= EPS); // Make sure that we don't divide by 0
 
-        point = normalise(point) * radius;
+        point = normalise(point);
 
-        return point;
+        return SurfaceInteraction{point * radius, point};
     }
 };
 
@@ -139,7 +143,7 @@ public:
 
             if (t > EPSILON) // Ray intersection
             {
-                if (t < minDistance)
+                if (ray.isInside(t) && t < minDistance)
                 {
                     minDistance = t;
                     index = i;
@@ -162,7 +166,7 @@ public:
         return true;
     }
 
-    Vec3f sampleSurface(std::default_random_engine &generator, std::uniform_real_distribution<float> &distribution) override
+    SurfaceInteraction sampleSurface(std::default_random_engine &generator, std::uniform_real_distribution<float> &distribution) override
     {
         float num = distribution(generator) * triangles.size();
         size_t index = (size_t)std::floor(num);
@@ -173,9 +177,8 @@ public:
         float r2 = distribution(generator);
 
         Vec3f point = triangles[index].v0 * (1 - r1) + triangles[index].v1 * r1 * (1 - r2) + triangles[index].v2 * r1 * r2;
-        point += triangles[index].normal * EPS;
 
-        return point;
+        return SurfaceInteraction{point, triangles[index].normal};
     }
 };
 
