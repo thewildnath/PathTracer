@@ -3,11 +3,11 @@
 
 #include "intersection.h"
 #include "ray.h"
+#include "sampler.h"
 #include "surfaceinteraction.h"
 #include "triangle.h"
 
 #include <cassert>
-#include <random>
 #include <vector>
 
 namespace scg
@@ -17,7 +17,7 @@ class Geometry
 {
 public:
     virtual bool getIntersection(Ray const&, Intersection&) const = 0;
-    virtual SurfaceInteraction sampleSurface(std::default_random_engine&, std::uniform_real_distribution<float>&) = 0;
+    virtual SurfaceInteraction sampleSurface(Sampler&) = 0;
 };
 
 class Sphere : public Geometry
@@ -64,7 +64,7 @@ public:
         return true;
     }
 
-    SurfaceInteraction sampleSurface(std::default_random_engine &generator, std::uniform_real_distribution<float> &distribution) override
+    SurfaceInteraction sampleSurface(Sampler &sampler) override
     {
         // Mathsy version
         /*
@@ -79,9 +79,9 @@ public:
 
         do
         {
-            point.x = distribution(generator) - 0.5f;
-            point.y = distribution(generator) - 0.5f;
-            point.z = distribution(generator) - 0.5f;
+            point.x = sampler.nextFloat() - 0.5f;
+            point.y = sampler.nextFloat() - 0.5f;
+            point.z = sampler.nextFloat() - 0.5f;
         } while (point.length() <= EPS); // Make sure that we don't divide by 0
 
         point = normalise(point);
@@ -165,15 +165,13 @@ public:
         return true;
     }
 
-    SurfaceInteraction sampleSurface(std::default_random_engine &generator, std::uniform_real_distribution<float> &distribution) override
+    SurfaceInteraction sampleSurface(Sampler &sampler) override
     {
-        float num = distribution(generator) * triangles.size();
-        size_t index = (size_t)std::floor(num);
-
+        size_t index = (size_t)sampler.nextDiscrete(triangles.size());
         assert(index < triangles.size());
 
-        float r1 = std::sqrt(distribution(generator));
-        float r2 = distribution(generator);
+        float r1 = std::sqrt(sampler.nextFloat());
+        float r2 = sampler.nextFloat();
 
         Vec3f point = triangles[index].v0 * (1 - r1) + triangles[index].v1 * r1 * (1 - r2) + triangles[index].v2 * r1 * r2;
 

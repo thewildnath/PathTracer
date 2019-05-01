@@ -5,10 +5,10 @@
 #include "geometry.h"
 #include "math_utils.h"
 #include "ray.h"
+#include "sampler.h"
 #include "surfaceinteraction.h"
 
 #include <memory>
-#include <random>
 #include <vector>
 
 namespace scg
@@ -40,9 +40,9 @@ public:
         return true;
     }
 
-    SurfaceInteraction sampleSurface(std::default_random_engine &generator, std::uniform_real_distribution<float> &distribution)
+    SurfaceInteraction sampleSurface(Sampler &sampler)
     {
-        SurfaceInteraction interaction = geometry->sampleSurface(generator, distribution);
+        SurfaceInteraction interaction = geometry->sampleSurface(sampler);
         interaction.position += position;
 
         return interaction;

@@ -3,6 +3,7 @@
 #include "object.h"
 #include "ray.h"
 #include "raytrace.h"
+#include "sampler.h"
 #include "scene.h"
 #include "SDLauxiliary.h"
 #include "triangle.h"
@@ -15,7 +16,6 @@
 #include <cstdint>
 #include <cstring>
 #include <memory>
-#include <random>
 
 #define RES 450
 #define SCREEN_WIDTH  RES
@@ -31,8 +31,7 @@ bool Update();
 void Draw(screen *screen);
 void InitialiseBuffer();
 
-std::default_random_engine generator;
-std::uniform_real_distribution<float> distribution(0, 1);
+scg::Sampler sampler;
 
 scg::Camera camera{
     scg::Vec3f(0, 0, -3),
@@ -124,7 +123,7 @@ void Draw(screen *screen)
             scg::Ray ray = camera.getRay(x, y);
 
             int depth = 3;
-            scg::Vec3f colour = scg::trace(scene, ray, depth, generator, distribution);
+            scg::Vec3f colour = scg::trace(scene, ray, depth, sampler);
             buffer[y][x] += colour; // TODO: clamp value
 
             PutPixelSDL(screen, x, y, buffer[y][x] / samples);

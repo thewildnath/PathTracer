@@ -1,12 +1,12 @@
 #include "raytrace.h"
 
+#include "sampler.h"
 #include "surfaceinteraction.h"
 #include "vector_type.h"
 #include "ray.h"
 
 #include <cassert>
 #include <limits>
-#include <random>
 
 namespace scg
 {
@@ -68,8 +68,7 @@ Vec3f trace(
     Scene const& scene,
     Ray const& ray,
     int depth,
-    std::default_random_engine &generator,
-    std::uniform_real_distribution<float> &distribution)
+    Sampler &sampler)
 {
     // Check for recursion end
     if (depth <= 0)
@@ -107,14 +106,12 @@ Vec3f trace(
     //if (diffuse)
     {
         // Calculate direct light
-        float num = distribution(generator) * scene.lights.size();
-        size_t index = (size_t)std::floor(num);
-
-        assert(num < scene.lights.size());
+        size_t index = (size_t)sampler.nextDiscrete(scene.lights.size());
+        assert(index < scene.lights.size());
 
         std::shared_ptr<Light> light = scene.lights[index];
         LightType lightType = light->getType();
-        LightHit lightHit = light->illuminate(interaction, generator, distribution);
+        LightHit lightHit = light->illuminate(interaction, sampler);
 
         if (light != lightPtr)
         switch (lightType)
@@ -153,8 +150,8 @@ Vec3f trace(
         createCoordinateSystem(normal, Nt, Nb);
 
         float pdf = 1 / (2 * (float)M_PI);
-        float r1 = distribution(generator);
-        float r2 = distribution(generator);
+        float r1 = sampler.nextFloat();
+        float r2 = sampler.nextFloat();
         Vec3f sample = uniformSampleHemisphere(r1, r2);
         Vec3f nextDirection(
             sample.x * Nb.x + sample.y * normal.x + sample.z * Nt.x,
@@ -162,7 +159,7 @@ Vec3f trace(
             sample.x * Nb.z + sample.y * normal.z + sample.z * Nt.z);
         Ray nextRay{interaction.getSafePosition(), nextDirection};
         // don't forget to divide by PDF and multiply by cos(theta)
-        indirectLight = trace(scene, nextRay, depth - 1, generator, distribution) * r1 / pdf;
+        indirectLight = trace(scene, nextRay, depth - 1, sampler) * r1 / pdf;
         //indirectLight /= 255;
 
         // Finalise and return

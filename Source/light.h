@@ -2,11 +2,11 @@
 #define RAYTRACER_LIGHT_H
 
 #include "object.h"
+#include "sampler.h"
 #include "surfaceinteraction.h"
 #include "vector_type.h"
 
 #include <memory>
-#include <random>
 
 namespace scg
 {
@@ -41,7 +41,7 @@ public:
     Light(Vec3f const& colour, float intensity):
         colour(colour), intensity(intensity) {};
 
-    virtual LightHit illuminate(SurfaceInteraction const&, std::default_random_engine&, std::uniform_real_distribution<float>&) const = 0;
+    virtual LightHit illuminate(SurfaceInteraction const&, Sampler &) const = 0;
 
     virtual Vec3f getEmittance()
     {
@@ -63,7 +63,7 @@ public:
     AbstractLight(Vec3f const& colour, float intensity):
         Light(colour, intensity) {};
 
-    LightHit illuminate(SurfaceInteraction const& interaction, std::default_random_engine&, std::uniform_real_distribution<float>&) const override
+    LightHit illuminate(SurfaceInteraction const& interaction, Sampler&) const override
     {
         LightHit lightHit;
 
@@ -90,7 +90,7 @@ public:
     PointLight(Vec3f const& colour, float intensity, Vec3f const& position):
         Light(colour, intensity), position(position) {};
 
-    LightHit illuminate(SurfaceInteraction const& interaction, std::default_random_engine&, std::uniform_real_distribution<float>&) const override
+    LightHit illuminate(SurfaceInteraction const& interaction, Sampler&) const override
     {
         LightHit lightHit;
 
@@ -121,7 +121,7 @@ public:
     DirectionalLight(Vec3f const& colour, float intensity, Vec3f const& direction):
         Light(colour, intensity), direction(normalise(direction)) {};
 
-    LightHit illuminate(SurfaceInteraction const&, std::default_random_engine&, std::uniform_real_distribution<float>&) const override
+    LightHit illuminate(SurfaceInteraction const&, Sampler&) const override
     {
         LightHit lightHit;
 
@@ -150,11 +150,11 @@ public:
     ObjectLight(Vec3f const& colour, float intensity, std::shared_ptr<Object> object):
         Light(colour, intensity), object(object) {};
 
-    LightHit illuminate(SurfaceInteraction const& interaction, std::default_random_engine &generator, std::uniform_real_distribution<float> &distribution) const override
+    LightHit illuminate(SurfaceInteraction const& interaction, Sampler &sampler) const override
     {
         LightHit lightHit;
 
-        SurfaceInteraction source = object->sampleSurface(generator, distribution);
+        SurfaceInteraction source = object->sampleSurface(sampler);
 
         lightHit.colour = colour;
 
