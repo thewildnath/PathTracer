@@ -1,44 +1,35 @@
 #include "raytrace.h"
 
+#include "surfaceinteraction.h"
+#include "vector_type.h"
+#include "ray.h"
+
+#include <cassert>
 #include <limits>
+#include <random>
 
 namespace scg
 {
 
 bool getClosestIntersection(
-    glm::vec4 start,
-    glm::vec4 dir,
-    const std::vector <Triangle> &triangles,
+    Scene const& scene,
+    Ray const& ray,
     Intersection &closestIntersection)
 {
     float minDistance = std::numeric_limits<float>::max();
     int index = -1;
 
-    for (int i = 0; i < triangles.size(); ++i)
+    for (int i = 0; i < (int)scene.objects.size(); ++i)
     {
-        Triangle triangle = triangles[i];
+        Intersection intersection;
 
-        glm::vec4 v0 = triangle.v0;
-        glm::vec4 v1 = triangle.v1;
-        glm::vec4 v2 = triangle.v2;
-
-        glm::vec3 d = glm::vec3(dir);
-        glm::vec3 e1 = glm::vec3(v1.x - v0.x, v1.y - v0.y, v1.z - v0.z);
-        glm::vec3 e2 = glm::vec3(v2.x - v0.x, v2.y - v0.y, v2.z - v0.z);
-        glm::vec3 b = glm::vec3(start.x - v0.x, start.y - v0.y, start.z - v0.z);
-        glm::mat3 A(-d, e1, e2);
-        glm::vec3 x = glm::inverse(A) * b;
-
-        float t = x.x;
-        float u = x.y;
-        float v = x.z;
-
-        if (0 <= u && 0 <= v && u + v <= 1)
+        if (scene.objects[i]->getIntersection(ray, intersection))
         {
-            if (t < minDistance)
+            if (intersection.distance < minDistance)
             {
-                minDistance = t;
+                minDistance = intersection.distance;
                 index = i;
+                closestIntersection = intersection;
             }
         }
     }
@@ -48,11 +39,139 @@ bool getClosestIntersection(
         return false;
     }
 
-    closestIntersection.distance = minDistance;
-    closestIntersection.position = start + dir * minDistance;
-    closestIntersection.triangleIndex = index;
+    closestIntersection.objectID = index;
 
     return true;
+}
+
+void createCoordinateSystem(Vec3f const& N, Vec3f &Nt, Vec3f &Nb)
+{
+    if (std::fabs(N.x) > std::fabs(N.y))
+        Nt = Vec3f(N.z, 0, -N.x) / std::sqrt(N.x * N.x + N.z * N.z);
+    else
+        Nt = Vec3f(0, -N.z, N.y) / std::sqrt(N.y * N.y + N.z * N.z);
+    Nb = cross(N, Nt);
+}
+
+Vec3f uniformSampleHemisphere(const float &r1, const float &r2)
+{
+    // cos(theta) = u1 = y
+    // cos^2(theta) + sin^2(theta) = 1 -> sin(theta) = srtf(1 - cos^2(theta))
+    float sinTheta = sqrtf(1 - r1 * r1);
+    float phi = 2 * (float)M_PI * r2;
+    float x = sinTheta * cosf(phi);
+    float z = sinTheta * sinf(phi);
+    return Vec3f(x, r1, z);
+}
+
+Vec3f trace(
+    Scene const& scene,
+    Ray const& ray,
+    int depth,
+    std::default_random_engine &generator,
+    std::uniform_real_distribution<float> &distribution)
+{
+    // Check for recursion end
+    if (depth <= 0)
+    {
+        return Vec3f(0, 0, 0); // Ambient
+    }
+
+    // Intersect the scene
+    Intersection intersection{};
+
+    if (!getClosestIntersection(scene, ray, intersection))
+    {
+        return Vec3f(0, 0, 0); // Ambient //TODO: skybox
+    }
+
+    Vec3f const& normal = intersection.normal;
+    auto const& material = scene.materials[intersection.materialID];
+    auto const& lightPtr = material->lightPtr;
+    Vec3f colour = material->getColour(intersection.uv);
+
+    Vec3f directLight;
+
+    if (lightPtr != nullptr)
+    {
+        // Do not light on the back side
+        if (dot(normal, -ray.direction) >= 0)
+            directLight = lightPtr->getEmittance();
+    }
+
+    // Calculate interaction(safe point for light calculation and next ray trace)
+    SurfaceInteraction interaction{
+        intersection.position,
+        normal};
+
+    //if (diffuse)
+    {
+        // Calculate direct light
+        float num = distribution(generator) * scene.lights.size();
+        size_t index = (size_t)std::floor(num);
+
+        assert(num < scene.lights.size());
+
+        std::shared_ptr<Light> light = scene.lights[index];
+        LightType lightType = light->getType();
+        LightHit lightHit = light->illuminate(interaction, generator, distribution);
+
+        if (light != lightPtr)
+        switch (lightType)
+        {
+            case LightType_Abstract:
+            {
+                float intensity = lightHit.intensity * std::max(0.0f, dot(normal, lightHit.direction));
+                directLight += lightHit.colour * intensity;
+
+                break;
+            }
+            case LightType_Point:
+            case LightType_Directional:
+            case LightType_Object:
+            {
+                Ray lightRay{interaction.getSafePosition(), lightHit.direction};
+                Intersection lightIntersection{};
+
+                // Check for objects blocking the path
+                if (!scg::getClosestIntersection(scene, lightRay, lightIntersection) ||
+                    lightIntersection.distance + 2 * EPS >= lightHit.distance)
+                {
+                    float intensity =
+                        lightHit.intensity * std::max(0.0f, dot(normal, lightHit.direction));
+                    directLight += lightHit.colour * intensity;
+                }
+
+                break;
+            }
+        }
+
+        // Calculate indirect light
+        /*
+        Vec3f indirectLight;
+
+        Vec3f Nt, Nb;
+        createCoordinateSystem(normal, Nt, Nb);
+
+        float pdf = 1 / (2 * (float)M_PI);
+        float r1 = distribution(generator);
+        float r2 = distribution(generator);
+        Vec3f sample = uniformSampleHemisphere(r1, r2);
+        Vec3f nextDirection(
+            sample.x * Nb.x + sample.y * normal.x + sample.z * Nt.x,
+            sample.x * Nb.y + sample.y * normal.y + sample.z * Nt.y,
+            sample.x * Nb.z + sample.y * normal.z + sample.z * Nt.z);
+        //TODO: Ray nextRay{interaction.position, nextDirection, EPS};
+        // don't forget to divide by PDF and multiply by cos(theta)
+        indirectLight = trace(scene, nextRay, depth - 1, generator, distribution) * r1 / pdf;
+        //indirectLight /= 255;
+
+        // Finalise and return
+        //return (directLight / M_PI + indirectLight * 2) * colour;
+        float coef = 0.8;
+        return colour * (directLight * coef + indirectLight * (1 - coef));//*/
+        return colour * directLight;
+    }
 }
 
 }

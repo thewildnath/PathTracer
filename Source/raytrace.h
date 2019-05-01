@@ -1,22 +1,30 @@
 #ifndef RAYTRACE_H
 #define RAYTRACE_H
 
+#include "intersection.h"
+#include "object.h"
+#include "scene.h"
 #include "triangle.h"
-#include "utils.h"
+#include "vector_type.h"
+#include "ray.h"
 
-#include <glm/glm.hpp>
-
+#include <random>
 #include <vector>
 
 namespace scg
 {
 
 bool getClosestIntersection(
-    glm::vec4 start,
-    glm::vec4 dir,
-    const std::vector <Triangle> &triangles,
+    Scene const& scene,
+    Ray const& ray,
     Intersection &closestIntersection);
 
+Vec3f trace(
+    Scene const& scene,
+    Ray const& ray,
+    int depth,
+    std::default_random_engine &generator,
+    std::uniform_real_distribution<float> &distribution);
 }
 
 #endif //RAYTRACE_H
