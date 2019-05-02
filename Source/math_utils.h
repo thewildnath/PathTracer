@@ -6,9 +6,10 @@
 namespace scg
 {
 
-const float EPS = 1e-6;
+const float EPS = 1e-5;
 //const float EPS = std::numeric_limits<float>::epsilon();
 const float INF = std::numeric_limits<float>::infinity();
+
 
 template<typename T>
 inline T clamp(T const& value, T const& low, T const& high)

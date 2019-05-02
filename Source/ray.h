@@ -26,7 +26,7 @@ public:
 
     inline bool isInside(float distance) const
     {
-        return minT - EPS <= distance && distance <= maxT + EPS;
+        return minT <= distance && distance <= maxT;
     }
 };
 

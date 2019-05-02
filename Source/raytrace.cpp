@@ -44,27 +44,7 @@ bool getClosestIntersection(
     return true;
 }
 
-void createCoordinateSystem(Vec3f const& N, Vec3f &Nt, Vec3f &Nb)
-{
-    if (std::fabs(N.x) > std::fabs(N.y))
-        Nt = Vec3f(N.z, 0, -N.x) / std::sqrt(N.x * N.x + N.z * N.z);
-    else
-        Nt = Vec3f(0, -N.z, N.y) / std::sqrt(N.y * N.y + N.z * N.z);
-    Nb = cross(N, Nt);
-}
-
-Vec3f uniformSampleHemisphere(const float &r1, const float &r2)
-{
-    // cos(theta) = u1 = y
-    // cos^2(theta) + sin^2(theta) = 1 -> sin(theta) = srtf(1 - cos^2(theta))
-    float sinTheta = sqrtf(1 - r1 * r1);
-    float phi = 2 * (float)M_PI * r2;
-    float x = sinTheta * cosf(phi);
-    float z = sinTheta * sinf(phi);
-    return Vec3f(x, r1, z);
-}
-
-Vec3f SampleLights(SurfaceInteraction const& interaction, Scene const& scene, std::shared_ptr<Light> const& hitLight, Sampler &sampler)
+Vec3f SampleLights(SurfaceInteraction &interaction, Scene const& scene, std::shared_ptr<Material> const& material, std::shared_ptr<Light> const& hitLight, Sampler &sampler)
 {
     // Cannot sample the hitLight
     if (scene.lights.size() <= 1 && hitLight != nullptr)
@@ -90,8 +70,14 @@ Vec3f SampleLights(SurfaceInteraction const& interaction, Scene const& scene, st
     {
         case LightType_Abstract:
         {
-            float intensity = lightHit.intensity * std::max(0.0f, dot(interaction.normal, lightHit.direction));
-            directLight += lightHit.colour * intensity;
+            //float intensity = lightHit.intensity * std::max(0.0f, dot(interaction.normal, lightHit.direction));
+            //directLight += lightHit.colour * intensity;
+            interaction.inputDir = lightHit.direction;
+            float pdf = material->pdf(interaction);
+            if (pdf != 0)
+            {
+                directLight += lightHit.colour * material->evaluate(interaction) * lightHit.intensity / pdf;
+            }
 
             break;
         }
@@ -106,8 +92,14 @@ Vec3f SampleLights(SurfaceInteraction const& interaction, Scene const& scene, st
             if (!scg::getClosestIntersection(scene, lightRay, lightIntersection) ||
                 lightIntersection.distance + EPS >= lightHit.distance)
             {
-                float intensity = lightHit.intensity * std::max(0.0f, dot(interaction.normal, lightHit.direction));
-                directLight += lightHit.colour * intensity;
+                //float intensity = lightHit.intensity * std::max(0.0f, dot(interaction.normal, lightHit.direction));
+                //directLight += lightHit.colour * intensity;
+                interaction.inputDir = lightHit.direction;
+                float pdf = material->pdf(interaction);
+                if (pdf != 0)
+                {
+                    directLight += lightHit.colour * material->evaluate(interaction) * lightHit.intensity / pdf;
+                }
             }
 
             break;
@@ -160,9 +152,10 @@ Vec3f trace(
             interaction.normal *= -1;
 
         // Calculate direct light
-        Vec3f directLight = SampleLights(interaction, scene, hitLight, sampler);
+        colour += throughput * SampleLights(interaction, scene, material, hitLight, sampler);
 
-        colour += throughput * material->evaluate(intersection.uv) * directLight;
+        Vec3f c = material->evaluate(interaction);
+        float pdf = material->pdf(interaction);
 
         // Calculate indirect light
         /*

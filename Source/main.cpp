@@ -93,7 +93,11 @@ int main(int argc, char *argv[])
     scene.lights.emplace_back(lightPtr);
     scene.materials.emplace_back(std::make_shared<scg::Lambert>(scg::Lambert{texture, lightPtr}));
 //*/
-
+    std::shared_ptr<scg::Object> object2Ptr = std::make_shared<scg::Object>(scg::Object{
+        { 0.6, -0.15, 0},
+        std::make_shared<scg::Sphere>(0.3, 0)
+    });
+    scene.objects.emplace_back(object2Ptr);
 
 
 
