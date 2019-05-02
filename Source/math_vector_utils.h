@@ -7,6 +7,10 @@
 namespace scg
 {
 
+inline Vec3f reflect(Vec3f const& v, Vec3f const& normal) {
+    return normal * 2.0f * dot(v, normal) - v;
+}
+
 inline void createCoordinateSystem(Vec3f const& N, Vec3f &Nt, Vec3f &Nb)
 {
     if (std::fabs(N.x) > std::fabs(N.y))

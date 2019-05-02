@@ -21,7 +21,7 @@ bool getClosestIntersection(
 
 Vec3f trace(
     Scene const& scene,
-    Ray const& ray,
+    Ray ray,
     int depth,
     Sampler &sampler);
 }

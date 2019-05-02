@@ -63,12 +63,12 @@ Scene LoadTestModel()
     triangles.emplace_back(Triangle(C, D, B, 6));//2));
 
     // Left wall
-    triangles.emplace_back(Triangle(A, E, C, 6));//5));
-    triangles.emplace_back(Triangle(C, E, G, 6));//5));
+    triangles.emplace_back(Triangle(A, E, C, 2));//5));
+    triangles.emplace_back(Triangle(C, E, G, 2));//5));
 
     // Right wall
-    triangles.emplace_back(Triangle(F, B, D, 6));//1));
-    triangles.emplace_back(Triangle(H, F, D, 6));//1));
+    triangles.emplace_back(Triangle(F, B, D, 0));//1));
+    triangles.emplace_back(Triangle(H, F, D, 0));//1));
 
     // Ceiling
     triangles.emplace_back(Triangle(E, F, G, 6));//3));

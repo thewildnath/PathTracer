@@ -46,6 +46,12 @@ bool getClosestIntersection(
 
 Vec3f SampleLights(SurfaceInteraction &interaction, Scene const& scene, std::shared_ptr<Material> const& material, std::shared_ptr<Light> const& hitLight, Sampler &sampler)
 {
+    // Cannot light mirror
+    if ((material->getSupportedLobes(interaction.uv) & BSDFLobe::Specular) != 0)
+    {
+        return Vec3f(0, 0, 0);
+    }
+
     // Cannot sample the hitLight
     if (scene.lights.size() <= 1 && hitLight != nullptr)
     {
@@ -85,7 +91,7 @@ Vec3f SampleLights(SurfaceInteraction &interaction, Scene const& scene, std::sha
         case LightType_Directional:
         case LightType_Object:
         {
-            Ray lightRay{interaction.getSafePosition(), lightHit.direction};
+            Ray lightRay{interaction.position, lightHit.direction, RAY_EPS};
             Intersection lightIntersection{};
 
             // Check for objects blocking the path
@@ -111,7 +117,7 @@ Vec3f SampleLights(SurfaceInteraction &interaction, Scene const& scene, std::sha
 
 Vec3f trace(
     Scene const& scene,
-    Ray const& ray,
+    Ray ray,
     int depth,
     Sampler &sampler)
 {
@@ -154,38 +160,22 @@ Vec3f trace(
         // Calculate direct light
         colour += throughput * SampleLights(interaction, scene, material, hitLight, sampler);
 
-        Vec3f c = material->evaluate(interaction);
+        // Sample next direction
+        material->sample(interaction, sampler);
         float pdf = material->pdf(interaction);
 
-        // Calculate indirect light
-        /*
-        Vec3f indirectLight;
+        // Accumulate
+        if (pdf == 0) std::cout << "WTF";
+        throughput *= material->evaluate(interaction) / pdf;
+        //throughput *= pdf;
 
-        Vec3f Nt, Nb;
-        createCoordinateSystem(normal, Nt, Nb);
-
-        float pdf = 1 / (2 * (float)M_PI);
-        float r1 = sampler.nextFloat();
-        float r2 = sampler.nextFloat();
-        Vec3f sample = uniformSampleHemisphere(r1, r2);
-        Vec3f nextDirection(
-            sample.x * Nb.x + sample.y * normal.x + sample.z * Nt.x,
-            sample.x * Nb.y + sample.y * normal.y + sample.z * Nt.y,
-            sample.x * Nb.z + sample.y * normal.z + sample.z * Nt.z);
-        Ray nextRay{interaction.getSafePosition(), nextDirection};
-        // don't forget to divide by PDF and multiply by cos(theta)
-        indirectLight = trace(scene, nextRay, depth - 1, sampler) * r1 / pdf;
-        //indirectLight /= 255;
-
-        // Finalise and return
-        //return (directLight / M_PI + indirectLight * 2) * colour;
-        float coef = 0.8;
-        return colour * (directLight * coef + indirectLight * (1 - coef));//*/
-
-        break;
+        // Create new ray
+        ray.origin = interaction.position;
+        ray.direction = interaction.inputDir;
+        ray.minT = RAY_EPS;
     }
 
-    return colour;
+    return colour / depth;
 }
 
 }

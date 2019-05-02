@@ -1,6 +1,7 @@
 #ifndef RAYTRACER_INTERACTION_H
 #define RAYTRACER_INTERACTION_H
 
+#include "bsdf_lobe.h"
 #include "vector_type.h"
 
 namespace scg
@@ -17,6 +18,8 @@ public:
 
     Vec3f inputDir;
     Vec3f outputDir;
+
+    BSDFLobe sampledLobe;
 
     SurfaceInteraction() = default;
 

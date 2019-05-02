@@ -6,8 +6,9 @@
 namespace scg
 {
 
-const float EPS = 1e-5;
+const float EPS = 1e-6;
 //const float EPS = std::numeric_limits<float>::epsilon();
+const float RAY_EPS = 1e-4;
 const float INF = std::numeric_limits<float>::infinity();
 
 

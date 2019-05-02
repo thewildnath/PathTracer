@@ -97,7 +97,7 @@ public:
 
         lightHit.colour = colour;
 
-        lightHit.direction = this->position - interaction.getSafePosition();
+        lightHit.direction = this->position - interaction.position;
         lightHit.distance = lightHit.direction.length();
         lightHit.direction /= lightHit.distance;
 
@@ -159,7 +159,7 @@ public:
 
         lightHit.colour = colour;
 
-        lightHit.direction = source.position - interaction.getSafePosition();
+        lightHit.direction = source.position - interaction.position;
         lightHit.distance = lightHit.direction.length();
         lightHit.direction /= lightHit.distance;
 
