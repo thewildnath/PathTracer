@@ -16,7 +16,7 @@ class LightHit
 {
 public:
     Vec3f colour;
-    float intensity;
+    float pdf;
 
     Vec3f direction; // Normalised vector pointing to the source. Equal to the normal in case of AbstractLight.
     float distance;
@@ -68,8 +68,8 @@ public:
     {
         LightHit lightHit;
 
-        lightHit.colour = colour;
-        lightHit.intensity = intensity;
+        lightHit.colour = colour * intensity;
+        lightHit.pdf = intensity;
         lightHit.direction = interaction.normal;
 
         return lightHit;
@@ -95,13 +95,13 @@ public:
     {
         LightHit lightHit;
 
-        lightHit.colour = colour;
+        lightHit.colour = colour * intensity;
 
         lightHit.direction = this->position - interaction.position;
         lightHit.distance = lightHit.direction.length();
         lightHit.direction /= lightHit.distance;
 
-        lightHit.intensity = intensity / (float)(4 * M_PI * lightHit.distance * lightHit.distance);
+        lightHit.pdf = (float)(4 * M_PI * lightHit.distance * lightHit.distance);
 
         return lightHit;
     }
@@ -126,12 +126,12 @@ public:
     {
         LightHit lightHit;
 
-        lightHit.colour = colour;
+        lightHit.colour = colour * intensity;
 
         lightHit.direction = -direction; // TODO: generate slightly random direction
         lightHit.distance = INF;
 
-        lightHit.intensity = intensity;
+        lightHit.pdf = 1;
 
         return lightHit;
     }
@@ -157,14 +157,14 @@ public:
 
         SurfaceInteraction source = object->sampleSurface(sampler);
 
-        lightHit.colour = colour;
+        lightHit.colour = colour * intensity;
 
         lightHit.direction = source.position - interaction.position;
         lightHit.distance = lightHit.direction.length();
         lightHit.direction /= lightHit.distance;
 
-        lightHit.intensity = intensity / (float)(4 * M_PI * lightHit.distance * lightHit.distance);
-        lightHit.intensity = lightHit.intensity * std::max(0.0f, dot(source.normal, -lightHit.direction));
+        lightHit.pdf = (float)(M_PI * lightHit.distance * lightHit.distance);
+        lightHit.pdf = lightHit.pdf / std::max(0.0f, dot(source.normal, -lightHit.direction));
 
         return lightHit;
     }

@@ -44,6 +44,13 @@ bool getClosestIntersection(
     return true;
 }
 
+inline float powerHeuristic(int numf, float fPdf, int numg, float gPdf) {
+    float f = numf * fPdf;
+    float g = numg * gPdf;
+
+    return (f * f) / (f * f + g * g);
+}
+
 Vec3f SampleLights(SurfaceInteraction &interaction, Scene const& scene, std::shared_ptr<Material> const& material, std::shared_ptr<Light> const& hitLight, Sampler &sampler)
 {
     // Cannot light mirror
@@ -76,13 +83,16 @@ Vec3f SampleLights(SurfaceInteraction &interaction, Scene const& scene, std::sha
     {
         case LightType_Abstract:
         {
-            //float intensity = lightHit.intensity * std::max(0.0f, dot(interaction.normal, lightHit.direction));
-            //directLight += lightHit.colour * intensity;
             interaction.inputDir = lightHit.direction;
             float pdf = material->pdf(interaction);
-            if (pdf != 0)
+            if (lightHit.pdf != 0)
             {
-                directLight += lightHit.colour * material->evaluate(interaction) * lightHit.intensity / pdf;
+                interaction.inputDir = lightHit.direction;
+                float pdf = material->pdf(interaction);
+                if (pdf != 0)
+                {
+                    directLight += material->evaluate(interaction) * lightHit.colour / lightHit.pdf;
+                }
             }
 
             break;
@@ -98,13 +108,15 @@ Vec3f SampleLights(SurfaceInteraction &interaction, Scene const& scene, std::sha
             if (!scg::getClosestIntersection(scene, lightRay, lightIntersection) ||
                 lightIntersection.distance + EPS >= lightHit.distance)
             {
-                //float intensity = lightHit.intensity * std::max(0.0f, dot(interaction.normal, lightHit.direction));
-                //directLight += lightHit.colour * intensity;
-                interaction.inputDir = lightHit.direction;
-                float pdf = material->pdf(interaction);
-                if (pdf != 0)
+                if (std::isnormal(lightHit.pdf)) // Real number, not 0
                 {
-                    directLight += lightHit.colour * material->evaluate(interaction) * lightHit.intensity / pdf;
+                    interaction.inputDir = lightHit.direction;
+                    float pdf = material->pdf(interaction);
+                    if (pdf != 0)
+                    {
+                        float weight = M_PI;//powerHeuristic(1, lightHit.pdf, 1, pdf);
+                        directLight += material->evaluate(interaction) * lightHit.colour * weight / lightHit.pdf;
+                    }
                 }
             }
 
@@ -112,7 +124,7 @@ Vec3f SampleLights(SurfaceInteraction &interaction, Scene const& scene, std::sha
         }
     }
 
-    return directLight;
+    return directLight * scene.lights.size();
 }
 
 Vec3f trace(

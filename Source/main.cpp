@@ -56,11 +56,11 @@ int main(int argc, char *argv[])
     scene = scg::LoadTestModel();
 
     // Point lights
-    //scene.lights.emplace_back(std::make_shared<scg::PointLight>(scg::PointLight{{1.0f, 1.0f, 1.0f}, 10, {0, -0.75, 0}}));
-    //scene.lights.emplace_back(std::make_shared<scg::PointLight>(scg::PointLight{{1.0f, 1.0f, 1.0f}, 10, {-0.5, -0.75, 0}}));
-    //scene.lights.emplace_back(std::make_shared<scg::PointLight>(scg::PointLight{{1.0f, 1.0f, 1.0f}, 10, {0.5, -0.75, 0}}));
+    //scene.lights.emplace_back(std::make_shared<scg::PointLight>(scg::PointLight{{1.0f, 1.0f, 1.0f}, 40, {0, -0.75, 0}}));
+    //scene.lights.emplace_back(std::make_shared<scg::PointLight>(scg::PointLight{{1.0f, 1.0f, 1.0f}, 20, {-0.5, -0.75, 0}}));
+    //scene.lights.emplace_back(std::make_shared<scg::PointLight>(scg::PointLight{{1.0f, 1.0f, 1.0f}, 20, {0.5, -0.75, 0}}));
     // Directional lights
-    //scene.lights.emplace_back(std::make_shared<scg::DirectionalLight>(scg::DirectionalLight{{1.0f, 1.0f, 1.0f}, 5, {0, 0.5, 0.5}}));
+    //scene.lights.emplace_back(std::make_shared<scg::DirectionalLight>(scg::DirectionalLight{{1.0f, 1.0f, 1.0f}, 1, {0.2, 0.5, 0.5}}));
 
     size_t index = scene.materials.size();
     std::shared_ptr<scg::ColourTexture> texture = std::make_shared<scg::ColourTexture>(scg::ColourTexture{
@@ -88,7 +88,7 @@ int main(int argc, char *argv[])
 //    });
     scene.objects.emplace_back(objectPtr);
     std::shared_ptr<scg::ObjectLight> lightPtr = std::make_shared<scg::ObjectLight>(scg::ObjectLight{
-        {1.0f, 1.0f, 1.0f}, 40,
+        {1.0f, 1.0f, 1.0f}, 20,
         objectPtr
     });
     scene.lights.emplace_back(lightPtr);
@@ -133,7 +133,7 @@ void Draw(screen *screen)
             scg::Ray ray = camera.getRay(x, y);
             ray.minT = scg::RAY_EPS;
 
-            int depth = 3;
+            int depth = 1;
             scg::Vec3f colour = scg::trace(scene, ray, depth, sampler[omp_get_thread_num()]);
             buffer[y][x] += colour; // TODO: clamp value
 
