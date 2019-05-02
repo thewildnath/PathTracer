@@ -43,9 +43,10 @@ public:
 
     virtual LightHit illuminate(SurfaceInteraction const&, Sampler &) const = 0;
 
-    virtual Vec3f getEmittance()
+    virtual Vec3f getEmittance(SurfaceInteraction const& interaction)
     {
-        return colour * intensity;
+        // Do not illuminate on the back side
+        return colour * intensity * std::max(0.0f, dot(interaction.normal, interaction.outputDir));
     }
 
     virtual LightType getType() const = 0;

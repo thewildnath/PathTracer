@@ -55,13 +55,13 @@ int main(int argc, char *argv[])
     scene = scg::LoadTestModel();
 
     // Point lights
-    scene.lights.emplace_back(std::make_shared<scg::PointLight>(scg::PointLight{{1.0f, 1.0f, 1.0f}, 20, {0, -0.75, 0}}));
+    //scene.lights.emplace_back(std::make_shared<scg::PointLight>(scg::PointLight{{1.0f, 1.0f, 1.0f}, 20, {0, -0.75, 0}}));
     //scene.lights.emplace_back(std::make_shared<scg::PointLight>(scg::PointLight{{1.0f, 1.0f, 1.0f}, 10, {-0.5, -0.75, 0}}));
     //scene.lights.emplace_back(std::make_shared<scg::PointLight>(scg::PointLight{{1.0f, 1.0f, 1.0f}, 10, {0.5, -0.75, 0}}));
     // Directional lights
     //scene.lights.emplace_back(std::make_shared<scg::DirectionalLight>(scg::DirectionalLight{{1.0f, 1.0f, 1.0f}, 5, {0, 0.5, 0.5}}));
 
-/*
+//*
     // Ceiling light
     size_t index = scene.materials.size();
 

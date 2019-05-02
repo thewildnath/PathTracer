@@ -6,12 +6,19 @@
 namespace scg
 {
 
-// Similar to an intersection, but should be initialised with a safe position(i.e. position + normal * EPS)
+// Information regarding an interaction with the scene
+// May not initialise all fields and update them during the process
 class SurfaceInteraction
 {
 public:
     Vec3f position;
     Vec3f normal;
+    Vec2f uv;
+
+    Vec3f inputDir;
+    Vec3f outputDir;
+
+    SurfaceInteraction() = default;
 
     SurfaceInteraction(Vec3f const& position, Vec3f const& normal):
         position(position), normal(normal) {};

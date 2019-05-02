@@ -23,7 +23,7 @@ public:
 
     Object(
         Vec3f const& position,
-        std::shared_ptr<Geometry> geometry):
+        std::shared_ptr<Geometry> const& geometry):
         position(position), geometry(geometry) {};
 
     bool getIntersection(Ray ray, Intersection& intersection) const

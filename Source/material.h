@@ -2,6 +2,7 @@
 #define RAYTRACER_MATERIAL_H
 
 #include "light.h"
+#include "texture.h"
 #include "vector_type.h"
 
 #include <memory>

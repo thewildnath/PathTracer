@@ -64,86 +64,108 @@ Vec3f uniformSampleHemisphere(const float &r1, const float &r2)
     return Vec3f(x, r1, z);
 }
 
+Vec3f SampleLights(SurfaceInteraction const& interaction, Scene const& scene, std::shared_ptr<Light> const& hitLight, Sampler &sampler)
+{
+    // Cannot sample the hitLight
+    if (scene.lights.size() <= 1 && hitLight != nullptr)
+    {
+        return Vec3f(0, 0, 0);
+    }
+
+    // Find another light
+    std::shared_ptr<Light> light;
+    do
+    {
+        size_t index = (size_t)sampler.nextDiscrete(scene.lights.size());
+        light = scene.lights[index];
+    } while (light == hitLight);
+
+    // Calculate light
+    Vec3f directLight;
+
+    LightType lightType = light->getType();
+    LightHit lightHit = light->illuminate(interaction, sampler);
+
+    switch (lightType)
+    {
+        case LightType_Abstract:
+        {
+            float intensity = lightHit.intensity * std::max(0.0f, dot(interaction.normal, lightHit.direction));
+            directLight += lightHit.colour * intensity;
+
+            break;
+        }
+        case LightType_Point:
+        case LightType_Directional:
+        case LightType_Object:
+        {
+            Ray lightRay{interaction.getSafePosition(), lightHit.direction};
+            Intersection lightIntersection{};
+
+            // Check for objects blocking the path
+            if (!scg::getClosestIntersection(scene, lightRay, lightIntersection) ||
+                lightIntersection.distance + EPS >= lightHit.distance)
+            {
+                float intensity = lightHit.intensity * std::max(0.0f, dot(interaction.normal, lightHit.direction));
+                directLight += lightHit.colour * intensity;
+            }
+
+            break;
+        }
+    }
+
+    return directLight;
+}
+
 Vec3f trace(
     Scene const& scene,
     Ray const& ray,
     int depth,
     Sampler &sampler)
 {
-    // Check for recursion end
-    if (depth <= 0)
+    Vec3f colour;
+    Vec3f throughput(1.0f, 1.0f, 1.0f);
+
+    for (int bounces = 0; bounces < depth; ++bounces)
     {
-        return Vec3f(0, 0, 0); // Ambient
-    }
+        // Intersect the scene
+        Intersection intersection;
 
-    // Intersect the scene
-    Intersection intersection{};
-
-    if (!getClosestIntersection(scene, ray, intersection))
-    {
-        return Vec3f(0, 0, 0); // Ambient //TODO: skybox
-    }
-
-    Vec3f const& normal = intersection.normal;
-    auto const& material = scene.materials[intersection.materialID];
-    auto const& lightPtr = material->lightPtr;
-    Vec3f colour = material->getColour(intersection.uv);
-
-    Vec3f directLight;
-
-    if (lightPtr != nullptr)
-    {
-        // Do not light on the back side
-        if (dot(normal, -ray.direction) >= 0)
-            directLight = lightPtr->getEmittance();
-    }
-
-    // Calculate interaction(safe point for light calculation and next ray trace)
-    SurfaceInteraction interaction{
-        intersection.position,
-        normal};
-
-    //if (diffuse)
-    {
-        // Calculate direct light
-        size_t index = (size_t)sampler.nextDiscrete(scene.lights.size());
-        assert(index < scene.lights.size());
-
-        std::shared_ptr<Light> light = scene.lights[index];
-        LightType lightType = light->getType();
-        LightHit lightHit = light->illuminate(interaction, sampler);
-
-        if (light != lightPtr)
-        switch (lightType)
+        if (!getClosestIntersection(scene, ray, intersection))
         {
-            case LightType_Abstract:
-            {
-                float intensity = lightHit.intensity * std::max(0.0f, dot(normal, lightHit.direction));
-                directLight += lightHit.colour * intensity;
-
-                break;
-            }
-            case LightType_Point:
-            case LightType_Directional:
-            case LightType_Object:
-            {
-                Ray lightRay{interaction.getSafePosition(), lightHit.direction};
-                Intersection lightIntersection{};
-
-                // Check for objects blocking the path
-                if (!scg::getClosestIntersection(scene, lightRay, lightIntersection) ||
-                    lightIntersection.distance + EPS >= lightHit.distance)
-                {
-                    float intensity = lightHit.intensity * std::max(0.0f, dot(normal, lightHit.direction));
-                    directLight += lightHit.colour * intensity;
-                }
-
-                break;
-            }
+            colour += throughput * Vec3f(0, 0, 0); // Ambient //TODO: skybox
+            break;
         }
 
+        auto const& material = scene.materials[intersection.materialID];
+
+        // Initialise interaction
+        SurfaceInteraction interaction;
+        interaction.position = intersection.position;
+        interaction.normal = intersection.normal;
+        interaction.uv = interaction.uv;
+        interaction.outputDir = -ray.direction;
+
+        // Add light
+        auto const& hitLight = material->lightPtr;
+        if (hitLight != nullptr)
+        {
+            colour += throughput * hitLight->getEmittance(interaction);
+        }
+
+        // TODO: maybe it's wrong???????
+        // Reflect normal
+        // Done after sampling the light because it only emits on one face
+        if (dot(interaction.outputDir, interaction.normal) < 0)
+            interaction.normal *= -1;
+
+        // Calculate direct light
+        Vec3f directLight = SampleLights(interaction, scene, hitLight, sampler);
+
+        colour += throughput * material->getColour(intersection.uv) * directLight;
+
         // Calculate indirect light
-        //*
+        /*
         Vec3f indirectLight;
 
         Vec3f Nt, Nb;
@@ -166,8 +188,11 @@ Vec3f trace(
         //return (directLight / M_PI + indirectLight * 2) * colour;
         float coef = 0.8;
         return colour * (directLight * coef + indirectLight * (1 - coef));//*/
-        return colour * directLight;
+
+        break;
     }
+
+    return colour;
 }
 
 }
