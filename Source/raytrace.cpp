@@ -147,7 +147,7 @@ Vec3f trace(
         interaction.outputDir = -ray.direction;
 
         // Add light
-        auto const& hitLight = material->lightPtr;
+        auto const& hitLight = material->getLight(interaction.uv);
         if (hitLight != nullptr)
         {
             colour += throughput * hitLight->getEmittance(interaction);
@@ -162,7 +162,7 @@ Vec3f trace(
         // Calculate direct light
         Vec3f directLight = SampleLights(interaction, scene, hitLight, sampler);
 
-        colour += throughput * material->getColour(intersection.uv) * directLight;
+        colour += throughput * material->evaluate(intersection.uv) * directLight;
 
         // Calculate indirect light
         /*

@@ -83,12 +83,15 @@ int main(int argc, char *argv[])
 //        std::make_shared<scg::Sphere>(0.2, index)
 //    });
     scene.objects.emplace_back(objectPtr);
+    std::shared_ptr<scg::ColourTexture> texture = std::make_shared<scg::ColourTexture>(scg::ColourTexture{
+        {1.0f, 1.0f, 1.0f}
+    });
     std::shared_ptr<scg::ObjectLight> lightPtr = std::make_shared<scg::ObjectLight>(scg::ObjectLight{
         {1.0f, 1.0f, 1.0f}, 40,
         objectPtr
     });
     scene.lights.emplace_back(lightPtr);
-    scene.materials.emplace_back(std::make_shared<scg::Material>(scg::Material{{0.75f, 0.75f, 0.75f}, lightPtr}));
+    scene.materials.emplace_back(std::make_shared<scg::Lambert>(scg::Lambert{texture, lightPtr}));
 //*/
 
 

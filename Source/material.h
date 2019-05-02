@@ -13,20 +13,49 @@ namespace scg
 class Material
 {
 public:
-    Vec3f color;
-    std::shared_ptr<Light> lightPtr;
+    virtual Vec3f evaluate(Vec2f const& uv) const = 0;
+    virtual void sample(SurfaceInteraction &interaction, Sampler &sampler) const = 0;
+    virtual float pdf(SurfaceInteraction const& interaction) const = 0;
 
-    Material() = default;
-
-    Material(Vec3f const& color):
-        color(color) {};
-
-    Material(Vec3f const& color, std::shared_ptr<Light> lightPtr):
-        color(color), lightPtr(lightPtr) {};
-
-    Vec3f getColour(Vec2f const&) const
+    virtual std::shared_ptr<Light> getLight(Vec2f const& uv) const
     {
-        return color;
+        return nullptr;
+    }
+};
+
+class Lambert : public Material
+{
+protected:
+    Lambert() = default;
+
+public:
+    std::shared_ptr<Texture> texture;
+    std::shared_ptr<Light> light;
+
+    Lambert(std::shared_ptr<Texture> const& texture):
+        texture(texture) {};
+
+    Lambert(std::shared_ptr<Texture> const& texture, std::shared_ptr<Light> const& light):
+        texture(texture), light(light) {};
+
+    Vec3f evaluate(Vec2f const& uv) const override
+    {
+        return texture->evaluate(uv);
+    }
+
+    void sample(SurfaceInteraction &interaction, Sampler &sampler) const override
+    {
+
+    }
+
+    float pdf(SurfaceInteraction const& interaction) const override
+    {
+
+    }
+
+    std::shared_ptr<Light> getLight(Vec2f const&) const override
+    {
+        return light;
     }
 };
 

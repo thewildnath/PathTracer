@@ -3,6 +3,7 @@
 #include "geometry.h"
 #include "material.h"
 #include "scene.h"
+#include "texture.h"
 #include "triangle.h"
 #include "vector_type.h"
 
@@ -14,22 +15,30 @@ namespace scg
 Scene LoadTestModel()
 {
     // Defines colours:
-    Material red(Vec3f(0.75f, 0.15f, 0.15f));
-    Material yellow(Vec3f(0.75f, 0.75f, 0.15f));
-    Material green(Vec3f(0.15f, 0.75f, 0.15f));
-    Material cyan(Vec3f(0.15f, 0.75f, 0.75f));
-    Material blue(Vec3f(0.15f, 0.15f, 0.75f));
-    Material purple(Vec3f(0.75f, 0.15f, 0.75f));
-    Material white(Vec3f(0.75f, 0.75f, 0.75f));
+    ColourTexture redTexture(Vec3f(0.75f, 0.15f, 0.15f));
+    ColourTexture yellowTexture(Vec3f(0.75f, 0.75f, 0.15f));
+    ColourTexture greenTexture(Vec3f(0.15f, 0.75f, 0.15f));
+    ColourTexture cyanTexture(Vec3f(0.15f, 0.75f, 0.75f));
+    ColourTexture blueTexture(Vec3f(0.15f, 0.15f, 0.75f));
+    ColourTexture purpleTexture(Vec3f(0.75f, 0.15f, 0.75f));
+    ColourTexture whiteTexture(Vec3f(0.75f, 0.75f, 0.75f));
+
+    Lambert red(std::make_shared<ColourTexture>(redTexture));
+    Lambert yellow(std::make_shared<ColourTexture>(yellowTexture));
+    Lambert green(std::make_shared<ColourTexture>(greenTexture));
+    Lambert cyan(std::make_shared<ColourTexture>(cyanTexture));
+    Lambert blue(std::make_shared<ColourTexture>(blueTexture));
+    Lambert purple(std::make_shared<ColourTexture>(purpleTexture));
+    Lambert white(std::make_shared<ColourTexture>(whiteTexture));
 
     std::vector<std::shared_ptr<Material>> materials;
-    materials.push_back(std::make_shared<Material>(red));    // 0
-    materials.push_back(std::make_shared<Material>(yellow)); // 1
-    materials.push_back(std::make_shared<Material>(green));  // 2
-    materials.push_back(std::make_shared<Material>(cyan));   // 3
-    materials.push_back(std::make_shared<Material>(blue));   // 4
-    materials.push_back(std::make_shared<Material>(purple)); // 5
-    materials.push_back(std::make_shared<Material>(white));  // 6
+    materials.push_back(std::make_shared<Lambert>(red));    // 0
+    materials.push_back(std::make_shared<Lambert>(yellow)); // 1
+    materials.push_back(std::make_shared<Lambert>(green));  // 2
+    materials.push_back(std::make_shared<Lambert>(cyan));   // 3
+    materials.push_back(std::make_shared<Lambert>(blue));   // 4
+    materials.push_back(std::make_shared<Lambert>(purple)); // 5
+    materials.push_back(std::make_shared<Lambert>(white));  // 6
 
     std::vector<Triangle> triangles;
     triangles.reserve(5 * 2 * 3);
