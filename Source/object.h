@@ -26,11 +26,11 @@ public:
         std::shared_ptr<Geometry> const& geometry):
         position(position), geometry(geometry) {};
 
-    bool getIntersection(Ray ray, Intersection& intersection) const
+    bool getIntersection(Ray ray, Intersection& intersection, int ignore = 0) const
     {
         ray.origin -= position;
 
-        if (!geometry->getIntersection(ray, intersection))
+        if (!geometry->getIntersection(ray, intersection, ignore))
         {
             return false;
         }

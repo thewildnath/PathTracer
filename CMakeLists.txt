@@ -21,4 +21,3 @@ add_executable(raytracer
 
 find_library(SDL_LIB libsdl2 HINTS include/sdl/lib)
 target_link_libraries(raytracer PUBLIC ${SDL_LIB})
-

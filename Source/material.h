@@ -102,6 +102,69 @@ public:
     }
 };
 
+class SpecularDielectric : public Material
+{
+protected:
+    SpecularDielectric() = default;
+
+public:
+    std::shared_ptr<Texture> texture;
+    float ior;
+
+    SpecularDielectric(std::shared_ptr<Texture> const& texture, float ior):
+        texture(texture), ior(ior) {};
+
+    Vec3f evaluate(SurfaceInteraction const& interaction) const override
+    {
+        return texture->evaluate(interaction.uv);
+    }
+
+    void sample(SurfaceInteraction &interaction, Sampler &sampler) const override
+    {
+        float VdotN = dot(interaction.outputDir, interaction.normal);
+        float iorO = ior;
+
+        // Check for side
+        if (VdotN < 0.0f)
+        {
+            iorO = 1.0f;
+            interaction.normal = -interaction.normal;
+            VdotN = -VdotN;
+        }
+
+        float eta = interaction.iorI / iorO;
+        float sinSquaredThetaT = SinSquaredThetaT(VdotN, eta);
+        float fresnel = Fresnel(interaction.iorI, iorO, VdotN, sinSquaredThetaT);
+
+        float rand = sampler.nextFloat();
+        if (rand <= fresnel)
+        {
+            // Reflect
+            interaction.inputDir = reflect(interaction.outputDir, interaction.normal);
+            interaction.sampledLobe = BSDFLobe::SpecularReflection;
+            interaction.iorO = interaction.iorI;
+        } else
+        {
+            // Refract
+            interaction.inputDir = refract(interaction.outputDir, interaction.normal, VdotN, eta, sinSquaredThetaT);
+            interaction.sampledLobe = BSDFLobe::SpecularTransmission;
+            interaction.iorO = iorO;
+        }
+
+        // TODO: Should check for NaN
+    }
+
+    float pdf(SurfaceInteraction const&) const override
+    {
+        return 1.0f;
+    }
+
+    BSDFLobe getSupportedLobes(Vec2f const&) const override
+    {
+        return BSDFLobe::Specular;
+    }
+};
+
 }
 
 #endif //RAYTRACER_MATERIAL_H

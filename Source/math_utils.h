@@ -23,6 +23,26 @@ inline float toRadians(float degree)
     return degree * (float)M_PI / 180.0f;
 }
 
+inline float Fresnel(float iorI, float iorO, float VdotN, float sinSquaredThetaT)
+{
+    // Check for total internal reflection
+    if (sinSquaredThetaT > 1.0f)
+    {
+        return 1.0f;
+    }
+
+    float cosThetaT = sqrtf(1.0f - sinSquaredThetaT);
+    float R_perpendicular = (iorI * VdotN - iorO * cosThetaT) / (iorI * VdotN + iorO * cosThetaT);
+    float R_parallel = (iorO * VdotN - iorI * cosThetaT) / (iorO * VdotN + iorI * cosThetaT);
+
+    return 0.5f * (R_perpendicular * R_perpendicular + R_parallel * R_parallel);
+}
+
+inline float SinSquaredThetaT(float VdotN, float eta)
+{
+    return eta * eta * (1.0f - VdotN * VdotN);
+}
+
 }
 
 #endif //RAYTRACER_MATH_UTILS_H

@@ -179,11 +179,11 @@ Scene LoadTestModel()
     // Extra
 
     // Point lights
-    scene.lights.emplace_back(std::make_shared<scg::PointLight>(scg::PointLight{{1.0f, 1.0f, 1.0f}, 10, {0.75, -0.75, 0.15}}));
+    //scene.lights.emplace_back(std::make_shared<scg::PointLight>(scg::PointLight{{1.0f, 1.0f, 1.0f}, 10, {0.75, -0.75, 0.15}}));
     //scene.lights.emplace_back(std::make_shared<scg::PointLight>(scg::PointLight{{1.0f, 1.0f, 1.0f}, 10, {-0.5, -0.75, 0}}));
     //scene.lights.emplace_back(std::make_shared<scg::PointLight>(scg::PointLight{{1.0f, 1.0f, 1.0f}, 10, {0.5, -0.75, 0}}));
     // Directional lights
-    scene.lights.emplace_back(std::make_shared<scg::DirectionalLight>(scg::DirectionalLight{{1.0f, 1.0f, 1.0f}, 10, {0.2, 0.5, 0.5}}));
+    //scene.lights.emplace_back(std::make_shared<scg::DirectionalLight>(scg::DirectionalLight{{1.0f, 1.0f, 1.0f}, 10, {0.2, 0.5, 0.5}}));
 
     size_t index = scene.materials.size();
     std::shared_ptr<scg::ColourTexture> texture = std::make_shared<scg::ColourTexture>(scg::ColourTexture{
@@ -192,7 +192,7 @@ Scene LoadTestModel()
 //*
     // Ceiling light
 
-    float eL = 0.7;
+    float eL = 1.0f;
     Vec3f eE(eL / 2, 0, -eL / 2);
     Vec3f eF(-eL / 2, 0, -eL / 2);
     Vec3f eG(eL / 2, 0, eL / 2);
@@ -202,7 +202,7 @@ Scene LoadTestModel()
         scg::Triangle(eG, eH, eF, index)
     };
     std::shared_ptr<scg::Object> objectPtr = std::make_shared<scg::Object>(scg::Object{
-        { -0.6, -0.99, 0},
+        { 0, -0.99, 0},
         std::make_shared<scg::Mesh>(etriangles)
     });
 //    std::shared_ptr<scg::Object> objectPtr = std::make_shared<scg::Object>(scg::Object{
@@ -255,7 +255,8 @@ Scene LoadTestModel2()
     materials.push_back(blue);   // 4
     materials.push_back(purple); // 5
     materials.push_back(white);  // 6
-    materials.push_back(std::make_shared<scg::Mirror>(scg::Mirror{whiteTexture})); // 7
+    materials.push_back(std::make_shared<Mirror>(whiteTexture)); // 7
+    materials.push_back(std::make_shared<SpecularDielectric>(whiteTexture, 1.52f)); // 8
 
     std::vector<Triangle> triangles;
     triangles.reserve(5 * 2 * 3);
@@ -297,7 +298,7 @@ Scene LoadTestModel2()
 
     // ---------------------------------------------------------------------------
     // Short block
-
+/*
     A = Vec3f(290, 0, 114);
     B = Vec3f(130, 0, 65);
     C = Vec3f(240, 0, 272);
@@ -309,28 +310,29 @@ Scene LoadTestModel2()
     H = Vec3f(82, 165, 225);
 
     // Front
-    triangles.emplace_back(Triangle(E, B, A, 6));//0));
-    triangles.emplace_back(Triangle(E, F, B, 6));//0));
+    triangles.emplace_back(Triangle(E, B, A, 8));//0));
+    triangles.emplace_back(Triangle(E, F, B, 8));//0));
 
     // Front
-    triangles.emplace_back(Triangle(F, D, B, 6));//0));
-    triangles.emplace_back(Triangle(F, H, D, 6));//0));
+    triangles.emplace_back(Triangle(F, D, B, 8));//0));
+    triangles.emplace_back(Triangle(F, H, D, 8));//0));
 
     // BACK
-    triangles.emplace_back(Triangle(H, C, D, 6));//0));
-    triangles.emplace_back(Triangle(H, G, C, 6));//0));
+    triangles.emplace_back(Triangle(H, C, D, 8));//0));
+    triangles.emplace_back(Triangle(H, G, C, 8));//0));
 
     // LEFT
-    triangles.emplace_back(Triangle(G, E, C, 6));//0));
-    triangles.emplace_back(Triangle(E, A, C, 6));//0));
+    triangles.emplace_back(Triangle(G, E, C, 8));//0));
+    triangles.emplace_back(Triangle(E, A, C, 8));//0));
 
     // TOP
-    triangles.emplace_back(Triangle(G, F, E, 6));//0));
-    triangles.emplace_back(Triangle(G, H, F, 6));//0));
+    triangles.emplace_back(Triangle(G, F, E, 8));//0));
+    triangles.emplace_back(Triangle(G, H, F, 8));//0));
+//*/
 
     // ---------------------------------------------------------------------------
     // Tall block
-
+/*
     A = Vec3f(423, 0, 247);
     B = Vec3f(265, 0, 296);
     C = Vec3f(472, 0, 406);
@@ -360,6 +362,7 @@ Scene LoadTestModel2()
     // TOP
     triangles.emplace_back(Triangle(G, F, E, 6));
     triangles.emplace_back(Triangle(G, H, F, 6));
+//*/
 
     // ----------------------------------------------
     // Scale to the volume [-1,1]^3
@@ -391,12 +394,13 @@ Scene LoadTestModel2()
         {0, 0, 0},
         std::make_shared<Mesh>(Mesh(triangles))
     }));
+    scene.lightIngoreMask |= (1 << 8);
 
 
     // Extra
 
     // Point lights
-    //scene.lights.emplace_back(std::make_shared<scg::PointLight>(scg::PointLight{{1.0f, 1.0f, 1.0f}, 10, {0..0f, -0.75f, 0.0f}}));
+    //scene.lights.emplace_back(std::make_shared<scg::PointLight>(scg::PointLight{{1.0f, 1.0f, 1.0f}, 20, {0.0f, -0.75f, 0.0f}}));
     //scene.lights.emplace_back(std::make_shared<scg::PointLight>(scg::PointLight{{1.0f, 1.0f, 1.0f}, 10, {-0.5f, -0.75f, 0.0f}}));
     //scene.lights.emplace_back(std::make_shared<scg::PointLight>(scg::PointLight{{1.0f, 1.0f, 1.0f}, 10, {0.5f, -0.75f, 0.0f}}));
     // Directional lights
@@ -409,7 +413,7 @@ Scene LoadTestModel2()
 //*
     // Ceiling light
 
-    float eL = 1.0f;
+    float eL = 0.5f;
     Vec3f eE(eL / 2, 0, -eL / 2);
     Vec3f eF(-eL / 2, 0, -eL / 2);
     Vec3f eG(eL / 2, 0, eL / 2);
@@ -428,12 +432,22 @@ Scene LoadTestModel2()
 //    });
     scene.objects.emplace_back(objectPtr);
     std::shared_ptr<scg::ObjectLight> lightPtr = std::make_shared<scg::ObjectLight>(scg::ObjectLight{
-        {1.0f, 1.0f, 1.0f}, 20,
+        {1.0f, 1.0f, 1.0f}, 40,
         objectPtr
     });
     scene.lights.emplace_back(lightPtr);
     scene.materials.emplace_back(std::make_shared<scg::Lambert>(scg::Lambert{texture, lightPtr}));
 //*/
+    std::shared_ptr<scg::Object> sphere = std::make_shared<scg::Object>(scg::Object{
+        { 0.7, -0.2, -0.0},
+        std::make_shared<scg::Sphere>(0.3, 8)
+    });
+    scene.objects.emplace_back(sphere);
+    std::shared_ptr<scg::Object> sphere2 = std::make_shared<scg::Object>(scg::Object{
+        { 0.3, 0.65, -0.0},
+        std::make_shared<scg::Sphere>(0.3, 8)
+    });
+    scene.objects.emplace_back(sphere2);
 
     return scene;
 }

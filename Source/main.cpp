@@ -86,7 +86,7 @@ void Draw(screen *screen)
             scg::Ray ray = camera.getLensRay(x, y, sampler[omp_get_thread_num()]);
             ray.minT = scg::RAY_EPS;
 
-            int depth = 3;
+            int depth = 8;
             float gamma = 1.0f;
             scg::Vec3f colour = scg::trace(scene, ray, depth, sampler[omp_get_thread_num()]);
             buffer[y][x] += colour * gamma; // TODO: clamp value

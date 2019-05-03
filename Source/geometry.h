@@ -16,7 +16,7 @@ namespace scg
 class Geometry
 {
 public:
-    virtual bool getIntersection(Ray const&, Intersection&) const = 0;
+    virtual bool getIntersection(Ray const&, Intersection&, int ignore) const = 0;
     virtual SurfaceInteraction sampleSurface(Sampler&) = 0;
 };
 
@@ -30,8 +30,13 @@ public:
     Sphere(float radius, size_t materialID):
         radius(radius), materialID(materialID) {};
 
-    bool getIntersection(Ray const& ray, Intersection& intersection) const override
+    bool getIntersection(Ray const& ray, Intersection& intersection, int ignore = 0) const override
     {
+        if ((1 << materialID) & ignore)
+        {
+            return false;
+        }
+
         //std::cout << "Circle" << std::endl;
         float b = dot(ray.origin * 2.0f, ray.direction);
         float c = dot(ray.origin, ray.origin) - radius * radius;
@@ -100,7 +105,7 @@ public:
     Mesh(std::vector<Triangle>& triangles):
         triangles(std::move(triangles)) {};
 
-    bool getIntersection(Ray const& ray, Intersection& intersection) const override
+    bool getIntersection(Ray const& ray, Intersection& intersection, int ignore = 0) const override
     {
         //std::cout << "Mesh" << std::endl;
         //Möller–Trumbore intersection algorithm
@@ -109,6 +114,11 @@ public:
 
         for (int i = 0; i < (int)triangles.size(); ++i)
         {
+            if ((1 << triangles[i].materialID) & ignore)
+            {
+                continue;
+            }
+
             Vec3f vertex0 = triangles[i].v0;
             Vec3f vertex1 = triangles[i].v1;
             Vec3f vertex2 = triangles[i].v2;

@@ -19,6 +19,9 @@ public:
     Vec3f inputDir;
     Vec3f outputDir;
 
+    float iorI;
+    float iorO;
+
     BSDFLobe sampledLobe;
 
     SurfaceInteraction() = default;

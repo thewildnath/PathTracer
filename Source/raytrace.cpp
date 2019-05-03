@@ -14,7 +14,8 @@ namespace scg
 bool getClosestIntersection(
     Scene const& scene,
     Ray const& ray,
-    Intersection &closestIntersection)
+    Intersection &closestIntersection,
+    int ignore = 0)
 {
     float minDistance = std::numeric_limits<float>::max();
     int index = -1;
@@ -23,7 +24,7 @@ bool getClosestIntersection(
     {
         Intersection intersection;
 
-        if (scene.objects[i]->getIntersection(ray, intersection))
+        if (scene.objects[i]->getIntersection(ray, intersection, ignore))
         {
             if (intersection.distance < minDistance)
             {
@@ -103,7 +104,7 @@ Vec3f SampleLights(SurfaceInteraction &interaction, Scene const& scene, std::sha
             Intersection lightIntersection{};
 
             // Check for objects blocking the path
-            if (!scg::getClosestIntersection(scene, lightRay, lightIntersection) ||
+            if (!scg::getClosestIntersection(scene, lightRay, lightIntersection, scene.lightIngoreMask) ||
                 lightIntersection.distance + EPS >= lightHit.distance)
             {
                 if (std::isnormal(lightHit.pdf)) // Real number, not 0
@@ -133,6 +134,9 @@ Vec3f trace(
     Vec3f colour;
     Vec3f throughput(1.0f, 1.0f, 1.0f);
 
+    SurfaceInteraction interaction;
+    interaction.iorI = 1.0f; // Air
+
     for (int bounces = 0; bounces < depth; ++bounces)
     {
         // Intersect the scene
@@ -147,11 +151,11 @@ Vec3f trace(
         auto const& material = scene.materials[intersection.materialID];
 
         // Initialise interaction
-        SurfaceInteraction interaction;
         interaction.position = intersection.position;
         interaction.normal = intersection.normal;
         interaction.uv = interaction.uv;
         interaction.outputDir = -ray.direction;
+        interaction.iorO = 0.0f;
 
         // Add light
         auto const& hitLight = material->getLight(interaction.uv);
@@ -163,8 +167,8 @@ Vec3f trace(
         // TODO: maybe it's wrong???????
         // Reflect normal
         // Done after sampling the light because it only emits on one face
-        if (dot(interaction.outputDir, interaction.normal) < 0)
-            interaction.normal *= -1;
+        //if (dot(interaction.outputDir, interaction.normal) < 0)
+        //    interaction.normal *= -1;
 
         // Calculate direct light
         colour += throughput * SampleLights(interaction, scene, material, hitLight, sampler);
@@ -177,6 +181,11 @@ Vec3f trace(
         if (pdf == 0) std::cout << "WTF";
         throughput *= material->evaluate(interaction) / pdf;
         //throughput *= pdf;
+
+        if (interaction.sampledLobe == BSDFLobe::SpecularTransmission)
+        {
+            interaction.iorI = interaction.iorO;
+        }
 
         // Create new ray
         ray.origin = interaction.position;

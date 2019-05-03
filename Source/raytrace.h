@@ -17,7 +17,8 @@ namespace scg
 bool getClosestIntersection(
     Scene const& scene,
     Ray const& ray,
-    Intersection &closestIntersection);
+    Intersection &closestIntersection,
+    int ignore);
 
 Vec3f trace(
     Scene const& scene,
