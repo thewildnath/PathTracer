@@ -114,7 +114,7 @@ Vec3f SampleLights(SurfaceInteraction &interaction, Scene const& scene, std::sha
                     float pdf = material->pdf(interaction);
                     if (pdf != 0)
                     {
-                        float weight = M_PI;//powerHeuristic(1, lightHit.pdf, 1, pdf);
+                        float weight = 1;//powerHeuristic(1, lightHit.pdf, 1, pdf);
                         directLight += material->evaluate(interaction) * lightHit.colour * weight / lightHit.pdf;
                     }
                 }

@@ -133,7 +133,7 @@ void Draw(screen *screen)
             scg::Ray ray = camera.getRay(x, y);
             ray.minT = scg::RAY_EPS;
 
-            int depth = 1;
+            int depth = 3;
             scg::Vec3f colour = scg::trace(scene, ray, depth, sampler[omp_get_thread_num()]);
             buffer[y][x] += colour; // TODO: clamp value
 

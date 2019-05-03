@@ -43,7 +43,7 @@ public:
 
     virtual LightHit illuminate(SurfaceInteraction const&, Sampler &) const = 0;
 
-    virtual Vec3f getEmittance(SurfaceInteraction const& interaction)
+    virtual Vec3f getEmittance(SurfaceInteraction const& interaction) const
     {
         // Do not illuminate on the back side
         return colour * intensity * std::max(0.0f, dot(interaction.normal, interaction.outputDir));
@@ -69,7 +69,7 @@ public:
         LightHit lightHit;
 
         lightHit.colour = colour * intensity;
-        lightHit.pdf = intensity;
+        lightHit.pdf = 1;
         lightHit.direction = interaction.normal;
 
         return lightHit;
@@ -157,13 +157,13 @@ public:
 
         SurfaceInteraction source = object->sampleSurface(sampler);
 
-        lightHit.colour = colour * intensity;
+        lightHit.colour = colour * intensity * (float)M_1_PI;
 
         lightHit.direction = source.position - interaction.position;
         lightHit.distance = lightHit.direction.length();
         lightHit.direction /= lightHit.distance;
 
-        lightHit.pdf = (float)(M_PI * lightHit.distance * lightHit.distance);
+        lightHit.pdf = (float)M_1_PI * lightHit.distance * lightHit.distance;
         lightHit.pdf = lightHit.pdf / std::max(0.0f, dot(source.normal, -lightHit.direction));
 
         return lightHit;
