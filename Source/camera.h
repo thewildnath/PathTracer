@@ -15,9 +15,11 @@ public:
 
     int width;
     int height;
-    float focalLength;
 
     bool antialiasing = true;
+
+    float aperture = 0;
+    float focalLength = 0.5;
 
     //Camera() = default;
 
@@ -36,10 +38,27 @@ public:
         Vec3f dir{
             ((float)x + dX - width / 2.0f),
             ((float)y + dY - height / 2.0f),
-            focalLength};
+            (width + height) / 2};
         dir = rotate(dir, rotation);
 
         return Ray{position, dir};
+    }
+
+    Ray getLensRay(int const x, int const y, Sampler &sampler) const
+    {
+        Ray focalRay = getRay(x, y, sampler);
+        Vec3f objective = focalRay(focalLength);
+
+        Vec3f dPos{
+            (sampler.nextFloat() - 0.5f) * aperture,
+            (sampler.nextFloat() - 0.5f) * aperture,
+            0.0f
+        };
+
+        Vec3f pos = position + rotate(dPos, rotation);;
+        Vec3f dir = objective - pos;
+
+        return Ray{pos, dir};
     }
 };
 

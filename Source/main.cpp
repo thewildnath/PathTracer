@@ -21,7 +21,7 @@
 #define RES 600
 #define SCREEN_WIDTH  RES
 #define SCREEN_HEIGHT RES
-#define FOCAL_LENGTH  RES
+//#define FOCAL_LENGTH  0.5
 #define FULLSCREEN_MODE false
 
 #undef main // Bloody hell, hope it doesn't come back and haunt me
@@ -39,7 +39,9 @@ scg::Camera camera{
     scg::Vec3f(0, 0, 0),
     SCREEN_WIDTH,
     SCREEN_HEIGHT,
-    FOCAL_LENGTH};
+    true,
+    0.1f,
+    3.0f};
 
 scg::Scene scene;
 
@@ -81,7 +83,7 @@ void Draw(screen *screen)
     {
         for (int x = 0; x < SCREEN_WIDTH; ++x)
         {
-            scg::Ray ray = camera.getRay(x, y, sampler[omp_get_thread_num()]);
+            scg::Ray ray = camera.getLensRay(x, y, sampler[omp_get_thread_num()]);
             ray.minT = scg::RAY_EPS;
 
             int depth = 3;
