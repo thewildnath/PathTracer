@@ -175,6 +175,56 @@ Scene LoadTestModel()
         std::make_shared<Mesh>(Mesh(triangles))
     }));
 
+
+    // Extra
+
+    // Point lights
+    //scene.lights.emplace_back(std::make_shared<scg::PointLight>(scg::PointLight{{1.0f, 1.0f, 1.0f}, 40, {0, -0.75, 0}}));
+    //scene.lights.emplace_back(std::make_shared<scg::PointLight>(scg::PointLight{{1.0f, 1.0f, 1.0f}, 20, {-0.5, -0.75, 0}}));
+    //scene.lights.emplace_back(std::make_shared<scg::PointLight>(scg::PointLight{{1.0f, 1.0f, 1.0f}, 20, {0.5, -0.75, 0}}));
+    // Directional lights
+    //scene.lights.emplace_back(std::make_shared<scg::DirectionalLight>(scg::DirectionalLight{{1.0f, 1.0f, 1.0f}, 1, {0.2, 0.5, 0.5}}));
+
+    size_t index = scene.materials.size();
+    std::shared_ptr<scg::ColourTexture> texture = std::make_shared<scg::ColourTexture>(scg::ColourTexture{
+        {1.0f, 1.0f, 1.0f}
+    });
+//*
+    // Ceiling light
+
+    float eL = 1;
+    Vec3f eE(eL / 2, 0, -eL / 2);
+    Vec3f eF(-eL / 2, 0, -eL / 2);
+    Vec3f eG(eL / 2, 0, eL / 2);
+    Vec3f eH(-eL / 2, 0, eL / 2);
+    std::vector<scg::Triangle> etriangles{
+        scg::Triangle(eG, eF, eE, index),
+        scg::Triangle(eG, eH, eF, index)
+    };
+    std::shared_ptr<scg::Object> objectPtr = std::make_shared<scg::Object>(scg::Object{
+        { 0, -0.99, 0},
+        std::make_shared<scg::Mesh>(etriangles)
+    });
+//    std::shared_ptr<scg::Object> objectPtr = std::make_shared<scg::Object>(scg::Object{
+//        { 0, -0.7, 0},
+//        std::make_shared<scg::Sphere>(0.2, index)
+//    });
+    scene.objects.emplace_back(objectPtr);
+    std::shared_ptr<scg::ObjectLight> lightPtr = std::make_shared<scg::ObjectLight>(scg::ObjectLight{
+        {1.0f, 1.0f, 1.0f}, 20,
+        objectPtr
+    });
+    scene.lights.emplace_back(lightPtr);
+    scene.materials.emplace_back(std::make_shared<scg::Lambert>(scg::Lambert{texture, lightPtr}));
+//*/
+    scene.materials.emplace_back(std::make_shared<scg::Mirror>(scg::Mirror{texture}));
+    index = scene.materials.size() - 1;
+    std::shared_ptr<scg::Object> object2Ptr = std::make_shared<scg::Object>(scg::Object{
+        { 0.6, -0.15, 0},
+        std::make_shared<scg::Sphere>(0.3, index)
+    });
+    scene.objects.emplace_back(object2Ptr);
+
     return scene;
 }
 

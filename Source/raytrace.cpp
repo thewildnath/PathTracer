@@ -83,8 +83,6 @@ Vec3f SampleLights(SurfaceInteraction &interaction, Scene const& scene, std::sha
     {
         case LightType_Abstract:
         {
-            interaction.inputDir = lightHit.direction;
-            float pdf = material->pdf(interaction);
             if (lightHit.pdf != 0)
             {
                 interaction.inputDir = lightHit.direction;
@@ -114,8 +112,7 @@ Vec3f SampleLights(SurfaceInteraction &interaction, Scene const& scene, std::sha
                     float pdf = material->pdf(interaction);
                     if (pdf != 0)
                     {
-                        float weight = 1;//powerHeuristic(1, lightHit.pdf, 1, pdf);
-                        directLight += material->evaluate(interaction) * lightHit.colour * weight / lightHit.pdf;
+                        directLight += material->evaluate(interaction) * lightHit.colour / lightHit.pdf;
                     }
                 }
             }
