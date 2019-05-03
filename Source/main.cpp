@@ -55,7 +55,7 @@ int main(int argc, char *argv[])
     screen *screen = InitializeSDL(SCREEN_WIDTH, SCREEN_HEIGHT, FULLSCREEN_MODE);
 
     // Load scene and lights
-    scene = scg::LoadTestModel();
+    scene = scg::LoadTestModel2();
 
     while (Update())
     {

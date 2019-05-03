@@ -13,6 +13,7 @@ namespace scg
 // -1 <= y <= +1
 // -1 <= z <= +1
 Scene LoadTestModel();
+Scene LoadTestModel2();
 
 }
 

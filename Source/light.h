@@ -95,7 +95,7 @@ public:
     {
         LightHit lightHit;
 
-        lightHit.colour = colour * intensity * (4 * M_PI);
+        lightHit.colour = colour * intensity * (4 * M_PI); // TODO: maybe M_1_PI
 
         lightHit.direction = this->position - interaction.position;
         lightHit.distance = lightHit.direction.length();
@@ -128,7 +128,7 @@ public:
 
         lightHit.colour = colour * intensity;
 
-        lightHit.direction = -direction; // TODO: generate slightly random direction
+        lightHit.direction = normalise(-direction); // TODO: generate slightly random direction
         lightHit.distance = INF;
 
         lightHit.pdf = 1;
