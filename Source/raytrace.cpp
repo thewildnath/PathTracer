@@ -121,7 +121,7 @@ Vec3f SampleLights(SurfaceInteraction &interaction, Scene const& scene, std::sha
         }
     }
 
-    return directLight * scene.lights.size();
+    return directLight;
 }
 
 Vec3f trace(

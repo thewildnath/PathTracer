@@ -95,7 +95,7 @@ public:
     {
         LightHit lightHit;
 
-        lightHit.colour = colour * intensity;
+        lightHit.colour = colour * intensity * (4 * M_PI);
 
         lightHit.direction = this->position - interaction.position;
         lightHit.distance = lightHit.direction.length();
