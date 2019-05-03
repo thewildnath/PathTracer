@@ -130,7 +130,7 @@ void Draw(screen *screen)
     {
         for (int x = 0; x < SCREEN_WIDTH; ++x)
         {
-            scg::Ray ray = camera.getRay(x, y);
+            scg::Ray ray = camera.getRay(x, y, sampler[omp_get_thread_num()]);
             ray.minT = scg::RAY_EPS;
 
             int depth = 3;
