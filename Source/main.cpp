@@ -40,7 +40,7 @@ scg::Camera camera{
     SCREEN_WIDTH,
     SCREEN_HEIGHT,
     true,
-    0.1f,
+    0.0f,
     3.0f};
 
 scg::Scene scene;
