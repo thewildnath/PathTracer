@@ -137,7 +137,10 @@ Vec3f trace(
     SurfaceInteraction interaction;
     interaction.iorI = 1.0f; // Air
 
-    for (int bounces = 0; bounces < depth; ++bounces)
+    int minBounces = depth;
+    int maxBounces = 50;
+
+    for (int bounces = 0; bounces < maxBounces; ++bounces)
     {
         // Intersect the scene
         Intersection intersection;
@@ -191,9 +194,20 @@ Vec3f trace(
         ray.origin = interaction.position;
         ray.direction = interaction.inputDir;
         ray.minT = RAY_EPS;
+
+        // Russian Roulette
+        if (bounces > minBounces)
+        {
+            float p = std::max(throughput.x, std::max(throughput.y, throughput.z));
+            if (sampler.nextFloat() > p) {
+                break;
+            }
+
+            throughput *= 1 / p;
+        }
     }
 
-    return colour / depth;
+    return colour / minBounces;
 }
 
 }

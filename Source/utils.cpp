@@ -257,6 +257,7 @@ Scene LoadTestModel2()
     materials.push_back(white);  // 6
     materials.push_back(std::make_shared<Mirror>(whiteTexture)); // 7
     materials.push_back(std::make_shared<SpecularDielectric>(whiteTexture, 1.52f)); // 8
+    materials.push_back(std::make_shared<DiffuseDielectric>(whiteTexture, 1.52f)); // 9
 
     std::vector<Triangle> triangles;
     triangles.reserve(5 * 2 * 3);
@@ -277,16 +278,16 @@ Scene LoadTestModel2()
     Vec3f H(0, L, L);
 
     // Floor:
-    triangles.emplace_back(Triangle(C, B, A, 6));//2));
-    triangles.emplace_back(Triangle(C, D, B, 6));//2));
+    triangles.emplace_back(Triangle(C, B, A, 4));//2));
+    triangles.emplace_back(Triangle(C, D, B, 4));//2));
 
     // Left wall
-    triangles.emplace_back(Triangle(A, E, C, 2));//5));
-    triangles.emplace_back(Triangle(C, E, G, 2));//5));
+    triangles.emplace_back(Triangle(A, E, C, 0));//5));
+    triangles.emplace_back(Triangle(C, E, G, 0));//5));
 
     // Right wall
-    triangles.emplace_back(Triangle(F, B, D, 0));//1));
-    triangles.emplace_back(Triangle(H, F, D, 0));//1));
+    triangles.emplace_back(Triangle(F, B, D, 2));//1));
+    triangles.emplace_back(Triangle(H, F, D, 2));//1));
 
     // Ceiling
     triangles.emplace_back(Triangle(E, F, G, 6));//3));
@@ -298,7 +299,7 @@ Scene LoadTestModel2()
 
     // ---------------------------------------------------------------------------
     // Short block
-/*
+//*
     A = Vec3f(290, 0, 114);
     B = Vec3f(130, 0, 65);
     C = Vec3f(240, 0, 272);
@@ -332,7 +333,7 @@ Scene LoadTestModel2()
 
     // ---------------------------------------------------------------------------
     // Tall block
-/*
+//*
     A = Vec3f(423, 0, 247);
     B = Vec3f(265, 0, 296);
     C = Vec3f(472, 0, 406);
@@ -344,8 +345,8 @@ Scene LoadTestModel2()
     H = Vec3f(314, 330, 456);
 
     // Front
-    triangles.emplace_back(Triangle(E, B, A, 7));
-    triangles.emplace_back(Triangle(E, F, B, 7));
+    triangles.emplace_back(Triangle(E, B, A, 6));
+    triangles.emplace_back(Triangle(E, F, B, 6));
 
     // Front
     triangles.emplace_back(Triangle(F, D, B, 6));
@@ -394,7 +395,8 @@ Scene LoadTestModel2()
         {0, 0, 0},
         std::make_shared<Mesh>(Mesh(triangles))
     }));
-    scene.lightIngoreMask |= (1 << 8);
+    //scene.lightIngoreMask |= (1 << 8);
+    //scene.lightIngoreMask |= (1 << 9);
 
 
     // Extra
@@ -438,17 +440,18 @@ Scene LoadTestModel2()
     scene.lights.emplace_back(lightPtr);
     scene.materials.emplace_back(std::make_shared<scg::Lambert>(scg::Lambert{texture, lightPtr}));
 //*/
+/*
     std::shared_ptr<scg::Object> sphere = std::make_shared<scg::Object>(scg::Object{
         { 0.7, -0.2, -0.0},
         std::make_shared<scg::Sphere>(0.3, 8)
     });
     scene.objects.emplace_back(sphere);
     std::shared_ptr<scg::Object> sphere2 = std::make_shared<scg::Object>(scg::Object{
-        { 0.3, 0.65, -0.0},
+        { 0.3, 0.65, -0.2},
         std::make_shared<scg::Sphere>(0.3, 8)
     });
     scene.objects.emplace_back(sphere2);
-
+*/
     return scene;
 }
 

@@ -1,0 +1,9 @@
+#ifndef RAYTRACER_BOUNDINGBOX_H
+#define RAYTRACER_BOUNDINGBOX_H
+
+namespace scg
+{
+
+}
+
+#endif //RAYTRACER_BOUNDINGBOX_H
