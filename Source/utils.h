@@ -12,9 +12,9 @@ namespace scg
 // -1 <= x <= +1
 // -1 <= y <= +1
 // -1 <= z <= +1
-Scene LoadTestModel();
+Scene LoadTestModel1();
 Scene LoadTestModel2();
-
+Scene LoadTestModel3();
 }
 
 #endif //COMS30115_UTILITY_H

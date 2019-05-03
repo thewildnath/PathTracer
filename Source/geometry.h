@@ -1,6 +1,7 @@
 #ifndef RAYTRACER_GEOMETRY_H
 #define RAYTRACER_GEOMETRY_H
 
+#include "boundingbox.h"
 #include "intersection.h"
 #include "ray.h"
 #include "sampler.h"
@@ -17,7 +18,8 @@ class Geometry
 {
 public:
     virtual bool getIntersection(Ray const&, Intersection&, int ignore) const = 0;
-    virtual SurfaceInteraction sampleSurface(Sampler&) = 0;
+    virtual SurfaceInteraction sampleSurface(Sampler&) const = 0;
+    virtual BoundingBox getBoundingBox() const = 0;
 };
 
 class Sphere : public Geometry
@@ -69,7 +71,7 @@ public:
         return true;
     }
 
-    SurfaceInteraction sampleSurface(Sampler &sampler) override
+    SurfaceInteraction sampleSurface(Sampler &sampler) const override
     {
         // Mathsy version
         /*
@@ -92,6 +94,14 @@ public:
         point = normalise(point);
 
         return SurfaceInteraction{point * radius, point};
+    }
+
+    BoundingBox getBoundingBox() const
+    {
+        Vec3f min = Vec3f(-1) * radius;
+        Vec3f max = Vec3f(1) * radius;
+
+        return BoundingBox(min, max);
     }
 };
 
@@ -175,7 +185,7 @@ public:
         return true;
     }
 
-    SurfaceInteraction sampleSurface(Sampler &sampler) override
+    SurfaceInteraction sampleSurface(Sampler &sampler) const override
     {
         size_t index = (size_t)sampler.nextDiscrete(triangles.size());
         assert(index < triangles.size());
@@ -186,6 +196,26 @@ public:
         Vec3f point = triangles[index].v0 * (1 - r1) + triangles[index].v1 * r1 * (1 - r2) + triangles[index].v2 * r1 * r2;
 
         return SurfaceInteraction{point, triangles[index].normal};
+    }
+
+    BoundingBox getBoundingBox() const
+    {
+        return BoundingBox(Vec3f(-1000), Vec3f(1000));
+        Vec3f min(INF);
+        Vec3f max(-INF);
+
+        for (int i = 0; i < (int)triangles.size(); ++i)
+        {
+            min = minV(min, triangles[i].v0);
+            min = minV(min, triangles[i].v1);
+            min = minV(min, triangles[i].v2);
+
+            max = maxV(max, triangles[i].v0);
+            max = maxV(max, triangles[i].v1);
+            max = maxV(max, triangles[i].v2);
+        }
+
+        return BoundingBox(min, max);
     }
 };
 

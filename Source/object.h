@@ -1,6 +1,7 @@
 #ifndef RAYTRACER_OBJECT_H
 #define RAYTRACER_OBJECT_H
 
+#include "boundingbox.h"
 #include "intersection.h"
 #include "geometry.h"
 #include "math_utils.h"
@@ -21,16 +22,21 @@ public:
 
     std::shared_ptr<Geometry> geometry;
 
+    BoundingBox boundingBox;
+
     Object(
         Vec3f const& position,
         std::shared_ptr<Geometry> const& geometry):
-        position(position), geometry(geometry) {};
+        position(position), geometry(geometry)
+    {
+        boundingBox = geometry->getBoundingBox();
+    };
 
     bool getIntersection(Ray ray, Intersection& intersection, int ignore = 0) const
     {
         ray.origin -= position;
 
-        if (!geometry->getIntersection(ray, intersection, ignore))
+        if (!boundingBox.getIntersection(ray) || !geometry->getIntersection(ray, intersection, ignore))
         {
             return false;
         }

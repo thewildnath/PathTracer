@@ -40,7 +40,7 @@ scg::Camera camera{
     SCREEN_WIDTH,
     SCREEN_HEIGHT,
     true,
-    0.01f,
+    0.05f,
     3.0f};
 
 scg::Scene scene;
@@ -55,7 +55,9 @@ int main(int argc, char *argv[])
     screen *screen = InitializeSDL(SCREEN_WIDTH, SCREEN_HEIGHT, FULLSCREEN_MODE);
 
     // Load scene and lights
-    scene = scg::LoadTestModel2();
+    //scene = scg::LoadTestModel1();
+    //scene = scg::LoadTestModel2();
+    scene = scg::LoadTestModel3();
 
     while (Update())
     {
