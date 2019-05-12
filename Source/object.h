@@ -29,14 +29,17 @@ public:
         std::shared_ptr<Geometry> const& geometry):
         position(position), geometry(geometry)
     {
-        boundingBox = geometry->getBoundingBox();
+        //boundingBox = geometry->getBoundingBox();
     };
 
     bool getIntersection(Ray ray, Intersection& intersection, int ignore = 0) const
     {
         ray.origin -= position;
 
-        if (!boundingBox.getIntersection(ray) || !geometry->getIntersection(ray, intersection, ignore))
+        //BBIntersection bbIntersection;
+        //boundingBox.getIntersection(ray, bbIntersection);
+
+        if (/*!bbIntersection.valid ||*/ !geometry->getIntersection(ray, intersection, ignore))
         {
             return false;
         }

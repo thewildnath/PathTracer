@@ -32,6 +32,7 @@ add_executable(raytracer
         Source/texture.h
         Source/math_vector_utils.h
         Source/bsdf_lobe.h
+        Source/boundingbox.cpp
         Source/boundingbox.h
         Source/pathtrace.h)
 

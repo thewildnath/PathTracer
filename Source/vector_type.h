@@ -374,6 +374,24 @@ inline Vector<3, T> rotate(Vector<3, T> const& a, Vector<3, T> const& rot)
     return rotateZ(rotateX(rotateY(a, toRadians(rot.y)), toRadians(rot.x)), toRadians(rot.z));
 }
 
+inline Vec3f minV(Vec3f const& v1, Vec3f const& v2)
+{
+    return Vec3f(
+        fminf(v1.x, v2.x),
+        fminf(v1.y, v2.y),
+        fminf(v1.z, v2.z)
+    );
+}
+
+inline Vec3f maxV(Vec3f const& v1, Vec3f const& v2)
+{
+    return Vec3f(
+        fmaxf(v1.x, v2.x),
+        fmaxf(v1.y, v2.y),
+        fmaxf(v1.z, v2.z)
+    );
+}
+
 }
 
 #endif //RAYTRACER_VECTORS_H
