@@ -671,7 +671,7 @@ Scene LoadTestModel3()
 //*
     std::shared_ptr<scg::Object> sphere = std::make_shared<scg::Object>(scg::Object{
         { -0.4, 0.1, 0.2},
-        std::make_shared<scg::Sphere>(0.35, 8)
+        std::make_shared<scg::Sphere>(0.35, 7)
     });
     scene.objects.emplace_back(sphere);
     std::shared_ptr<scg::Object> sphere2 = std::make_shared<scg::Object>(scg::Object{
