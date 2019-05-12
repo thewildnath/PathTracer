@@ -282,6 +282,7 @@ public:
 typedef Vector<2, int> Vec2i;
 typedef Vector<2, float> Vec2f;
 typedef Vector<3, float> Vec3f;
+typedef Vector<4, float> Vec4f;
 
 // Vector methods
 template<int DIM, typename T>

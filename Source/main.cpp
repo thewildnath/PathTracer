@@ -1,13 +1,10 @@
 #include "camera.h"
-#include "light.h"
-#include "object.h"
 #include "pathtrace.h"
 #include "ray.h"
 #include "raytrace.h"
 #include "sampler.h"
 #include "scene.h"
 #include "SDLauxiliary.h"
-#include "triangle.h"
 #include "utils.h"
 #include "vector_type.h"
 
@@ -22,16 +19,17 @@
 #define RES 600
 #define SCREEN_WIDTH  RES
 #define SCREEN_HEIGHT RES
-//#define FOCAL_LENGTH  0.5
+
 #define FULLSCREEN_MODE false
 
-#undef main // Bloody hell, hope it doesn't come back and haunt me
+#undef main // SDL2 compatibility with Windows
 
-/* ----------------------------------------------------------------------------*/
-/* FUNCTIONS                                                                   */
+// FUNCTIONS
 bool Update();
 void Draw(screen *screen);
 void InitialiseBuffer();
+
+
 
 scg::Sampler sampler[20]; // TODO: !!! find a better solution
 
@@ -40,9 +38,9 @@ scg::Camera camera{
     scg::Vec3f(0, 0, 0),
     SCREEN_WIDTH,
     SCREEN_HEIGHT,
-    true,
-    0.2f,
-    3.0f};
+    true, // Jitter
+    0.2f, // Aperture
+    3.0f}; // Focal length
 
 scg::Scene scene;
 
@@ -55,33 +53,29 @@ int main(int argc, char *argv[])
 
     screen *screen = InitializeSDL(SCREEN_WIDTH, SCREEN_HEIGHT, FULLSCREEN_MODE);
 
-    // Load scene and lights
-    //scene = scg::LoadTestModel1();
-    //scene = scg::LoadTestModel2();
-    scene = scg::LoadTestModel3();
+    // Load scene
+    scene = scg::LoadTestModel();
 
+    // Start main loop
     while (Update())
     {
         Draw(screen);
         SDL_Renderframe(screen);
     }
 
+    // Save and finish
     SDL_SaveImage(screen, "screenshot.bmp");
-
     KillSDL(screen);
+
     return 0;
 }
 
-/*Place your drawing here*/
 void Draw(screen *screen)
 {
     ++samples;
 
-    /* Clear buffer */
-    //memset(screen->buffer, 0, screen->height * screen->width * sizeof(uint32_t));
-
     // TODO: reseed generator
-    #pragma omp parallel for schedule(dynamic) collapse(2)// firstprivate(sampler)
+    #pragma omp parallel for schedule(dynamic) collapse(2)
     for (int y = 0; y < SCREEN_HEIGHT; ++y)
     {
         for (int x = 0; x < SCREEN_WIDTH; ++x)
@@ -99,7 +93,6 @@ void Draw(screen *screen)
     }
 }
 
-/*Place updates of parameters here*/
 bool Update()
 {
     static int t = SDL_GetTicks();
