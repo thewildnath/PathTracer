@@ -4,6 +4,7 @@
 #include "light.h"
 #include "material.h"
 #include "object.h"
+#include "volume.h"
 
 #include <vector>
 
@@ -16,6 +17,7 @@ public:
     std::vector<std::shared_ptr<Light>> lights;
     std::vector<std::shared_ptr<Material>> materials;
     std::vector<std::shared_ptr<Object>> objects;
+    std::shared_ptr<Volume> volume; // Supports single volume
 
     int lightIngoreMask = 0;
 };

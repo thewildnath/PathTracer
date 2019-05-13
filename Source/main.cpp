@@ -60,7 +60,7 @@ int main(int argc, char *argv[])
     scg::loadTransferFunction(settings);
     scene = scg::loadTestModel();
 
-    scg::loadBrain(volume, temp, settings);
+    scg::loadBrain(volume, temp, scene, settings);
 
     // Start main loop
     while (Update())

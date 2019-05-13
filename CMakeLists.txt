@@ -28,6 +28,8 @@ add_executable(raytracer
         Source/object.h
         Source/pathtrace.h
         Source/ray.h
+        Source/raycast.cpp
+        Source/raycast.h
         Source/raytrace.cpp
         Source/raytrace.h
         Source/sampler.h

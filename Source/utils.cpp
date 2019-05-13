@@ -91,7 +91,7 @@ void loadTransferFunction(Settings &settings)
 //*/
 }
 
-void loadBrain(scg::Volume& volume, scg::Volume& temp, scg::Settings const& settings)
+void loadBrain(scg::Volume& volume, scg::Volume& temp, Scene &scene, scg::Settings const& settings)
 {
     char filename[50] = "../data/StanfordBrain/mrbrain-16bit000.tif";
     for (int x = 0; x < 99; ++x)
@@ -137,6 +137,8 @@ void loadBrain(scg::Volume& volume, scg::Volume& temp, scg::Settings const& sett
     }
 
     buildOctree(volume, volume.octree, settings.octreeLevels, settings);
+
+    scene.volume = std::make_shared<Volume>(volume);
 
     std::cout << "Done loadBrain." << std::endl;
 }
