@@ -1,12 +1,12 @@
 #ifndef RAYTRACER_PATHTRACE_H
 #define RAYTRACER_PATHTRACE_H
 
+#include "ray.h"
 #include "raytrace.h"
 #include "sampler.h"
 #include "scene.h"
 #include "scatterevent.h"
 #include "vector_type.h"
-#include "ray.h"
 
 namespace scg
 {

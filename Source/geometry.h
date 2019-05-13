@@ -65,6 +65,7 @@ public:
         intersection.position   = ray(t);
         intersection.distance   = t;
         intersection.normal     = normalise(intersection.position);
+        intersection.surfaceType = SurfaceType::Surface;
         intersection.materialID = materialID;
         intersection.uv         = Vec2f(0, 0);
 
@@ -176,11 +177,12 @@ public:
             return false;
         }
 
-        intersection.position   = ray(minDistance);
-        intersection.distance   = minDistance;
-        intersection.normal     = triangles[index].normal;
-        intersection.materialID = triangles[index].materialID;
-        intersection.uv         = Vec2f(0, 0);
+        intersection.position    = ray(minDistance);
+        intersection.distance    = minDistance;
+        intersection.normal      = triangles[index].normal;
+        intersection.surfaceType = SurfaceType::Surface;
+        intersection.materialID  = triangles[index].materialID;
+        intersection.uv          = Vec2f(0, 0);
 
         return true;
     }

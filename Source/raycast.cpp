@@ -1,11 +1,12 @@
 #include "raycast.h"
 
 #include "boundingbox.h"
+#include "intersection.h"
 #include "octree.h"
 #include "ray.h"
 #include "settings.h"
-#include "volume.h"
 #include "vector_type.h"
+#include "volume.h"
 
 #include <algorithm>
 #include <iostream>
@@ -34,23 +35,8 @@ struct State
     }
 };
 
-class ScatterEvent
+bool castRayWoodcock(Volume const& volume, Ray const& ray, Intersection &intersection, Settings const& settings, Sampler &sampler)
 {
-public:
-    bool isTrue;
-    float t;
-
-    ScatterEvent():
-        isTrue(false), t(0) {};
-
-    ScatterEvent(bool isTrue, float t):
-        isTrue(isTrue), t(t) {};
-};
-
-ScatterEvent castRayWoodcock(Volume const& volume, Ray const& ray, Settings const& settings, Sampler &sampler)
-{
-    ScatterEvent scatterEvent;
-
     Vec3f color(0, 0, 0);
 
     BBIntersection bbIntersection;
@@ -58,7 +44,7 @@ ScatterEvent castRayWoodcock(Volume const& volume, Ray const& ray, Settings cons
 
     if (!bbIntersection.valid)
     {
-        return scatterEvent;
+        return false;
     }
 
     float minT = std::max(ray.minT, bbIntersection.nearT);
@@ -78,21 +64,22 @@ ScatterEvent castRayWoodcock(Volume const& volume, Ray const& ray, Settings cons
 
         if (sampler.nextFloat() < out.w * invMaxDensity * settings.densityScale * settings.stepSizeWoodcock)
         {
-            scatterEvent.isTrue = true;
-            scatterEvent.t = minT;
-            return scatterEvent;
+            intersection.position   = pos;
+            intersection.distance   = minT;
+            intersection.normal     = normalise(intersection.position);
+            intersection.surfaceType = SurfaceType::Volume;
+
+            return true;
         }
 
         minT += (-std::log(sampler.nextFloat())) * invMaxDensity * settings.stepSizeWoodcock;
     }
 
-    return scatterEvent;
+    return false;
 }
 
-ScatterEvent castRayWoodcockFast(Volume const& volume, Ray ray, Settings const& settings, Sampler &sampler)
+bool castRayWoodcockFast(Volume const& volume, Ray ray, Intersection &intersection, Settings const& settings, Sampler &sampler)
 {
-    ScatterEvent scatterEvent;
-
     Vec3f color(0, 0, 0);
 
     std::stack<State> st;
@@ -196,9 +183,12 @@ ScatterEvent castRayWoodcockFast(Volume const& volume, Ray ray, Settings const& 
 
             if (sampler.nextFloat() < (out.w * settings.densityScale) * invMaxOpacity * settings.stepSizeWoodcock)
             {
-                scatterEvent.isTrue = true;
-                scatterEvent.t = minT;
-                return scatterEvent;
+                intersection.position   = pos;
+                intersection.distance   = minT;
+                intersection.normal     = normalise(intersection.position);
+                intersection.surfaceType = SurfaceType::Volume;
+
+                return true;
             }
 
             minT += (-std::log(sampler.nextFloat())) * invMaxOpacity * settings.stepSizeWoodcock;
@@ -209,19 +199,19 @@ ScatterEvent castRayWoodcockFast(Volume const& volume, Ray ray, Settings const& 
         st.pop();
     }
 
-    return scatterEvent;
+    return false;
 }
 
 Vec3f singleScatter(Volume const& volume, Ray const& ray, Settings const& settings, Sampler &sampler)
 {
-    ScatterEvent scatterEvent = castRayWoodcockFast(volume, ray, settings, sampler);
+    Intersection intersection;
 
-    if (!scatterEvent.isTrue)
+    if (!castRayWoodcockFast(volume, ray, intersection, settings, sampler))
     {
         return Vec3f(0, 0, 0); // Background
     }
 
-    Vec3f pos = ray(scatterEvent.t);
+    Vec3f pos = intersection.position;
 
     Vec3f normal = normalise(volume.getNormal(pos, 0.5f));
 
@@ -235,7 +225,7 @@ Vec3f singleScatter(Volume const& volume, Ray const& ray, Settings const& settin
     {
         Ray lightRay(pos, -settings.lightDir);
 
-        if (!castRayWoodcockFast(volume, lightRay, settings, sampler).isTrue)
+        if (!castRayWoodcockFast(volume, lightRay, intersection, settings, sampler))
         {
             light = std::max(light, dot(normal, settings.lightDir));
         }

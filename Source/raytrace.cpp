@@ -1,8 +1,9 @@
 #include "raytrace.h"
 
+#include "ray.h"
+#include "raytrace.h"
 #include "scatterevent.h"
 #include "vector_type.h"
-#include "ray.h"
 
 #include <cassert>
 #include <limits>
