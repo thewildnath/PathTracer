@@ -65,6 +65,11 @@ public:
             sampleVolume(pos + deltaY) - sampleVolume(pos - deltaY),
             sampleVolume(pos + deltaZ) - sampleVolume(pos - deltaZ));
     }
+    
+    inline Vec3f getGradientNormalised(Vec3f const& pos, float eps) const
+    {
+        return normalise(getGradient(pos, eps));
+    }
 };
 
 void buildOctree(Volume const& volume, Octree &octree, int levels, Settings const& settings);

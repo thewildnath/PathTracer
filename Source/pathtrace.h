@@ -124,7 +124,12 @@ Vec3f trace(
 
             if (!getClosestIntersection(scene, lightRay, intersection, settings, sampler, scene.lightIngoreMask))
             {
-                Vec3f normal = normalise(scene.volume->getGradient(localPos, 0.5f));
+                Vec3f normal;
+
+                if (sampler.nextFloat() < settings.gradientFactor)
+                    normal = normalise(scene.volume->getGradient(localPos, 0.5f));
+                else
+                    normal = settings.lightDir;
                 light = std::max(light, dot(normal, settings.lightDir));
             }
 

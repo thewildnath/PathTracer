@@ -42,6 +42,7 @@ void loadTransferFunction(Settings &settings)
     float x, a, r, g, b;
 
     fin >> settings.densityScale;
+    fin >> settings.gradientFactor;
 
     while (fin >> x >> a >> r >> g >> b)
     {

@@ -16,8 +16,8 @@ public:
     Vec3f lightDir;
 
     float stepSize;
-
     float densityScale;
+    float gradientFactor;
 
     //float slice;
 
