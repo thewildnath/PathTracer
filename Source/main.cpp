@@ -32,7 +32,7 @@ void InitialiseBuffer();
 scg::Sampler sampler[20]; // TODO: !!! find a better solution
 
 scg::Camera camera{
-    scg::Vec3f(0, 0, -256),
+    scg::Vec3f(0, 15, -240),
     scg::Vec3f(0, 0, 0),
     SCREEN_WIDTH,
     SCREEN_HEIGHT,

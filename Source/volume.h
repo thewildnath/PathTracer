@@ -54,7 +54,7 @@ public:
         return coef;
     }
 
-    inline Vec3f getNormal(Vec3f const &pos, float eps) const
+    inline Vec3f getGradient(Vec3f const& pos, float eps) const
     {
         Vec3f deltaX(eps, 0, 0);
         Vec3f deltaY(0, eps, 0);

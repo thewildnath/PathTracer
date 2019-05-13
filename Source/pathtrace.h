@@ -124,10 +124,11 @@ Vec3f trace(
 
             if (!getClosestIntersection(scene, lightRay, intersection, settings, sampler, scene.lightIngoreMask))
             {
-                light = std::max(light, dot(intersection.normal, settings.lightDir));
+                Vec3f normal = normalise(scene.volume->getGradient(localPos, 0.5f));
+                light = std::max(light, dot(normal, settings.lightDir));
             }
 
-            colour += (Vec3f(out.x, out.y,  out.z) / 255.0f * light * 1.0f);
+            colour += (Vec3f(out.x, out.y,  out.z) * light * 1.0f) / 255.0f;
 
             return colour;
             break;

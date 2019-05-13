@@ -202,41 +202,4 @@ bool castRayWoodcockFast(Volume const& volume, Ray ray, Intersection &intersecti
     return false;
 }
 
-Vec3f singleScatter(Volume const& volume, Ray const& ray, Settings const& settings, Sampler &sampler)
-{
-    Intersection intersection;
-
-    if (!castRayWoodcockFast(volume, ray, intersection, settings, sampler))
-    {
-        return Vec3f(0, 0, 0); // Background
-    }
-
-    Vec3f pos = intersection.position;
-
-    Vec3f normal = normalise(volume.getNormal(pos, 0.5f));
-
-    float coef = volume.sampleVolume(pos);
-
-    Vec4f out = settings.transferFunction.evaluate(coef);
-
-    float light = 0.1f;
-
-    if (true)
-    {
-        Ray lightRay(pos, -settings.lightDir);
-
-        if (!castRayWoodcockFast(volume, lightRay, intersection, settings, sampler))
-        {
-            light = std::max(light, dot(normal, settings.lightDir));
-        }
-    }
-
-    //Vec3f reflected = glm::normalize(glm::reflect(ray.dir, normal));
-    //float specularLow  = std::pow(glm::dot(-ray.dir, reflected), 10);
-    //float specularHigh = std::pow(glm::dot(-ray.dir, reflected), 500);
-
-    Vec3f color = (Vec3f(out.x, out.y,  out.z) * light * 1.0f);// + specularLow * 20.0f + specularHigh * 50.0f);
-    return color / 255.0f;
-}
-
 }
