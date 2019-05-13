@@ -43,6 +43,9 @@ scg::Camera camera{
 scg::Settings settings;
 scg::Scene scene;
 
+scg::Volume volume(256, 256, 256);
+scg::Volume temp(256, 256, 256);
+
 int samples;
 scg::Vec3f buffer[SCREEN_HEIGHT][SCREEN_WIDTH];
 
@@ -52,10 +55,12 @@ int main(int argc, char *argv[])
 
     screen *screen = InitializeSDL(SCREEN_WIDTH, SCREEN_HEIGHT, FULLSCREEN_MODE);
 
-    // Initialise
+    // Initialise scene
     settings = scg::loadSettings();
     scg::loadTransferFunction(settings);
     scene = scg::loadTestModel();
+
+    scg::loadBrain(volume, temp, settings);
 
     // Start main loop
     while (Update())

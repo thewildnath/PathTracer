@@ -6,9 +6,12 @@ set(CMAKE_CXX_FLAGS "-Ofast -Wall -Wextra -fopenmp -ffast-math")# -funroll-loops
 #set(CMAKE_CXX_FLAGS "-O0 -Wall -Wextra -ffast-math")
 
 include_directories(include/sdl/include/SDL2)
+include_directories(include/tinytiff)
 include_directories(Source)
 
 add_executable(raytracer
+        include/tinytiff/tinytiffreader.cpp
+        include/tinytiff/tinytiffreader.h
         Source/bsdf_lobe.h
         Source/boundingbox.cpp
         Source/boundingbox.h
@@ -20,6 +23,8 @@ add_executable(raytracer
         Source/math_utils.h
         Source/math_vector_utils.h
         Source/main.cpp
+        Source/octree.cpp
+        Source/octree.h
         Source/object.h
         Source/pathtrace.h
         Source/ray.h
@@ -36,6 +41,8 @@ add_executable(raytracer
         Source/triangle.h
         Source/utils.cpp
         Source/utils.h
+        Source/volume.cpp
+        Source/volume.h
         Source/vector_type.h)
 
 find_library(SDL_LIB libsdl2 HINTS include/sdl/lib)
