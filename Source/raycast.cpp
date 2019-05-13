@@ -50,7 +50,7 @@ bool castRayWoodcock(Volume const& volume, Ray const& ray, Intersection &interse
     float minT = std::max(ray.minT, bbIntersection.nearT);
     float maxT = std::min(ray.maxT, bbIntersection.farT);
 
-    minT += (-std::log(sampler.nextFloat())) * settings.stepSizeWoodcock;
+    minT += (-std::log(sampler.nextFloat())) * settings.stepSize;
 
     float invMaxDensity = 1.0f;
 
@@ -62,7 +62,7 @@ bool castRayWoodcock(Volume const& volume, Ray const& ray, Intersection &interse
 
         Vec4f out = settings.transferFunction.evaluate(coef);
 
-        if (sampler.nextFloat() < out.w * invMaxDensity * settings.densityScale * settings.stepSizeWoodcock)
+        if (sampler.nextFloat() < out.w * invMaxDensity * settings.densityScale * settings.stepSize)
         {
             intersection.position   = pos;
             intersection.distance   = minT;
@@ -72,7 +72,7 @@ bool castRayWoodcock(Volume const& volume, Ray const& ray, Intersection &interse
             return true;
         }
 
-        minT += (-std::log(sampler.nextFloat())) * invMaxDensity * settings.stepSizeWoodcock;
+        minT += (-std::log(sampler.nextFloat())) * invMaxDensity * settings.stepSize;
     }
 
     return false;
@@ -91,7 +91,7 @@ bool castRayWoodcockFast(Volume const& volume, Ray ray, Intersection &intersecti
         st.push(State(&volume.octree, bbIntersection.nearT, bbIntersection.farT));
     }
 
-    ray.minT +=  (-std::log(sampler.nextFloat())) * settings.stepSizeWoodcock;
+    ray.minT +=  (-std::log(sampler.nextFloat())) * settings.stepSize;
 
     while (!st.empty() && ray.minT <= ray.maxT)
     {
@@ -181,7 +181,7 @@ bool castRayWoodcockFast(Volume const& volume, Ray ray, Intersection &intersecti
 
             Vec4f out = settings.transferFunction.evaluate(coef);
 
-            if (sampler.nextFloat() < (out.w * settings.densityScale) * invMaxOpacity * settings.stepSizeWoodcock)
+            if (sampler.nextFloat() < (out.w * settings.densityScale) * invMaxOpacity * settings.stepSize)
             {
                 intersection.position   = pos;
                 intersection.distance   = minT;
@@ -191,7 +191,7 @@ bool castRayWoodcockFast(Volume const& volume, Ray ray, Intersection &intersecti
                 return true;
             }
 
-            minT += (-std::log(sampler.nextFloat())) * invMaxOpacity * settings.stepSizeWoodcock;
+            minT += (-std::log(sampler.nextFloat())) * invMaxOpacity * settings.stepSize;
         }
 
         // Jump into next node

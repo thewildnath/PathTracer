@@ -25,14 +25,16 @@ bool getClosestIntersection(
     int index = -1;
 
     Intersection intersection;
-/*
-    if (castRayWoodcockFast(*scene.volume, ray, intersection, settings, sampler))
+//*
+    Ray volumeRay {ray.origin - scene.volumePos, ray.direction};
+    if (castRayWoodcockFast(*scene.volume, volumeRay, intersection, settings, sampler))
     {
         minDistance = intersection.distance;
-        index = scene.objects.size();
+        index = (int)scene.objects.size();
         closestIntersection = intersection;
+        closestIntersection.position += scene.volumePos;
     }
-*/
+//*/
     for (int i = 0; i < (int)scene.objects.size(); ++i)
     {
         if (scene.objects[i]->getIntersection(ray, intersection, ignore))

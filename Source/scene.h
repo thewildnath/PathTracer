@@ -17,7 +17,10 @@ public:
     std::vector<std::shared_ptr<Light>> lights;
     std::vector<std::shared_ptr<Material>> materials;
     std::vector<std::shared_ptr<Object>> objects;
-    std::shared_ptr<Volume> volume; // Supports single volume
+
+    // Supports single volume
+    Vec3f volumePos;
+    std::shared_ptr<Volume> volume;
 
     int lightIngoreMask = 0;
 };

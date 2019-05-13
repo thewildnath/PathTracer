@@ -112,6 +112,18 @@ Vec3f trace(
             break;
         }
 
+        if (intersection.surfaceType == SurfaceType::Volume)
+        {
+            Vec3f localPos = intersection.position - scene.volumePos;
+            float intensity = scene.volume->sampleVolume(localPos);
+            Vec4f out = settings.transferFunction.evaluate(intensity);
+
+            float light = std::max(0.1f, dot(intersection.normal, settings.lightDir));
+            colour += (Vec3f(out.x, out.y,  out.z) / 255.0f * light * 1.0f);
+
+            break;
+        }
+
         auto const& material = scene.materials[intersection.materialID];
 
         // Initialise interaction

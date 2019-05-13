@@ -16,7 +16,7 @@
 #include <memory>
 #include <omp.h>
 
-#define RES 600
+#define RES 400
 #define SCREEN_WIDTH  RES
 #define SCREEN_HEIGHT RES
 
@@ -32,7 +32,7 @@ void InitialiseBuffer();
 scg::Sampler sampler[20]; // TODO: !!! find a better solution
 
 scg::Camera camera{
-    scg::Vec3f(0, 0, -3),
+    scg::Vec3f(0, 0, -300),
     scg::Vec3f(0, 0, 0),
     SCREEN_WIDTH,
     SCREEN_HEIGHT,
@@ -58,7 +58,7 @@ int main(int argc, char *argv[])
     // Initialise scene
     settings = scg::loadSettings();
     scg::loadTransferFunction(settings);
-    scene = scg::loadTestModel();
+    //scene = scg::loadTestModel();
 
     scg::loadBrain(volume, temp, scene, settings);
 
@@ -81,16 +81,16 @@ void Draw(screen *screen)
     ++samples;
 
     // TODO: reseed generator
-    #pragma omp parallel for schedule(dynamic) collapse(2) shared(settings)
+    #pragma omp parallel for schedule(dynamic) collapse(2) shared(scene, settings)
     for (int y = 0; y < SCREEN_HEIGHT; ++y)
     {
         for (int x = 0; x < SCREEN_WIDTH; ++x)
         {
-            scg::Ray ray = camera.getLensRay(x, y, sampler[omp_get_thread_num()]);
+            scg::Ray ray = camera.getRay(x, y, sampler[omp_get_thread_num()]);
             ray.minT = scg::RAY_EPS;
 
-            int depth = 10;
-            float gamma = 3.0f;
+            int depth = 1;
+            float gamma = 1.0f;
             scg::Vec3f colour = scg::trace(scene, ray, depth, settings, sampler[omp_get_thread_num()]);
             buffer[y][x] += colour * gamma; // TODO: clamp value
 
