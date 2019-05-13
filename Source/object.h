@@ -7,7 +7,7 @@
 #include "math_utils.h"
 #include "ray.h"
 #include "sampler.h"
-#include "surfaceinteraction.h"
+#include "scatterevent.h"
 
 #include <memory>
 #include <vector>
@@ -49,9 +49,9 @@ public:
         return true;
     }
 
-    SurfaceInteraction sampleSurface(Sampler &sampler)
+    ScatterEvent sampleSurface(Sampler &sampler)
     {
-        SurfaceInteraction interaction = geometry->sampleSurface(sampler);
+        ScatterEvent interaction = geometry->sampleSurface(sampler);
         interaction.position += position;
 
         return interaction;

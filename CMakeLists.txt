@@ -12,10 +12,10 @@ include_directories(Source)
 add_executable(raytracer
         include/tinytiff/tinytiffreader.cpp
         include/tinytiff/tinytiffreader.h
-        Source/bsdf_lobe.h
         Source/boundingbox.cpp
         Source/boundingbox.h
         Source/camera.h
+        Source/enums.h
         Source/geometry.h
         Source/intersection.h
         Source/light.h
@@ -33,10 +33,10 @@ add_executable(raytracer
         Source/raytrace.cpp
         Source/raytrace.h
         Source/sampler.h
+        Source/scatterevent.h
         Source/scene.h
         Source/SDLauxiliary.h
         Source/settings.h
-        Source/surfaceinteraction.h
         Source/texture.h
         Source/transferfunction.h
         Source/triangle.cpp
@@ -45,7 +45,7 @@ add_executable(raytracer
         Source/utils.h
         Source/volume.cpp
         Source/volume.h
-        Source/vector_type.h)
+        Source/vector_type.h Source/enums.h)
 
 find_library(SDL_LIB libsdl2 HINTS include/sdl/lib)
 target_link_libraries(raytracer PUBLIC ${SDL_LIB})

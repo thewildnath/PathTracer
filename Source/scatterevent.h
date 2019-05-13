@@ -1,7 +1,7 @@
 #ifndef RAYTRACER_INTERACTION_H
 #define RAYTRACER_INTERACTION_H
 
-#include "bsdf_lobe.h"
+#include "enums.h"
 #include "vector_type.h"
 
 namespace scg
@@ -9,7 +9,7 @@ namespace scg
 
 // Information regarding an interaction with the scene
 // May not initialise all fields and update them during the process
-class SurfaceInteraction
+class ScatterEvent
 {
 public:
     Vec3f position;
@@ -22,12 +22,13 @@ public:
     float iorI;
     float iorO;
 
+    SurfaceType surfaceType;
     BSDFLobe sampledLobe;
 
-    SurfaceInteraction() = default;
+    ScatterEvent() = default;
 
-    SurfaceInteraction(Vec3f const& position, Vec3f const& normal):
-        position(position), normal(normal) {};
+    ScatterEvent(Vec3f const& position, Vec3f const& normal, SurfaceType surfaceType):
+        position(position), normal(normal), surfaceType(surfaceType) {};
 
     Vec3f getSafePosition() const
     {

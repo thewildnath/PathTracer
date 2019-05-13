@@ -1,8 +1,11 @@
-#ifndef RAYTRACER_BSDF_LOBE_H
-#define RAYTRACER_BSDF_LOBE_H
+#ifndef RAYTRACER_ENUMS_H
+#define RAYTRACER_ENUMS_H
 
-namespace scg
+enum SurfaceType
 {
+    Surface = 0,
+    Volume = (1 << 0)
+};
 
 enum BSDFLobe
 {
@@ -13,6 +16,4 @@ enum BSDFLobe
     Specular = SpecularReflection | SpecularTransmission
 };
 
-}
-
-#endif //RAYTRACER_BSDF_LOBE_H
+#endif //RAYTRACER_ENUMS_H

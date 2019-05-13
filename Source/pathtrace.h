@@ -4,14 +4,14 @@
 #include "raytrace.h"
 #include "sampler.h"
 #include "scene.h"
-#include "surfaceinteraction.h"
+#include "scatterevent.h"
 #include "vector_type.h"
 #include "ray.h"
 
 namespace scg
 {
 
-Vec3f SampleLights(SurfaceInteraction &interaction, Scene const& scene, std::shared_ptr<Material> const& material, std::shared_ptr<Light> const& hitLight, Sampler &sampler)
+Vec3f SampleLights(ScatterEvent &interaction, Scene const& scene, std::shared_ptr<Material> const& material, std::shared_ptr<Light> const& hitLight, Sampler &sampler)
 {
     // Cannot light mirror
     if ((material->getSupportedLobes(interaction.uv) & BSDFLobe::Specular) != 0)
@@ -93,7 +93,7 @@ Vec3f trace(
     Vec3f colour;
     Vec3f throughput(1.0f, 1.0f, 1.0f);
 
-    SurfaceInteraction interaction;
+    ScatterEvent interaction;
     interaction.iorI = 1.0f; // Air
 
     int minBounces = depth;

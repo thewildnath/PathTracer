@@ -1,6 +1,6 @@
 #include "raytrace.h"
 
-#include "surfaceinteraction.h"
+#include "scatterevent.h"
 #include "vector_type.h"
 #include "ray.h"
 

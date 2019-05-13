@@ -5,7 +5,7 @@
 #include "intersection.h"
 #include "ray.h"
 #include "sampler.h"
-#include "surfaceinteraction.h"
+#include "scatterevent.h"
 #include "triangle.h"
 
 #include <cassert>
@@ -18,7 +18,7 @@ class Geometry
 {
 public:
     virtual bool getIntersection(Ray const&, Intersection&, int ignore) const = 0;
-    virtual SurfaceInteraction sampleSurface(Sampler&) const = 0;
+    virtual ScatterEvent sampleSurface(Sampler&) const = 0;
     virtual BoundingBox getBoundingBox() const = 0;
 };
 
@@ -71,7 +71,7 @@ public:
         return true;
     }
 
-    SurfaceInteraction sampleSurface(Sampler &sampler) const override
+    ScatterEvent sampleSurface(Sampler &sampler) const override
     {
         // Mathsy version
         /*
@@ -93,7 +93,7 @@ public:
 
         point = normalise(point);
 
-        return SurfaceInteraction{point * radius, point};
+        return ScatterEvent{point * radius, point, SurfaceType::Surface};
     }
 
     BoundingBox getBoundingBox() const
@@ -185,7 +185,7 @@ public:
         return true;
     }
 
-    SurfaceInteraction sampleSurface(Sampler &sampler) const override
+    ScatterEvent sampleSurface(Sampler &sampler) const override
     {
         size_t index = (size_t)sampler.nextDiscrete(triangles.size());
         assert(index < triangles.size());
@@ -195,7 +195,7 @@ public:
 
         Vec3f point = triangles[index].v0 * (1 - r1) + triangles[index].v1 * r1 * (1 - r2) + triangles[index].v2 * r1 * r2;
 
-        return SurfaceInteraction{point, triangles[index].normal};
+        return ScatterEvent{point, triangles[index].normal, SurfaceType::Surface};
     }
 
     BoundingBox getBoundingBox() const

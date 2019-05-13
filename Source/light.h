@@ -3,7 +3,7 @@
 
 #include "object.h"
 #include "sampler.h"
-#include "surfaceinteraction.h"
+#include "scatterevent.h"
 #include "vector_type.h"
 
 #include <memory>
@@ -41,9 +41,9 @@ public:
     Light(Vec3f const& colour, float intensity):
         colour(colour), intensity(intensity) {};
 
-    virtual LightHit illuminate(SurfaceInteraction const&, Sampler &) const = 0;
+    virtual LightHit illuminate(ScatterEvent const&, Sampler &) const = 0;
 
-    virtual Vec3f getEmittance(SurfaceInteraction const& interaction) const
+    virtual Vec3f getEmittance(ScatterEvent const& interaction) const
     {
         // Do not illuminate on the back side
         return colour * intensity * std::max(0.0f, dot(interaction.normal, interaction.outputDir));
@@ -64,7 +64,7 @@ public:
     AbstractLight(Vec3f const& colour, float intensity):
         Light(colour, intensity) {};
 
-    LightHit illuminate(SurfaceInteraction const& interaction, Sampler&) const override
+    LightHit illuminate(ScatterEvent const& interaction, Sampler&) const override
     {
         LightHit lightHit;
 
@@ -91,7 +91,7 @@ public:
     PointLight(Vec3f const& colour, float intensity, Vec3f const& position):
         Light(colour, intensity), position(position) {};
 
-    LightHit illuminate(SurfaceInteraction const& interaction, Sampler&) const override
+    LightHit illuminate(ScatterEvent const& interaction, Sampler&) const override
     {
         LightHit lightHit;
 
@@ -122,7 +122,7 @@ public:
     DirectionalLight(Vec3f const& colour, float intensity, Vec3f const& direction):
         Light(colour, intensity), direction(normalise(direction)) {};
 
-    LightHit illuminate(SurfaceInteraction const&, Sampler&) const override
+    LightHit illuminate(ScatterEvent const&, Sampler&) const override
     {
         LightHit lightHit;
 
@@ -151,11 +151,11 @@ public:
     ObjectLight(Vec3f const& colour, float intensity, std::shared_ptr<Object> object):
         Light(colour, intensity), object(object) {};
 
-    LightHit illuminate(SurfaceInteraction const& interaction, Sampler &sampler) const override
+    LightHit illuminate(ScatterEvent const& interaction, Sampler &sampler) const override
     {
         LightHit lightHit;
 
-        SurfaceInteraction source = object->sampleSurface(sampler);
+        ScatterEvent source = object->sampleSurface(sampler);
 
         lightHit.colour = colour * intensity * (float)M_1_PI;
 
