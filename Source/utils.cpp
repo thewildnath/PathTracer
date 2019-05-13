@@ -45,7 +45,7 @@ void loadTransferFunction(Settings &settings)
 
     while (fin >> x >> a >> r >> g >> b)
     {
-        nodes.emplace_back(scg::Node{x, a, {r, g, b}});
+        nodes.emplace_back(scg::Node{x, a, Vec3f{r, g, b} / 255.0f});
     }
 
     settings.transferFunction = scg::TransferFunction(nodes);

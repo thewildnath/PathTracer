@@ -128,7 +128,7 @@ Vec3f trace(
                 light = std::max(light, dot(normal, settings.lightDir));
             }
 
-            colour += (Vec3f(out.x, out.y,  out.z) * light * 1.0f) / 255.0f;
+            colour += (Vec3f(out.x, out.y,  out.z) * light * 1.0f);
 
             return colour;
             break;
