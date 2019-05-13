@@ -371,7 +371,7 @@ inline Vector<3, T> rotateZ(Vector<3, T> const& a, float radians)
 template<typename T>
 inline Vector<3, T> rotate(Vector<3, T> const& a, Vector<3, T> const& rot)
 {
-    return rotateZ(rotateX(rotateY(a, toRadians(rot.y)), toRadians(rot.x)), toRadians(rot.z));
+    return rotateZ(rotateY(rotateX(a, toRadians(rot.x)), toRadians(rot.y)), toRadians(rot.z));
 }
 
 inline Vec3f minV(Vec3f const& v1, Vec3f const& v2)

@@ -32,13 +32,15 @@ void InitialiseBuffer();
 scg::Sampler sampler[20]; // TODO: !!! find a better solution
 
 scg::Camera camera{
-    scg::Vec3f(0, 0, -300),
+    scg::Vec3f(0, 0, -256),
     scg::Vec3f(0, 0, 0),
     SCREEN_WIDTH,
     SCREEN_HEIGHT,
     true, // Jitter
     0.2f, // Aperture
     3.0f}; // Focal length
+
+scg::Vec3f rotation{0, 0, 0};
 
 scg::Settings settings;
 scg::Scene scene;
@@ -88,9 +90,12 @@ void Draw(screen *screen)
         {
             scg::Ray ray = camera.getRay(x, y, sampler[omp_get_thread_num()]);
             ray.minT = scg::RAY_EPS;
+            
+            ray.origin = scg::rotate(ray.origin, rotation);
+            ray.direction = scg::rotate(ray.direction, rotation);
 
             int depth = 1;
-            float gamma = 1.0f;
+            float gamma = 2.0f;
             scg::Vec3f colour = scg::trace(scene, ray, depth, settings, sampler[omp_get_thread_num()]);
             buffer[y][x] += colour * gamma; // TODO: clamp value
 
@@ -125,45 +130,50 @@ bool Update()
                     return false;
                 case SDLK_w:
                     /* Move camera forward */
-                    camera.position.z += 0.2f;
+                    camera.position.z += 3.0f;
                     InitialiseBuffer();
                     break;
                 case SDLK_s:
                     /* Move camera backwards */
-                    camera.position.z -= 0.2f;
+                    camera.position.z -= 3.0f;
                     InitialiseBuffer();
                     break;
                 case SDLK_a:
                     /* Move camera left */
-                    camera.position.x -= 0.2f;
+                    camera.position.x -= 3.0f;
                     InitialiseBuffer();
                     break;
                 case SDLK_d:
                     /* Move camera right */
-                    camera.position.x += 0.2f;
+                    camera.position.x += 3.0f;
                     InitialiseBuffer();
                     break;
                 case SDLK_r:
                     InitialiseBuffer();
+                    scg::loadTransferFunction(settings);
                     break;
                 case SDLK_UP:
-                    /* Move rotate up */
-                    camera.rotation.x += 5;
+                    rotation.x -= 5;
+                    if (rotation.x < 0)
+                        rotation.x += 360;
                     InitialiseBuffer();
                     break;
                 case SDLK_DOWN:
-                    /* Move rotate down */
-                    camera.rotation.x -= 5;
+                    rotation.x += 5;
+                    if (rotation.x > 360)
+                        rotation.x -= 360;
                     InitialiseBuffer();
                     break;
                 case SDLK_LEFT:
-                    /* Move rotate left */
-                    camera.rotation.y -= 5;
+                    rotation.y += 5;
+                    if (rotation.y > 360)
+                        rotation.y -= 360;
                     InitialiseBuffer();
                     break;
                 case SDLK_RIGHT:
-                    /* Move rotate right */
-                    camera.rotation.y += 5;
+                    rotation.y -= 5;
+                    if (rotation.y < 0)
+                        rotation.y += 360;
                     InitialiseBuffer();
                     break;
             }

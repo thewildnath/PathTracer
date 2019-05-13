@@ -21,7 +21,6 @@ Settings loadSettings()
     Settings settings;
 
     settings.lightDir = scg::normalise(scg::Vec3f(1.0f, 0.5f, 1.0f));
-    settings.stepSize = 0.1f;
     settings.stepSize = 1.0f;
     settings.octreeLevels = 5;
     settings.brackets = std::vector<float>{

@@ -118,9 +118,18 @@ Vec3f trace(
             float intensity = scene.volume->sampleVolume(localPos);
             Vec4f out = settings.transferFunction.evaluate(intensity);
 
-            float light = std::max(0.1f, dot(intersection.normal, settings.lightDir));
+            float light = 0.1f; //std::max(0.1f, dot(intersection.normal, settings.lightDir));
+
+            Ray lightRay(intersection.position, -settings.lightDir);
+
+            if (!getClosestIntersection(scene, lightRay, intersection, settings, sampler, scene.lightIngoreMask))
+            {
+                light = std::max(light, dot(intersection.normal, settings.lightDir));
+            }
+
             colour += (Vec3f(out.x, out.y,  out.z) / 255.0f * light * 1.0f);
 
+            return colour;
             break;
         }
 
