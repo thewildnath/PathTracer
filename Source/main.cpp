@@ -1,9 +1,9 @@
 #include "camera.h"
 #include "pathtrace.h"
 #include "ray.h"
-#include "raytrace.h"
 #include "sampler.h"
 #include "scene.h"
+#include "settings.h"
 #include "SDLauxiliary.h"
 #include "utils.h"
 #include "vector_type.h"
@@ -29,8 +29,6 @@ bool Update();
 void Draw(screen *screen);
 void InitialiseBuffer();
 
-
-
 scg::Sampler sampler[20]; // TODO: !!! find a better solution
 
 scg::Camera camera{
@@ -42,6 +40,7 @@ scg::Camera camera{
     0.2f, // Aperture
     3.0f}; // Focal length
 
+scg::Settings settings;
 scg::Scene scene;
 
 int samples;
@@ -53,8 +52,10 @@ int main(int argc, char *argv[])
 
     screen *screen = InitializeSDL(SCREEN_WIDTH, SCREEN_HEIGHT, FULLSCREEN_MODE);
 
-    // Load scene
-    scene = scg::LoadTestModel();
+    // Initialise
+    settings = scg::loadSettings();
+    scg::loadTransferFunction(settings);
+    scene = scg::loadTestModel();
 
     // Start main loop
     while (Update())

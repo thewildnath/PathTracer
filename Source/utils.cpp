@@ -2,17 +2,94 @@
 
 #include "geometry.h"
 #include "material.h"
+#include "settings.h"
 #include "scene.h"
 #include "texture.h"
 #include "triangle.h"
 #include "vector_type.h"
 
+#include <fstream>
 #include <vector>
 
 namespace scg
 {
 
-Scene LoadTestModel()
+Settings loadSettings()
+{
+    Settings settings;
+
+    settings.lightDir = scg::normalise(scg::Vec3f(1.0f, 0.5f, 1.0f));
+    settings.stepSize = 0.1f;
+    settings.stepSizeWoodcock = 1.0f;
+    settings.slice = 0;
+    settings.octreeLevels = 5;
+    settings.brackets = std::vector<float>{
+        0, 1000, 1300, 1500, 1750, 1900, 2000, 2100, 2200, 2300, 2400, 2500, 2600, 2700, 2850, 3000, 3250, 3500, 99999 // 1 less than TF!
+    };
+    settings.maxOpacity.resize(settings.brackets.size() - 1);
+    settings.minStepSize.resize(settings.brackets.size() - 1);
+
+    return settings;
+}
+
+void loadTransferFunction(Settings &settings)
+{
+    std::ifstream fin;
+    fin.open("transfer.txt");
+
+    std::vector<scg::Node> nodes;
+
+    float x, a, r, g, b;
+
+    fin >> settings.densityScale;
+
+    while (fin >> x >> a >> r >> g >> b)
+    {
+        nodes.emplace_back(scg::Node{x, a, {r, g, b}});
+    }
+
+    settings.transferFunction = scg::TransferFunction(nodes);
+//*
+    for (int i = 0; i < (int)settings.minStepSize.size(); ++i)
+    {
+        settings.maxOpacity[i] = 0;
+        settings.minStepSize[i] = 0;
+    }
+//*/
+    settings.mask = 0;
+    for (size_t i = 0; i < nodes.size() - 1; ++i)
+    {
+        if (nodes[i].opacity > 0 || nodes[i + 1].opacity > 0)
+        {
+            for (int bracket = 0; bracket < (int)settings.brackets.size() - 1; ++bracket)
+            {
+                float minX = std::fmaxf(nodes[i].intensity, settings.brackets[bracket]);
+                float maxX = std::fminf(nodes[i + 1].intensity, settings.brackets[bracket + 1]);
+
+                if (minX < maxX)
+                {
+                    settings.mask |= (1 << bracket);
+                    //*
+                    float maxOpacity = std::fmaxf(settings.transferFunction.evaluate(minX).w, settings.transferFunction.evaluate(maxX).w);
+                    if (maxOpacity > settings.maxOpacity[bracket])
+                    {
+                        settings.maxOpacity[bracket] = maxOpacity;
+                    }
+                    //*/
+                }
+            }
+        }
+    }
+//*
+    for (int i = 0; i < (int)settings.minStepSize.size(); ++i)
+    {
+        settings.minStepSize[i] =
+            1.0f * settings.maxOpacity[i] + 0.1f * (1 - settings.maxOpacity[i]);
+    }
+//*/
+}
+
+Scene loadTestModel()
 {
     // Defines colours:
     std::shared_ptr<ColourTexture> redTexture = std::make_shared<ColourTexture>(Vec3f(0.75f, 0.15f, 0.15f));

@@ -12,6 +12,11 @@ const float RAY_EPS = 1e-4;
 const float INF = std::numeric_limits<float>::infinity();
 
 
+inline float lerp(float value1, float value2, float weight)
+{
+    return value1 * (1.0f - weight) + value2 * weight;
+}
+
 template<typename T>
 inline T clamp(T const& value, T const& low, T const& high)
 {
