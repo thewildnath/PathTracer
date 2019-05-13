@@ -22,6 +22,10 @@ public:
     Vec3f volumePos;
     std::shared_ptr<Volume> volume;
 
+    float minIntensity;
+    float maxIntensity;
+    float invMaxGradient;
+
     int lightIngoreMask = 0;
 };
 

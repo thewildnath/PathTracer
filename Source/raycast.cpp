@@ -66,7 +66,6 @@ bool castRayWoodcock(Volume const& volume, Ray const& ray, Intersection &interse
         {
             intersection.position   = pos;
             intersection.distance   = minT;
-            intersection.normal     = normalise(intersection.position);
             intersection.surfaceType = SurfaceType::Volume;
 
             return true;
@@ -185,7 +184,6 @@ bool castRayWoodcockFast(Volume const& volume, Ray ray, Intersection &intersecti
             {
                 intersection.position   = pos;
                 intersection.distance   = minT;
-                intersection.normal     = normalise(intersection.position);
                 intersection.surfaceType = SurfaceType::Volume;
 
                 return true;

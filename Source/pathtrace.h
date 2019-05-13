@@ -118,22 +118,31 @@ Vec3f trace(
             float intensity = scene.volume->sampleVolume(localPos);
             Vec4f out = settings.transferFunction.evaluate(intensity);
 
-            float light = 0.1f; //std::max(0.1f, dot(intersection.normal, settings.lightDir));
+            Vec3f normal = scene.volume->getGradient(localPos, 0.5f); // TODO: use transferfunction
+            float magnitude = normal.length();
 
-            Ray lightRay(intersection.position, -settings.lightDir);
+            float probBRDF = (1.0f - std::exp(-settings.gradientFactor * (magnitude * scene.invMaxGradient)));
 
-            if (!getClosestIntersection(scene, lightRay, intersection, settings, sampler, scene.lightIngoreMask))
+            if (sampler.nextFloat() > probBRDF)
             {
-                Vec3f normal;
+                normal /= magnitude;
 
-                if (sampler.nextFloat() < settings.gradientFactor)
-                    normal = normalise(scene.volume->getGradient(localPos, 0.5f));
-                else
-                    normal = settings.lightDir;
-                light = std::max(light, dot(normal, settings.lightDir));
+                float light = 0.1f;
+
+                Ray lightRay(intersection.position, -settings.lightDir);
+
+                if (!getClosestIntersection(scene, lightRay, intersection, settings, sampler, scene.lightIngoreMask))
+                {
+                    light = std::max(light, dot(normal, settings.lightDir));
+                }
+
+                colour += (Vec3f(out.x, out.y,  out.z) * light * 1.0f);
             }
-
-            colour += (Vec3f(out.x, out.y,  out.z) * light * 1.0f);
+            else
+            {
+                //normal = settings.lightDir;
+                colour += Vec3f{0.15f, 0.15f, 0.75f};
+            }
 
             return colour;
             break;

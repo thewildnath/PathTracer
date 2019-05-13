@@ -123,17 +123,24 @@ void loadBrain(scg::Volume& volume, scg::Volume& temp, Scene &scene, scg::Settin
         TinyTIFFReader_close(tiffr);
     }
 
+    scene.minIntensity = std::numeric_limits<float>::max();
+    scene.maxIntensity = std::numeric_limits<float>::min();
+
     for (int x = 0; x < volume.width; ++x)
     {
         for (int y = 0; y < volume.height; ++y)
         {
             for (int z = 0; z < volume.height; ++z)
             {
-                //volume.data[z][y][x] = (int)std::round(scg::sampleVolume(temp, Vec3f(z, y, x / 1.3f)));
-                volume.data[z][y][x] = (int)std::round(temp.sampleVolume(Vec3f(z, y, x / 1.3f)));
+                volume.data[z][y][x] = temp.sampleVolume(Vec3f(z, y, x / 1.3f));
+
+                scene.minIntensity = std::max(scene.minIntensity, volume.data[z][y][x]);
+                scene.maxIntensity = std::max(scene.maxIntensity, volume.data[z][y][x]);
             }
         }
     }
+
+    scene.invMaxGradient = 1.0f / (scene.maxIntensity * 3.0f);
 
     buildOctree(volume, volume.octree, settings.octreeLevels, settings);
 

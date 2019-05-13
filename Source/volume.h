@@ -16,7 +16,7 @@ public:
     int width = SIZE;
     int depth = SIZE;
 
-    int data[SIZE][SIZE][SIZE];
+    float data[SIZE][SIZE][SIZE];
 
     Octree octree;
 
@@ -65,7 +65,7 @@ public:
             sampleVolume(pos + deltaY) - sampleVolume(pos - deltaY),
             sampleVolume(pos + deltaZ) - sampleVolume(pos - deltaZ));
     }
-    
+
     inline Vec3f getGradientNormalised(Vec3f const& pos, float eps) const
     {
         return normalise(getGradient(pos, eps));

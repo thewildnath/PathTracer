@@ -83,7 +83,7 @@ void Draw(screen *screen)
     ++samples;
 
     // TODO: reseed generator
-    #pragma omp parallel for schedule(dynamic) collapse(2) shared(scene, settings)
+    #pragma omp parallel for schedule(dynamic) shared(camera, scene, settings, screen)
     for (int y = 0; y < SCREEN_HEIGHT; ++y)
     {
         for (int x = 0; x < SCREEN_WIDTH; ++x)
