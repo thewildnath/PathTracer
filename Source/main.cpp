@@ -81,7 +81,7 @@ void Draw(screen *screen)
     ++samples;
 
     // TODO: reseed generator
-    #pragma omp parallel for schedule(dynamic) collapse(2)
+    #pragma omp parallel for schedule(dynamic) collapse(2) shared(settings)
     for (int y = 0; y < SCREEN_HEIGHT; ++y)
     {
         for (int x = 0; x < SCREEN_WIDTH; ++x)
@@ -91,7 +91,7 @@ void Draw(screen *screen)
 
             int depth = 10;
             float gamma = 3.0f;
-            scg::Vec3f colour = scg::trace(scene, ray, depth, sampler[omp_get_thread_num()]);
+            scg::Vec3f colour = scg::trace(scene, ray, depth, settings, sampler[omp_get_thread_num()]);
             buffer[y][x] += colour * gamma; // TODO: clamp value
 
             PutPixelSDL(screen, x, y, buffer[y][x] / samples);

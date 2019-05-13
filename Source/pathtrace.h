@@ -6,12 +6,13 @@
 #include "sampler.h"
 #include "scene.h"
 #include "scatterevent.h"
+#include "settings.h"
 #include "vector_type.h"
 
 namespace scg
 {
 
-Vec3f SampleLights(ScatterEvent &interaction, Scene const& scene, std::shared_ptr<Material> const& material, std::shared_ptr<Light> const& hitLight, Sampler &sampler)
+Vec3f SampleLights(ScatterEvent &interaction, Scene const& scene, std::shared_ptr<Material> const& material, std::shared_ptr<Light> const& hitLight, Settings const& settings, Sampler &sampler)
 {
     // Cannot light mirror
     if ((material->getSupportedLobes(interaction.uv) & BSDFLobe::Specular) != 0)
@@ -63,7 +64,7 @@ Vec3f SampleLights(ScatterEvent &interaction, Scene const& scene, std::shared_pt
             Intersection lightIntersection{};
 
             // Check for objects blocking the path
-            if (!getClosestIntersection(scene, lightRay, lightIntersection, scene.lightIngoreMask) ||
+            if (!getClosestIntersection(scene, lightRay, lightIntersection, settings, sampler, scene.lightIngoreMask) ||
                 lightIntersection.distance + EPS >= lightHit.distance)
             {
                 if (std::isnormal(lightHit.pdf)) // Real number, not 0
@@ -88,6 +89,7 @@ Vec3f trace(
     Scene const& scene,
     Ray ray,
     int depth,
+    Settings const& settings,
     Sampler &sampler)
 {
     Vec3f colour;
@@ -104,7 +106,7 @@ Vec3f trace(
         // Intersect the scene
         Intersection intersection;
 
-        if (!getClosestIntersection(scene, ray, intersection, scene.lightIngoreMask))
+        if (!getClosestIntersection(scene, ray, intersection, settings, sampler, scene.lightIngoreMask))
         {
             colour += throughput * Vec3f(0, 0, 0); // Ambient //TODO: skybox
             break;
@@ -127,7 +129,7 @@ Vec3f trace(
         }
 
         // Calculate direct light
-        colour += throughput * SampleLights(interaction, scene, material, hitLight, sampler);
+        colour += throughput * SampleLights(interaction, scene, material, hitLight, settings, sampler);
 
         // Sample next direction
         material->sample(interaction, sampler);
