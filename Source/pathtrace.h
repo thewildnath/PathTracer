@@ -121,9 +121,10 @@ Vec3f trace(
             Vec3f normal = scene.volume->getGradient(localPos, 0.5f); // TODO: use transferfunction
             float magnitude = normal.length();
 
-            float probBRDF = (1.0f - std::exp(-settings.gradientFactor * (magnitude * scene.invMaxGradient)));
+            //float probBRDF = (1.0f - std::exp(-settings.gradientFactor * (magnitude * scene.invMaxGradient)));
 
-            if (sampler.nextFloat() > probBRDF)
+            // BRDF
+            //if (sampler.nextFloat() < probBRDF)
             {
                 normal /= magnitude;
 
@@ -137,12 +138,13 @@ Vec3f trace(
                 }
 
                 colour += (Vec3f(out.x, out.y,  out.z) * light * 1.0f);
-            }
+            }/*
+            // Isotropic
             else
             {
                 //normal = settings.lightDir;
                 colour += Vec3f{0.15f, 0.15f, 0.75f};
-            }
+            }*/
 
             return colour;
             break;
