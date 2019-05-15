@@ -20,8 +20,9 @@ Settings loadSettings()
 {
     Settings settings;
 
+    settings.renderType = 2;
     settings.lightDir = scg::normalise(scg::Vec3f(1.0f, 0.5f, 1.0f));
-    settings.stepSize = 1.0f;
+    settings.stepSize = 0.1f;
     settings.octreeLevels = 5;
     settings.brackets = std::vector<float>{
         0, 1000, 1300, 1500, 1750, 1900, 2000, 2100, 2200, 2300, 2400, 2500, 2600, 2700, 2850, 3000, 3250, 3500, 99999 // 1 less than TF!

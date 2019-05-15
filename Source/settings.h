@@ -13,6 +13,8 @@ namespace scg
 class Settings
 {
 public:
+    int renderType;
+
     Vec3f lightDir;
 
     float stepSize;

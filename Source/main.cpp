@@ -125,6 +125,14 @@ bool Update()
             int key_code = e.key.keysym.sym;
             switch (key_code)
             {
+                case SDLK_1:
+                    settings.renderType = 1;
+                    InitialiseBuffer();
+                    break;
+                case SDLK_2:
+                    settings.renderType = 2;
+                    InitialiseBuffer();
+                    break;
                 case SDLK_ESCAPE:
                     /* Move camera quit */
                     return false;
