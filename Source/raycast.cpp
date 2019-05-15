@@ -15,7 +15,7 @@
 namespace scg
 {
 
-float dT = 0.01;
+float dT = 0.0001;
 
 struct State
 {
@@ -215,9 +215,10 @@ bool castRayWoodcockFast2(Volume const& volume, Ray ray, Intersection &intersect
 
     float S = -std::log(sampler.nextFloat()) / settings.densityScale;
     float sum = 0.0f;
-    float sigmaT = 0.0f;
 
-    ray.minT +=  (-std::log(sampler.nextFloat())) * settings.stepSize;
+    bool needsJitter = true;
+
+    //ray.minT +=  (-std::log(sampler.nextFloat())) * settings.stepSize;
 
     while (!st.empty() && ray.minT <= ray.maxT)
     {
@@ -239,6 +240,7 @@ bool castRayWoodcockFast2(Volume const& volume, Ray ray, Intersection &intersect
         {
             // Jump into next node
             ray.minT = maxT + dT;
+            needsJitter = true;
             st.pop();
             continue;
         }
@@ -264,6 +266,7 @@ bool castRayWoodcockFast2(Volume const& volume, Ray ray, Intersection &intersect
                 {
                     minT += dT;
                     ray.minT = minT + dT;
+                    needsJitter = true;
                     continue;
                 }
 
@@ -275,6 +278,7 @@ bool castRayWoodcockFast2(Volume const& volume, Ray ray, Intersection &intersect
                 {
                     minT += dT;
                     ray.minT = minT + dT;
+                    needsJitter = true;
                     continue;
                 }
 
@@ -299,6 +303,12 @@ bool castRayWoodcockFast2(Volume const& volume, Ray ray, Intersection &intersect
         float invMaxOpacity = 1.0f;// / maxOpacity;
         //float invMaxOpacityDensity = invMaxOpacity / settings.densityScale;
 
+        if (needsJitter)
+        {
+            minT += sampler.nextFloat() * settings.stepSize - dT;
+            needsJitter = false;
+        }
+
         while (minT <= maxT)
         {
             Vec3f pos = ray(minT);
@@ -307,8 +317,7 @@ bool castRayWoodcockFast2(Volume const& volume, Ray ray, Intersection &intersect
 
             Vec4f out = settings.transferFunction.evaluate(coef);
 
-            sigmaT = settings.densityScale * out.w;
-            sum += sigmaT * settings.stepSize;
+            sum += settings.densityScale * out.w * settings.stepSize;
 
             if (sum > S)
             {

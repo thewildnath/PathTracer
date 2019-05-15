@@ -44,6 +44,7 @@ void loadTransferFunction(Settings &settings)
 
     fin >> settings.densityScale;
     fin >> settings.gradientFactor;
+    fin >> settings.stepSize;
 
     while (fin >> x >> a >> r >> g >> b)
     {
