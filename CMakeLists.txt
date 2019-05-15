@@ -3,6 +3,7 @@ project(raytracer)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_FLAGS "-Ofast -Wall -Wextra -fopenmp -ffast-math")# -funroll-loops")
+#set(CMAKE_CXX_FLAGS "-O0 -Wall -Wextra -fopenmp -ffast-math")
 #set(CMAKE_CXX_FLAGS "-O0 -Wall -Wextra -ffast-math")
 
 include_directories(include/sdl/include/SDL2)

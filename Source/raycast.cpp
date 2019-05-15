@@ -218,8 +218,6 @@ bool castRayWoodcockFast2(Volume const& volume, Ray ray, Intersection &intersect
 
     bool needsJitter = true;
 
-    //ray.minT +=  (-std::log(sampler.nextFloat())) * settings.stepSize;
-
     while (!st.empty() && ray.minT <= ray.maxT)
     {
         State &state = st.top();
@@ -290,7 +288,7 @@ bool castRayWoodcockFast2(Volume const& volume, Ray ray, Intersection &intersect
         }
 
         // Cast ray inside node
-/*
+//*
         float maxOpacity = 0.0f;
         for (int i = 0; i < (int)settings.maxOpacity.size(); ++i)
         {
@@ -299,13 +297,12 @@ bool castRayWoodcockFast2(Volume const& volume, Ray ray, Intersection &intersect
                 maxOpacity = settings.maxOpacity[i];
             }
         }
-//*/
-        float invMaxOpacity = 1.0f;// / maxOpacity;
-        //float invMaxOpacityDensity = invMaxOpacity / settings.densityScale;
 
+        float stepSize = lerp(1.0f, settings.stepSize, clamp(0.0f, 1.0f, settings.densityScale * maxOpacity));
+//*/
         if (needsJitter)
         {
-            minT += sampler.nextFloat() * settings.stepSize - dT;
+            minT += sampler.nextFloat() * stepSize - dT;
             needsJitter = false;
         }
 
@@ -317,9 +314,9 @@ bool castRayWoodcockFast2(Volume const& volume, Ray ray, Intersection &intersect
 
             Vec4f out = settings.transferFunction.evaluate(coef);
 
-            sum += settings.densityScale * out.w * settings.stepSize;
+            sum += settings.densityScale * out.w * stepSize;
 
-            if (sum > S)
+            if (sum >= S)
             {
                 intersection.position   = pos;
                 intersection.distance   = minT;
@@ -328,7 +325,7 @@ bool castRayWoodcockFast2(Volume const& volume, Ray ray, Intersection &intersect
                 return true;
             }
 
-            minT += settings.stepSize;
+            minT += stepSize;
         }
 
         // Jump into next node
@@ -340,3 +337,29 @@ bool castRayWoodcockFast2(Volume const& volume, Ray ray, Intersection &intersect
 }
 
 }
+
+// castRayWoodcock2 last case, try to skip before starting raymarching
+/*
+        float maxOpacity = 0.0f;
+        for (int i = 0; i < (int)settings.maxOpacity.size(); ++i)
+        {
+            if (node->mask & (1 << i) && settings.maxOpacity[i] > maxOpacity)
+            {
+                maxOpacity = settings.maxOpacity[i];
+            }
+        }
+
+        float stepCount = 1.0f + std::floor((maxT - minT) / settings.stepSize);
+        float stepSum = settings.densityScale * 1 * settings.stepSize;
+        //if (maxOpacity * (maxT - minT) / settings.stepSize < S)
+        if (stepCount * stepSum + sum < S)
+        {
+            // Jump into next node
+            sum += stepCount * stepSum;
+
+            ray.minT = maxT + dT;
+            needsJitter = true;
+            st.pop();
+            continue;
+        }
+//*/
