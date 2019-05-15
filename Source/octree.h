@@ -13,7 +13,6 @@ public:
     Octree* nodes[8];
     bool isLeaf;
 
-    float maxIntensity;
     int mask; // Mask for buckets inside
 
     Octree() = default;
