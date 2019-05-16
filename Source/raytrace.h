@@ -18,8 +18,7 @@ bool getClosestIntersection(
     Ray const& ray,
     Intersection& closestIntersection,
     Settings const& settings,
-    Sampler &sampler,
-    int ignore);
+    Sampler &sampler);
 
 }
 

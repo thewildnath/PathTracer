@@ -21,8 +21,6 @@ public:
     // Supports single volume
     Vec3f volumePos;
     std::shared_ptr<Volume> volume;
-
-    int lightIngoreMask = 0;
 };
 
 }

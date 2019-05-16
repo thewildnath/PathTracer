@@ -320,9 +320,6 @@ Scene loadTestModel(float size)
         {0, 0, 0},
         std::make_shared<Mesh>(Mesh(triangles))
     }));
-    //scene.lightIngoreMask |= (1 << 8);
-    //scene.lightIngoreMask |= (1 << 9);
-
 
     // Extra
 

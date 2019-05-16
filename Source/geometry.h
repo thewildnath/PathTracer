@@ -17,7 +17,7 @@ namespace scg
 class Geometry
 {
 public:
-    virtual bool getIntersection(Ray const&, Intersection&, int ignore) const = 0;
+    virtual bool getIntersection(Ray const&, Intersection&) const = 0;
     virtual ScatterEvent sampleSurface(Sampler&) const = 0;
     virtual BoundingBox getBoundingBox() const = 0;
 };
@@ -32,13 +32,8 @@ public:
     Sphere(float radius, size_t materialID):
         radius(radius), materialID(materialID) {};
 
-    bool getIntersection(Ray const& ray, Intersection& intersection, int ignore = 0) const override
+    bool getIntersection(Ray const& ray, Intersection& intersection) const override
     {
-        if ((1 << materialID) & ignore)
-        {
-            return false;
-        }
-
         //std::cout << "Circle" << std::endl;
         float b = dot(ray.origin * 2.0f, ray.direction);
         float c = dot(ray.origin, ray.origin) - radius * radius;
@@ -48,18 +43,17 @@ public:
             return false;
 
         disc = std::sqrt(disc);
-        float sol1 = -b + disc;
-        float sol2 = -b - disc;
+        float sol1 = (-b + disc) / 2.0f;
+        float sol2 = (-b - disc) / 2.0f;
 
         float t;
-        if (sol2 > EPS)
-            t = sol2 / 2.0f;
-        else if (sol1 > EPS)
-            t = sol1 / 2.0f;
+        //if (sol2 > EPS)
+        if (ray.isInside(sol2))
+            t = sol2;
+        //else if (sol1 > EPS)
+        else if (ray.isInside(sol1))
+            t = sol1;
         else
-            return false;
-
-        if (!ray.isInside(t))
             return false;
 
         intersection.position   = ray(t);
@@ -116,7 +110,7 @@ public:
     Mesh(std::vector<Triangle>& triangles):
         triangles(std::move(triangles)) {};
 
-    bool getIntersection(Ray const& ray, Intersection& intersection, int ignore = 0) const override
+    bool getIntersection(Ray const& ray, Intersection& intersection) const override
     {
         //std::cout << "Mesh" << std::endl;
         //Möller–Trumbore intersection algorithm
@@ -125,11 +119,6 @@ public:
 
         for (int i = 0; i < (int)triangles.size(); ++i)
         {
-            if ((1 << triangles[i].materialID) & ignore)
-            {
-                continue;
-            }
-
             Vec3f vertex0 = triangles[i].v0;
             Vec3f vertex1 = triangles[i].v1;
             Vec3f vertex2 = triangles[i].v2;

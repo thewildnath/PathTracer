@@ -74,9 +74,10 @@ Vec3f SampleLights(ScatterEvent &interaction, Scene const& scene, std::shared_pt
             if (std::isnormal(lightHit.pdf)) // Real number, not 0
             {
                 // Check for objects blocking the path
-                if (!getClosestIntersection(scene, lightRay, lightIntersection, settings, sampler, scene.lightIngoreMask) ||
+                if (!getClosestIntersection(scene, lightRay, lightIntersection, settings, sampler) ||
                     lightIntersection.distance + EPS >= lightHit.distance)
                 {
+                    getClosestIntersection(scene, lightRay, lightIntersection, settings, sampler);
                     interaction.inputDir = lightHit.direction;
                     float pdf = material->pdf(interaction);
                     if (pdf != 0)
@@ -107,15 +108,16 @@ Vec3f trace(
     ScatterEvent interaction;
     interaction.iorI = 1.0f; // Air
 
+    int bounces = 0;
     int minBounces = depth;
     int maxBounces = 50;
 
-    for (int bounces = 0; bounces < maxBounces; ++bounces)
+    for (bounces = 0; bounces < maxBounces; ++bounces)
     {
         // Intersect the scene
         Intersection intersection;
 
-        if (!getClosestIntersection(scene, ray, intersection, settings, sampler, scene.lightIngoreMask))
+        if (!getClosestIntersection(scene, ray, intersection, settings, sampler))
         {
             colour += throughput * Vec3f(0, 0, 0); // Ambient //TODO: skybox
             break;
@@ -220,7 +222,7 @@ Vec3f trace(
         }
     }
 
-    return colour / minBounces;
+    return colour / (1 + bounces);
 }
 
 }

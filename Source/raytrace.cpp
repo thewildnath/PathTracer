@@ -18,8 +18,7 @@ bool getClosestIntersection(
     Ray const& ray,
     Intersection &closestIntersection,
     Settings const& settings,
-    Sampler &sampler,
-    int ignore = 0)
+    Sampler &sampler)
 {
     float minDistance = std::numeric_limits<float>::max();
     int index = -1;
@@ -41,7 +40,7 @@ bool getClosestIntersection(
 //*/
     for (int i = 0; i < (int)scene.objects.size(); ++i)
     {
-        if (scene.objects[i]->getIntersection(ray, intersection, ignore))
+        if (scene.objects[i]->getIntersection(ray, intersection))
         {
             if (intersection.distance < minDistance)
             {

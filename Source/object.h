@@ -32,14 +32,14 @@ public:
         //boundingBox = geometry->getBoundingBox();
     };
 
-    bool getIntersection(Ray ray, Intersection& intersection, int ignore = 0) const
+    bool getIntersection(Ray ray, Intersection& intersection) const
     {
         ray.origin -= position;
 
         //BBIntersection bbIntersection;
         //boundingBox.getIntersection(ray, bbIntersection);
 
-        if (/*!bbIntersection.valid ||*/ !geometry->getIntersection(ray, intersection, ignore))
+        if (/*!bbIntersection.valid ||*/ !geometry->getIntersection(ray, intersection))
         {
             return false;
         }
