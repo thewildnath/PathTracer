@@ -158,6 +158,56 @@ void loadBrain(scg::Volume& volume, scg::Volume& temp, Scene &scene, scg::Settin
     scene.lights.emplace_back(std::make_shared<scg::DirectionalLight>(scg::DirectionalLight{{1.0f, 1.0f, 1.0f}, M_PI, {1.0f, 0.5f, 1.0f}}));
 }
 
+void loadManix(scg::Volume& volume, scg::Volume& temp, Scene &scene, scg::Settings const& settings)
+{
+    std::ifstream fin;
+    fin.open("../data/Manix/manix.raw");
+
+    int width = 512;
+    int height = 512;
+    int depth = 460;
+
+    char buf[2];
+    uint16_t val;
+
+    for (int x = 0; x < 50; ++x)
+    {
+        for (int y = 0; y < height; ++y)
+        {
+            for (int z = 0; z < depth; ++z)
+            {
+                fin.read(buf, 2);
+                val = (((uint16_t)buf[0]) << 8) + (uint16_t)buf[1];
+
+                temp.data[z][y][x] = val;
+            }
+        }
+    }
+
+    for (int x = 0; x < volume.width; ++x)
+    {
+        for (int y = 0; y < volume.height; ++y)
+        {
+            for (int z = 0; z < volume.height; ++z)
+            {
+                volume.data[z][y][x] = temp.sampleVolume(Vec3f(z, y, x));
+            }
+        }
+    }
+
+    buildOctree(volume, volume.octree, settings.octreeLevels, settings);
+
+    scene.volume = std::make_shared<Volume>(volume);
+    scene.volumePos = Vec3f{-135, -141, -75};
+
+    std::cout << "Done loadBrain." << std::endl;
+
+    // Point lights
+    //scene.lights.emplace_back(std::make_shared<scg::PointLight>(scg::PointLight{{1.0f, 1.0f, 1.0f}, 20, {0.0f, -0.75f, 0.0f}}));
+    // Directional lights
+    scene.lights.emplace_back(std::make_shared<scg::DirectionalLight>(scg::DirectionalLight{{1.0f, 1.0f, 1.0f}, M_PI, {1.0f, 0.5f, 1.0f}}));
+}
+
 Scene loadTestModel(float size)
 {
     // Defines colours:

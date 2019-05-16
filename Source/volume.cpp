@@ -6,7 +6,7 @@
 namespace scg
 {
 
-float eps = 2;
+float v_eps = 2;
 
 Volume::Volume(int height, int width, int depth):
     height(height), width(width), depth(depth)
@@ -14,7 +14,7 @@ Volume::Volume(int height, int width, int depth):
     //this->data = new int[depth, height, width];
 
     this->octree = Octree(
-        BoundingBox(Vec3f(0 + eps, 0 + eps, 0 + eps), Vec3f(230 - eps, 220 - eps, 135 - eps))
+        BoundingBox(Vec3f(0 + v_eps, 0 + v_eps, 0 + v_eps), Vec3f(230 - v_eps, 220 - v_eps, 135 - v_eps))
     );
 }
 

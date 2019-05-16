@@ -4,7 +4,7 @@
 #include "octree.h"
 #include "settings.h"
 
-#define SIZE 256
+#define VOLUME_SIZE 256
 
 namespace scg
 {
@@ -12,11 +12,11 @@ namespace scg
 class Volume
 {
 public:
-    int height = SIZE;
-    int width = SIZE;
-    int depth = SIZE;
+    int height = VOLUME_SIZE;
+    int width = VOLUME_SIZE;
+    int depth = VOLUME_SIZE;
 
-    float data[SIZE][SIZE][SIZE];
+    float data[VOLUME_SIZE][VOLUME_SIZE][VOLUME_SIZE];
 
     Octree octree;
 

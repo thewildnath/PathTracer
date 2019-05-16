@@ -45,8 +45,8 @@ scg::Vec3f rotation{0, 0, 0};
 scg::Settings settings;
 scg::Scene scene;
 
-scg::Volume volume(256, 256, 256);
-scg::Volume temp(256, 256, 256);
+scg::Volume volume(VOLUME_SIZE, VOLUME_SIZE, VOLUME_SIZE);
+scg::Volume temp(VOLUME_SIZE, VOLUME_SIZE, VOLUME_SIZE);
 
 int samples;
 scg::Vec3f buffer[SCREEN_HEIGHT][SCREEN_WIDTH];
@@ -62,6 +62,7 @@ int main(int argc, char *argv[])
     scg::loadTransferFunction(settings);
     //scene = scg::loadTestModel(80.0f);
     scg::loadBrain(volume, temp, scene, settings);
+    //scg::loadManix(volume, temp, scene, settings);
 
     // Start main loop
     while (Update())

@@ -16,6 +16,8 @@ void loadTransferFunction(Settings &settings);
 
 void loadBrain(Volume& volume, Volume& temp, Scene &scene, Settings const& settings);
 
+void loadManix(scg::Volume& volume, scg::Volume& temp, Scene &scene, scg::Settings const& settings);
+
 // Loads the Cornell Box. It is scaled to fill the volume:
 // -1 <= x <= +1
 // -1 <= y <= +1
