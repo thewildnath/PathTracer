@@ -58,7 +58,7 @@ Vec3f SampleLights(ScatterEvent &interaction, Scene const& scene, std::shared_pt
                 float pdf = material->pdf(interaction);
                 if (pdf != 0)
                 {
-                    directLight += material->evaluate(interaction) * lightHit.colour / lightHit.pdf; // TODO: fix dotProduct omission
+                    directLight += material->evaluate(interaction) * lightHit.colour / lightHit.pdf; // TODO: fix formula
                 }
             }
 
@@ -71,17 +71,18 @@ Vec3f SampleLights(ScatterEvent &interaction, Scene const& scene, std::shared_pt
             Ray lightRay{interaction.position, lightHit.direction, RAY_EPS};
             Intersection lightIntersection{};
 
-            // Check for objects blocking the path
-            if (!getClosestIntersection(scene, lightRay, lightIntersection, settings, sampler, scene.lightIngoreMask) ||
-                lightIntersection.distance + EPS >= lightHit.distance)
+            if (std::isnormal(lightHit.pdf)) // Real number, not 0
             {
-                if (std::isnormal(lightHit.pdf)) // Real number, not 0
+                // Check for objects blocking the path
+                if (!getClosestIntersection(scene, lightRay, lightIntersection, settings, sampler, scene.lightIngoreMask) ||
+                    lightIntersection.distance + EPS >= lightHit.distance)
                 {
                     interaction.inputDir = lightHit.direction;
                     float pdf = material->pdf(interaction);
                     if (pdf != 0)
                     {
-                        directLight += material->evaluate(interaction) * lightHit.colour / lightHit.pdf; // TODO: fix dotProduct omission
+                        float weight = powerHeuristic(1, lightHit.pdf, 1, pdf);
+                        directLight += material->evaluate(interaction) * lightHit.colour * weight / lightHit.pdf;
                     }
                 }
             }

@@ -95,13 +95,13 @@ public:
     {
         LightHit lightHit;
 
-        lightHit.colour = colour * intensity * (4 * M_PI); // TODO: maybe M_1_PI
+        lightHit.colour = colour * intensity * (float)M_1_PI;
 
         lightHit.direction = this->position - interaction.position;
         lightHit.distance = lightHit.direction.length();
         lightHit.direction /= lightHit.distance;
 
-        lightHit.pdf = (float)(4 * M_PI * lightHit.distance * lightHit.distance);
+        lightHit.pdf = (float)(2.0f * M_1_PI * lightHit.distance * lightHit.distance);
 
         return lightHit;
     }
@@ -131,7 +131,7 @@ public:
         lightHit.direction = normalise(-direction); // TODO: generate slightly random direction
         lightHit.distance = INF;
 
-        lightHit.pdf = 1;
+        lightHit.pdf = 1.0f;
 
         return lightHit;
     }
@@ -142,7 +142,7 @@ public:
     }
 };
 
-class ObjectLight : public Light
+class ObjectLight : public Light // TODO: Add m_area for scaling luminosity with size
 {
 private:
     std::shared_ptr<Object> object;
@@ -164,7 +164,7 @@ public:
         lightHit.direction /= lightHit.distance;
 
         lightHit.pdf = (float)M_1_PI * lightHit.distance * lightHit.distance;
-        lightHit.pdf = lightHit.pdf / std::max(0.0f, dot(source.normal, -lightHit.direction));
+        lightHit.pdf /= std::max(0.0f, dot(source.normal, -lightHit.direction));
 
         return lightHit;
     }
