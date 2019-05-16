@@ -365,12 +365,12 @@ Scene loadTestModel(float size)
 //*
     std::shared_ptr<scg::Object> sphere = std::make_shared<scg::Object>(scg::Object{
         Vec3f{ -0.4, 0.1, 0.2} * size,
-        std::make_shared<scg::Sphere>(0.35 * size, 6)
+        std::make_shared<scg::Sphere>(0.35 * size, 7)
     });
     scene.objects.emplace_back(sphere);
     std::shared_ptr<scg::Object> sphere2 = std::make_shared<scg::Object>(scg::Object{
         Vec3f{ 0.5, 0.55, -0.2} * size,
-        std::make_shared<scg::Sphere>(0.4 * size, 6)
+        std::make_shared<scg::Sphere>(0.4 * size, 8)
     });
     scene.objects.emplace_back(sphere2);
 //*/

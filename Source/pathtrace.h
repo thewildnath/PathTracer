@@ -20,7 +20,8 @@ inline float powerHeuristic(int nf, float fPdf, int ng, float gPdf)
     return (f * f) / (f * f + g * g);
 }
 
-Vec3f SampleLights(ScatterEvent &interaction, Scene const& scene, std::shared_ptr<Material> const& material, std::shared_ptr<Light> const& hitLight, Settings const& settings, Sampler &sampler)
+Vec3f SampleOneLight(ScatterEvent& interaction, Scene const& scene, std::shared_ptr<Material> const& material,
+                     std::shared_ptr<Light> const& hitLight, Settings const& settings, Sampler& sampler)
 {
     // Cannot light mirror
     if ((material->getSupportedLobes(interaction.uv) & BSDFLobe::Specular) != 0)
@@ -135,7 +136,7 @@ Vec3f trace(
         if (intersection.surfaceType == SurfaceType::Volume)
         {
             Vec3f localPos = intersection.position - scene.volumePos;
-            Vec3f normal = scene.volume->getGradient(localPos, 0.5f); // TODO: use transferfunction
+            Vec3f normal = scene.volume->getGradient(localPos, 0.5f); // TODO: Maybe use TransferFunction
 
             float magnitude = normal.length();
             float intensity = scene.volume->sampleVolume(localPos);
@@ -187,7 +188,7 @@ Vec3f trace(
         }
 
         // Calculate direct light
-        colour += throughput * SampleLights(interaction, scene, material, hitLight, settings, sampler);
+        colour += throughput * SampleOneLight(interaction, scene, material, hitLight, settings, sampler);
 
         if (bounces == minBounces - 1)
             break;
@@ -218,7 +219,7 @@ Vec3f trace(
                 break;
             }
 
-            throughput *= 1 / p;
+            throughput /= p;
         }
     }
 
