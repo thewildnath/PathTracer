@@ -61,9 +61,9 @@ public:
         Vec3f deltaZ(0, 0, eps);
 
         return Vec3f(
-            sampleVolume(pos + deltaX) - sampleVolume(pos - deltaX),
-            sampleVolume(pos + deltaY) - sampleVolume(pos - deltaY),
-            sampleVolume(pos + deltaZ) - sampleVolume(pos - deltaZ));
+            sampleVolume(pos - deltaX) - sampleVolume(pos + deltaX),
+            sampleVolume(pos - deltaY) - sampleVolume(pos + deltaY),
+            sampleVolume(pos - deltaZ) - sampleVolume(pos + deltaZ));
     }
 
     inline Vec3f getGradientNormalised(Vec3f const& pos, float eps) const

@@ -83,7 +83,7 @@ Vec3f SampleOneLight(ScatterEvent& interaction, Scene const& scene, std::shared_
                     float pdf = material->pdf(interaction);
                     if (pdf != 0)
                     {
-                        float weight = powerHeuristic(1, lightHit.pdf, 1, pdf);
+                        float weight = 1.0f;//powerHeuristic(1, lightHit.pdf, 1, pdf);
                         directLight += material->evaluate(interaction) * lightHit.colour * weight / lightHit.pdf;
                     }
                 }
@@ -120,7 +120,7 @@ Vec3f trace(
 
         if (!getClosestIntersection(scene, ray, intersection, settings, sampler))
         {
-            colour += throughput * settings.backgroundLight;//Vec3f(0, 0, 0); // Ambient //TODO: skybox
+            colour += throughput * settings.backgroundLight;
             break;
         }
 
@@ -149,6 +149,7 @@ Vec3f trace(
             //if (sampler.nextFloat() < probBRDF)
             {
                 interaction.normal = normal / magnitude;
+                interaction.position += interaction.normal * settings.stepSize;
                 material = std::make_shared<Lambert>(Lambert{std::make_shared<ColourTexture>(ColourTexture{Vec3f{out.x, out.y,  out.z}})});
 
                 /*

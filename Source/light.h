@@ -156,7 +156,7 @@ public:
 
         lightHit.colour = colour * intensity;
 
-        lightHit.direction = normalise(-direction); // TODO: generate slightly random direction
+        lightHit.direction = -direction; // TODO: generate slightly random direction
         lightHit.distance = INF;
 
         lightHit.pdf = 1.0f;

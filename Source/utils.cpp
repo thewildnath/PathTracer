@@ -51,7 +51,9 @@ void loadTransferFunction(Settings &settings)
     fin >> settings.depth;
     fin >> settings.gamma;
 
-    fin >> settings.backgroundLight.x >> settings.backgroundLight.y >> settings.backgroundLight.z;
+    float intensity;
+    fin >> intensity >> settings.backgroundLight.x >> settings.backgroundLight.y >> settings.backgroundLight.z;
+    settings.backgroundLight *= intensity;
 
     while (fin >> x >> a >> r >> g >> b)
     {
@@ -153,7 +155,7 @@ void loadBrain(scg::Volume& volume, scg::Volume& temp, Scene &scene, scg::Settin
     // Point lights
     //scene.lights.emplace_back(std::make_shared<scg::PointLight>(scg::PointLight{{1.0f, 1.0f, 1.0f}, 20, {0.0f, -0.75f, 0.0f}}));
     // Directional lights
-    scene.lights.emplace_back(std::make_shared<scg::DirectionalLight>(scg::DirectionalLight{{1.0f, 1.0f, 1.0f}, 5, {1.0f, 0.5f, 1.0f}}));
+    scene.lights.emplace_back(std::make_shared<scg::DirectionalLight>(scg::DirectionalLight{{1.0f, 1.0f, 1.0f}, M_PI, {1.0f, 0.5f, 1.0f}}));
 }
 
 Scene loadTestModel(float size)
