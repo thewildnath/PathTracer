@@ -26,15 +26,17 @@ bool getClosestIntersection(
 
     Intersection intersection;
 //*
-    Ray volumeRay {ray.origin - scene.volumePos, ray.direction};
-    //if (castRayWoodcockFast2(*scene.volume, volumeRay, intersection, settings, sampler))
-    if ((settings.renderType == 1 && castRayWoodcockFast(*scene.volume, volumeRay, intersection, settings, sampler)) ||
-        (settings.renderType == 2 && castRayWoodcockFast2(*scene.volume, volumeRay, intersection, settings, sampler)))
+    if (scene.volume)
     {
-        minDistance = intersection.distance;
-        index = (int)scene.objects.size();
-        closestIntersection = intersection;
-        closestIntersection.position += scene.volumePos;
+        Ray volumeRay{ray.origin - scene.volumePos, ray.direction};
+        if ((settings.renderType == 1 && castRayWoodcockFast(*scene.volume, volumeRay, intersection, settings, sampler)) ||
+            (settings.renderType == 2 && castRayWoodcockFast2(*scene.volume, volumeRay, intersection, settings, sampler)))
+        {
+            minDistance = intersection.distance;
+            index = (int) scene.objects.size();
+            closestIntersection = intersection;
+            closestIntersection.position += scene.volumePos;
+        }
     }
 //*/
     for (int i = 0; i < (int)scene.objects.size(); ++i)

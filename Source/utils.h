@@ -20,7 +20,7 @@ void loadBrain(Volume& volume, Volume& temp, Scene &scene, Settings const& setti
 // -1 <= x <= +1
 // -1 <= y <= +1
 // -1 <= z <= +1
-Scene loadTestModel();
+Scene loadTestModel(float size);
 
 }
 

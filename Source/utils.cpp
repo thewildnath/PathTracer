@@ -139,7 +139,7 @@ void loadBrain(scg::Volume& volume, scg::Volume& temp, Scene &scene, scg::Settin
     buildOctree(volume, volume.octree, settings.octreeLevels, settings);
 
     scene.volume = std::make_shared<Volume>(volume);
-    scene.volumePos = Vec3f{-135, -126, -75};
+    scene.volumePos = Vec3f{-135, -141, -75};
 
     std::cout << "Done loadBrain." << std::endl;
 
@@ -149,7 +149,7 @@ void loadBrain(scg::Volume& volume, scg::Volume& temp, Scene &scene, scg::Settin
     scene.lights.emplace_back(std::make_shared<scg::DirectionalLight>(scg::DirectionalLight{{1.0f, 1.0f, 1.0f}, 1, {1.0f, 0.5f, 1.0f}}));
 }
 
-Scene loadTestModel()
+Scene loadTestModel(float size)
 {
     // Defines colours:
     std::shared_ptr<ColourTexture> redTexture = std::make_shared<ColourTexture>(Vec3f(0.75f, 0.15f, 0.15f));
@@ -307,6 +307,10 @@ Scene loadTestModel()
         triangle.v1.y *= -1;
         triangle.v2.y *= -1;
 
+        triangle.v0 *= size;
+        triangle.v1 *= size;
+        triangle.v2 *= size;
+
         triangle.ComputeNormal();
     }
 
@@ -336,7 +340,7 @@ Scene loadTestModel()
 
 //*
     // Ceiling light
-    float eL = 0.5f;
+    float eL = 0.5f * size;
     Vec3f eE(eL / 2, 0, -eL / 2);
     Vec3f eF(-eL / 2, 0, -eL / 2);
     Vec3f eG(eL / 2, 0, eL / 2);
@@ -346,16 +350,16 @@ Scene loadTestModel()
         scg::Triangle(eG, eH, eF, index)
     };
     std::shared_ptr<scg::Object> objectPtr = std::make_shared<scg::Object>(scg::Object{
-        { 0, -0.99f, 0},
+        Vec3f{ 0, -0.99f, 0} * size,
         std::make_shared<scg::Mesh>(etriangles)
     });
 //    std::shared_ptr<scg::Object> objectPtr = std::make_shared<scg::Object>(scg::Object{
-//        { 0, -0.7, 0},
-//        std::make_shared<scg::Sphere>(0.2, index)
+//        Vec3f{ 0, -0.7, 0} * size,
+//        std::make_shared<scg::Sphere>(0.2 * size, index)
 //    });
     scene.objects.emplace_back(objectPtr);
     std::shared_ptr<scg::ObjectLight> lightPtr = std::make_shared<scg::ObjectLight>(scg::ObjectLight{
-        {1.0f, 1.0f, 1.0f}, 40,
+        Vec3f{1.0f, 1.0f, 1.0f} * size, 40 * size,
         objectPtr
     });
     scene.lights.emplace_back(lightPtr);
@@ -363,13 +367,13 @@ Scene loadTestModel()
 //*/
 //*
     std::shared_ptr<scg::Object> sphere = std::make_shared<scg::Object>(scg::Object{
-        { -0.4, 0.1, 0.2},
-        std::make_shared<scg::Sphere>(0.35, 7)
+        Vec3f{ -0.4, 0.1, 0.2} * size,
+        std::make_shared<scg::Sphere>(0.35 * size, 6)
     });
     scene.objects.emplace_back(sphere);
     std::shared_ptr<scg::Object> sphere2 = std::make_shared<scg::Object>(scg::Object{
-        { 0.5, 0.55, -0.2},
-        std::make_shared<scg::Sphere>(0.4, 8)
+        Vec3f{ 0.5, 0.55, -0.2} * size,
+        std::make_shared<scg::Sphere>(0.4 * size, 6)
     });
     scene.objects.emplace_back(sphere2);
 //*/

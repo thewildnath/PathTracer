@@ -32,7 +32,7 @@ void InitialiseBuffer();
 scg::Sampler sampler[20]; // TODO: !!! find a better solution
 
 scg::Camera camera{
-    scg::Vec3f(0, 15, -240),
+    scg::Vec3f(0, 0, -240),
     scg::Vec3f(0, 0, 0),
     SCREEN_WIDTH,
     SCREEN_HEIGHT,
@@ -59,10 +59,9 @@ int main(int argc, char *argv[])
 
     // Initialise scene
     settings = scg::loadSettings();
-    scg::loadTransferFunction(settings);
-    //scene = scg::loadTestModel();
-
-    scg::loadBrain(volume, temp, scene, settings);
+    //scg::loadTransferFunction(settings);
+    scene = scg::loadTestModel(80.0f);
+    //scg::loadBrain(volume, temp, scene, settings);
 
     // Start main loop
     while (Update())
@@ -95,7 +94,7 @@ void Draw(screen *screen)
             ray.direction = scg::rotate(ray.direction, rotation);
 
             int depth = 1;
-            float gamma = 1.0f;
+            float gamma = 0.5f;
             scg::Vec3f colour = scg::trace(scene, ray, depth, settings, sampler[omp_get_thread_num()]);
             buffer[y][x] += colour * gamma; // TODO: clamp value
 
