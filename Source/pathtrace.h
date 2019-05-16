@@ -29,8 +29,8 @@ Vec3f SampleOneLight(ScatterEvent& interaction, Scene const& scene, std::shared_
         return Vec3f(0, 0, 0);
     }
 
-    // Cannot sample the hitLight
-    if (scene.lights.size() <= 1 && hitLight != nullptr)
+    // Cannot sample another light
+    if (scene.lights.size() == 0 || (scene.lights.size() <= 1 && hitLight != nullptr))
     {
         return Vec3f(0, 0, 0);
     }
@@ -120,7 +120,7 @@ Vec3f trace(
 
         if (!getClosestIntersection(scene, ray, intersection, settings, sampler))
         {
-            colour += throughput * Vec3f(0, 0, 0); // Ambient //TODO: skybox
+            colour += throughput * settings.backgroundLight;//Vec3f(0, 0, 0); // Ambient //TODO: skybox
             break;
         }
 
@@ -145,26 +145,27 @@ Vec3f trace(
             //float probBRDF = (1.0f - std::exp(-settings.gradientFactor * (magnitude * scene.invMaxGradient)));
             //float probBRDF = (1.0f - std::exp(-settings.gradientFactor * (magnitude / intensity)));
 
-
             // BRDF
             //if (sampler.nextFloat() < probBRDF)
             {
-                //normal /= magnitude;
-
                 interaction.normal = normal / magnitude;
                 material = std::make_shared<Lambert>(Lambert{std::make_shared<ColourTexture>(ColourTexture{Vec3f{out.x, out.y,  out.z}})});
 
                 /*
+                normal /= magnitude;
+
                 float light = 0.1f;
 
                 Ray lightRay(intersection.position, -settings.lightDir);
 
-                if (!getClosestIntersection(scene, lightRay, intersection, settings, sampler, scene.lightIngoreMask))
+                if (!getClosestIntersection(scene, lightRay, intersection, settings, sampler))
                 {
                     light = std::max(light, dot(normal, settings.lightDir));
                 }
 
-                colour += (Vec3f(out.x, out.y,  out.z) * light * 1.0f);*/
+                colour += (Vec3f(out.x, out.y,  out.z) * light * 1.0f);
+                break;
+                //*/
             }/*
             // Isotropic
             else
@@ -172,8 +173,6 @@ Vec3f trace(
                 //normal = settings.lightDir;
                 colour += Vec3f{0.15f, 0.15f, 0.75f};
             }//*/
-
-            //break;
         }
         else
         {

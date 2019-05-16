@@ -59,9 +59,9 @@ int main(int argc, char *argv[])
 
     // Initialise scene
     settings = scg::loadSettings();
-    //scg::loadTransferFunction(settings);
-    scene = scg::loadTestModel(80.0f);
-    //scg::loadBrain(volume, temp, scene, settings);
+    scg::loadTransferFunction(settings);
+    //scene = scg::loadTestModel(80.0f);
+    scg::loadBrain(volume, temp, scene, settings);
 
     // Start main loop
     while (Update())
@@ -93,10 +93,8 @@ void Draw(screen *screen)
             ray.origin = scg::rotate(ray.origin, rotation);
             ray.direction = scg::rotate(ray.direction, rotation);
 
-            int depth = 8;
-            float gamma = 1.0f;
-            scg::Vec3f colour = scg::trace(scene, ray, depth, settings, sampler[omp_get_thread_num()]);
-            buffer[y][x] += colour * gamma; // TODO: clamp value
+            scg::Vec3f colour = scg::trace(scene, ray, settings.depth, settings, sampler[omp_get_thread_num()]);
+            buffer[y][x] += colour * settings.gamma; // TODO: clamp value
 
             PutPixelSDL(screen, x, y, buffer[y][x] / samples);
         }

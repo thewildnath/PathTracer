@@ -81,6 +81,34 @@ public:
     }
 };
 
+// Background light, comes from any direction
+// Should be used on the scene member variable, not the light list
+class BackgroundLight : public Light
+{
+private:
+    Vec3f colour;
+    float intensity;
+
+public:
+    BackgroundLight(Vec3f const& colour, float intensity):
+        Light(colour, intensity) {};
+
+    LightHit illuminate(ScatterEvent const& interaction, Sampler&) const override
+    {
+        LightHit lightHit;
+
+        lightHit.colour = colour * intensity;
+        lightHit.pdf = 1;
+
+        return lightHit;
+    }
+
+    LightType getType() const override
+    {
+        return LightType_Abstract;
+    }
+};
+
 // A source of light at a particular position with no shape/body
 class PointLight : public Light
 {

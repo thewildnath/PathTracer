@@ -21,7 +21,10 @@ Settings loadSettings()
     Settings settings;
 
     settings.renderType = 2;
-    settings.lightDir = scg::normalise(scg::Vec3f(1.0f, 0.5f, 1.0f));
+    settings.depth = 1;
+    settings.gamma = 1.0f;
+    settings.lightDir = normalise(Vec3f{1.0f, 0.5f, 1.0f});
+    settings.backgroundLight = Vec3f{0.0f, 0.0f, 0.0f};
     settings.stepSize = 0.1f;
     settings.octreeLevels = 5;
     settings.brackets = std::vector<float>{
@@ -45,6 +48,10 @@ void loadTransferFunction(Settings &settings)
     fin >> settings.densityScale;
     fin >> settings.gradientFactor;
     fin >> settings.stepSize;
+    fin >> settings.depth;
+    fin >> settings.gamma;
+
+    fin >> settings.backgroundLight.x >> settings.backgroundLight.y >> settings.backgroundLight.z;
 
     while (fin >> x >> a >> r >> g >> b)
     {
@@ -146,7 +153,7 @@ void loadBrain(scg::Volume& volume, scg::Volume& temp, Scene &scene, scg::Settin
     // Point lights
     //scene.lights.emplace_back(std::make_shared<scg::PointLight>(scg::PointLight{{1.0f, 1.0f, 1.0f}, 20, {0.0f, -0.75f, 0.0f}}));
     // Directional lights
-    //scene.lights.emplace_back(std::make_shared<scg::DirectionalLight>(scg::DirectionalLight{{1.0f, 1.0f, 1.0f}, 1, {1.0f, 0.5f, 1.0f}}));
+    scene.lights.emplace_back(std::make_shared<scg::DirectionalLight>(scg::DirectionalLight{{1.0f, 1.0f, 1.0f}, 5, {1.0f, 0.5f, 1.0f}}));
 }
 
 Scene loadTestModel(float size)
