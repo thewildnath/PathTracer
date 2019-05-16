@@ -49,7 +49,7 @@ public:
 
     void sample(ScatterEvent &interaction, Sampler &sampler) const override
     {
-        interaction.inputDir = SampleHemisphere(interaction.normal, sampler);
+        interaction.inputDir = sampleHemisphere(interaction.normal, sampler);
         interaction.sampledLobe = BSDFLobe::Diffuse;
     }
 
@@ -205,14 +205,14 @@ public:
         {
             // Reflect
             //interaction.inputDir = reflect(interaction.outputDir, interaction.normal);
-            interaction.inputDir = SampleHemisphere(interaction.normal, sampler);
+            interaction.inputDir = sampleHemisphere(interaction.normal, sampler);
             interaction.sampledLobe = BSDFLobe::SpecularReflection;
             interaction.iorO = interaction.iorI;
         }
         else
         {
             // Refract
-            interaction.inputDir = refract(SampleHemisphere(interaction.normal, sampler), interaction.normal, VdotN, eta, sinSquaredThetaT);
+            interaction.inputDir = refract(sampleHemisphere(interaction.normal, sampler), interaction.normal, VdotN, eta, sinSquaredThetaT);
             interaction.sampledLobe = BSDFLobe::SpecularTransmission;
             interaction.iorO = iorO;
         }
@@ -228,6 +228,39 @@ public:
     BSDFLobe getSupportedLobes(Vec2f const&) const override
     {
         return BSDFLobe::Specular;
+    }
+};
+
+class Isotropic : public Material
+{
+protected:
+    Isotropic() = default;
+
+public:
+    std::shared_ptr<Texture> texture;
+
+    Isotropic(std::shared_ptr<Texture> const& texture):
+        texture(texture) {};
+
+    Vec3f evaluate(ScatterEvent const& interaction) const override
+    {
+        return texture->evaluate(interaction.uv) * (float)M_1_PI;
+    }
+
+    void sample(ScatterEvent &interaction, Sampler &sampler) const override
+    {
+        interaction.inputDir = sampleSphere(sampler);
+        interaction.sampledLobe = BSDFLobe::Diffuse;
+    }
+
+    float pdf(ScatterEvent const&) const override
+    {
+        return 4.0f * (float)M_1_PI;
+    }
+
+    BSDFLobe getSupportedLobes(Vec2f const&) const override
+    {
+        return BSDFLobe::Diffuse;
     }
 };
 

@@ -93,7 +93,7 @@ public:
     BackgroundLight(Vec3f const& colour, float intensity):
         Light(colour, intensity) {};
 
-    LightHit illuminate(ScatterEvent const& interaction, Sampler&) const override
+    LightHit illuminate(ScatterEvent const&, Sampler&) const override
     {
         LightHit lightHit;
 

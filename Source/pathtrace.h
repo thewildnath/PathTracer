@@ -137,20 +137,22 @@ Vec3f trace(
         {
             Vec3f localPos = intersection.position - scene.volumePos;
             Vec3f normal = scene.volume->getGradient(localPos, 0.5f); // TODO: Maybe use TransferFunction
-
             float magnitude = normal.length();
             float intensity = scene.volume->sampleVolume(localPos);
             Vec4f out = settings.transferFunction.evaluate(intensity);
 
+            interaction.normal = normal / magnitude;
+
+            // T. Kroes
             //float probBRDF = (1.0f - std::exp(-settings.gradientFactor * (magnitude * scene.invMaxGradient)));
-            //float probBRDF = (1.0f - std::exp(-settings.gradientFactor * (magnitude / intensity)));
+            float probBRDF = (1.0f - std::exp(-settings.gradientFactor * (magnitude / intensity)));
 
             // BRDF
-            //if (sampler.nextFloat() < probBRDF)
+            if (sampler.nextFloat() < probBRDF)
             {
-                interaction.normal = normal / magnitude;
                 interaction.position += interaction.normal * settings.stepSize;
-                material = std::make_shared<Lambert>(Lambert{std::make_shared<ColourTexture>(ColourTexture{Vec3f{out.x, out.y,  out.z}})});
+                //out = Vec4f{0.0f, 0.0f, 1.0f, out.w};
+                material = std::make_shared<Lambert>(Lambert{std::make_shared<ColourTexture>(ColourTexture{{out.x, out.y,  out.z}})});
 
                 /*
                 normal /= magnitude;
@@ -167,12 +169,12 @@ Vec3f trace(
                 colour += (Vec3f(out.x, out.y,  out.z) * light * 1.0f);
                 break;
                 //*/
-            }/*
+            }//*
             // Isotropic
             else
             {
-                //normal = settings.lightDir;
-                colour += Vec3f{0.15f, 0.15f, 0.75f};
+                material = std::make_shared<Isotropic>(Isotropic{std::make_shared<ColourTexture>(ColourTexture{{out.x, out.y,  out.z}})});
+
             }//*/
         }
         else

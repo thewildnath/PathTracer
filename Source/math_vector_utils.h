@@ -36,7 +36,7 @@ inline Vec3f uniformSampleHemisphere(float const& r1, float const& r2)
     return Vec3f(x, r1, z);
 }
 
-inline Vec3f SampleHemisphere(Vec3f const& normal, Sampler &sampler)
+inline Vec3f sampleHemisphere(Vec3f const& normal, Sampler& sampler)
 {
     Vec3f Nt, Nb;
     createCoordinateSystem(normal, Nt, Nb);
@@ -50,6 +50,33 @@ inline Vec3f SampleHemisphere(Vec3f const& normal, Sampler &sampler)
         sample.x * Nb.z + sample.y * normal.z + sample.z * Nt.z);
 
     return nextDirection;
+}
+
+inline Vec3f sampleSphere(Sampler &sampler)
+{
+    // Mathsy version
+    /*
+    double theta = 2 * M_PI * uniform01(generator);
+    double phi = acos(1 - 2 * uniform01(generator));
+    double x = sin(phi) * cos(theta);
+    double y = sin(phi) * sin(theta);
+    double z = cos(phi);*/
+
+    // Engineer version
+    Vec3f point;
+    float length;
+
+    do
+    {
+        point.x = sampler.nextFloat() - 0.5f;
+        point.y = sampler.nextFloat() - 0.5f;
+        point.z = sampler.nextFloat() - 0.5f;
+        length = point.length();
+    } while (length <= EPS); // Make sure that we don't divide by 0
+
+    point /= length;
+
+    return point;
 }
 
 }

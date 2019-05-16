@@ -3,6 +3,7 @@
 
 #include "boundingbox.h"
 #include "intersection.h"
+#include "math_vector_utils.h"
 #include "ray.h"
 #include "sampler.h"
 #include "scatterevent.h"
@@ -68,26 +69,7 @@ public:
 
     ScatterEvent sampleSurface(Sampler &sampler) const override
     {
-        // Mathsy version
-        /*
-        double theta = 2 * M_PI * uniform01(generator);
-        double phi = acos(1 - 2 * uniform01(generator));
-        double x = sin(phi) * cos(theta);
-        double y = sin(phi) * sin(theta);
-        double z = cos(phi);*/
-
-        // Engineer version
-        Vec3f point;
-
-        do
-        {
-            point.x = sampler.nextFloat() - 0.5f;
-            point.y = sampler.nextFloat() - 0.5f;
-            point.z = sampler.nextFloat() - 0.5f;
-        } while (point.length() <= EPS); // Make sure that we don't divide by 0
-
-        point = normalise(point);
-
+        Vec3f point = sampleSphere(sampler);
         return ScatterEvent{point * radius, point, SurfaceType::Surface};
     }
 
@@ -191,7 +173,6 @@ public:
 
     BoundingBox getBoundingBox() const
     {
-        return BoundingBox(Vec3f(-1000), Vec3f(1000));
         Vec3f min(INF);
         Vec3f max(-INF);
 
