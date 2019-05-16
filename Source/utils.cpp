@@ -142,6 +142,11 @@ void loadBrain(scg::Volume& volume, scg::Volume& temp, Scene &scene, scg::Settin
     scene.volumePos = Vec3f{-135, -126, -75};
 
     std::cout << "Done loadBrain." << std::endl;
+
+    // Point lights
+    //scene.lights.emplace_back(std::make_shared<scg::PointLight>(scg::PointLight{{1.0f, 1.0f, 1.0f}, 20, {0.0f, -0.75f, 0.0f}}));
+    // Directional lights
+    scene.lights.emplace_back(std::make_shared<scg::DirectionalLight>(scg::DirectionalLight{{1.0f, 1.0f, 1.0f}, 1, {1.0f, 0.5f, 1.0f}}));
 }
 
 Scene loadTestModel()

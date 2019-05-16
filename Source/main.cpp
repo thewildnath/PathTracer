@@ -95,7 +95,7 @@ void Draw(screen *screen)
             ray.direction = scg::rotate(ray.direction, rotation);
 
             int depth = 1;
-            float gamma = 2.0f;
+            float gamma = 1.0f;
             scg::Vec3f colour = scg::trace(scene, ray, depth, settings, sampler[omp_get_thread_num()]);
             buffer[y][x] += colour * gamma; // TODO: clamp value
 

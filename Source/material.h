@@ -44,7 +44,7 @@ public:
 
     Vec3f evaluate(ScatterEvent const& interaction) const override
     {
-        return texture->evaluate(interaction.uv) * std::max(0.0f, dot(interaction.normal, interaction.inputDir)) * (float)M_1_PI;
+        return texture->evaluate(interaction.uv) * std::abs(dot(interaction.normal, interaction.inputDir)) * (float)M_1_PI;
     }
 
     void sample(ScatterEvent &interaction, Sampler &sampler) const override
@@ -55,7 +55,7 @@ public:
 
     float pdf(ScatterEvent const& interaction) const override
     {
-        return std::max(0.0f, dot(interaction.normal, interaction.inputDir)) * (float)M_1_PI;
+        return std::abs(dot(interaction.normal, interaction.inputDir)) * (float)M_1_PI;
     }
 
     BSDFLobe getSupportedLobes(Vec2f const&) const override

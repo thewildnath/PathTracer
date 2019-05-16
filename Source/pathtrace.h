@@ -12,6 +12,14 @@
 namespace scg
 {
 
+// From PBRT-v3
+inline float powerHeuristic(int nf, float fPdf, int ng, float gPdf)
+{
+    float f = nf * fPdf;
+    float g = ng * gPdf;
+    return (f * f) / (f * f + g * g);
+}
+
 Vec3f SampleLights(ScatterEvent &interaction, Scene const& scene, std::shared_ptr<Material> const& material, std::shared_ptr<Light> const& hitLight, Settings const& settings, Sampler &sampler)
 {
     // Cannot light mirror
@@ -73,7 +81,7 @@ Vec3f SampleLights(ScatterEvent &interaction, Scene const& scene, std::shared_pt
                     float pdf = material->pdf(interaction);
                     if (pdf != 0)
                     {
-                        directLight += material->evaluate(interaction) * lightHit.colour / lightHit.pdf;
+                        directLight += material->evaluate(interaction) * lightHit.colour / lightHit.pdf; // TODO: fix dotProduct omission
                     }
                 }
             }
@@ -82,7 +90,7 @@ Vec3f SampleLights(ScatterEvent &interaction, Scene const& scene, std::shared_pt
         }
     }
 
-    return directLight;
+    return directLight * scene.lights.size();
 }
 
 Vec3f trace(
@@ -112,22 +120,37 @@ Vec3f trace(
             break;
         }
 
+        // Initialise interaction
+        interaction.position = intersection.position;
+        interaction.normal = intersection.normal;
+        interaction.uv = interaction.uv;
+        interaction.outputDir = -ray.direction;
+        interaction.iorO = 0.0f;
+
+        std::shared_ptr<Material> material;
+
         if (intersection.surfaceType == SurfaceType::Volume)
         {
             Vec3f localPos = intersection.position - scene.volumePos;
+            Vec3f normal = scene.volume->getGradient(localPos, 0.5f); // TODO: use transferfunction
+
+            float magnitude = normal.length();
             float intensity = scene.volume->sampleVolume(localPos);
             Vec4f out = settings.transferFunction.evaluate(intensity);
 
-            Vec3f normal = scene.volume->getGradient(localPos, 0.5f); // TODO: use transferfunction
-            float magnitude = normal.length();
-
             //float probBRDF = (1.0f - std::exp(-settings.gradientFactor * (magnitude * scene.invMaxGradient)));
+            //float probBRDF = (1.0f - std::exp(-settings.gradientFactor * (magnitude / intensity)));
+
 
             // BRDF
             //if (sampler.nextFloat() < probBRDF)
             {
-                normal /= magnitude;
+                //normal /= magnitude;
 
+                interaction.normal = normal / magnitude;
+                material = std::make_shared<Lambert>(Lambert{std::make_shared<ColourTexture>(ColourTexture{Vec3f{out.x, out.y,  out.z}})});
+
+                /*
                 float light = 0.1f;
 
                 Ray lightRay(intersection.position, -settings.lightDir);
@@ -137,27 +160,21 @@ Vec3f trace(
                     light = std::max(light, dot(normal, settings.lightDir));
                 }
 
-                colour += (Vec3f(out.x, out.y,  out.z) * light * 1.0f);
+                colour += (Vec3f(out.x, out.y,  out.z) * light * 1.0f);*/
             }/*
             // Isotropic
             else
             {
                 //normal = settings.lightDir;
                 colour += Vec3f{0.15f, 0.15f, 0.75f};
-            }*/
+            }//*/
 
-            return colour;
-            break;
+            //break;
         }
-
-        auto const& material = scene.materials[intersection.materialID];
-
-        // Initialise interaction
-        interaction.position = intersection.position;
-        interaction.normal = intersection.normal;
-        interaction.uv = interaction.uv;
-        interaction.outputDir = -ray.direction;
-        interaction.iorO = 0.0f;
+        else
+        {
+            material = scene.materials[intersection.materialID];
+        }
 
         // Add light
         auto const& hitLight = material->getLight(interaction.uv);
@@ -169,12 +186,15 @@ Vec3f trace(
         // Calculate direct light
         colour += throughput * SampleLights(interaction, scene, material, hitLight, settings, sampler);
 
+        if (bounces == minBounces - 1)
+            break;
+
         // Sample next direction
         material->sample(interaction, sampler);
         float pdf = material->pdf(interaction);
 
         // Accumulate
-        if (pdf == 0) std::cout << "WTF";
+        if (!std::isnormal(pdf)) std::cout << "WTF";
         throughput *= material->evaluate(interaction) / pdf;
 
         if (interaction.sampledLobe == BSDFLobe::SpecularTransmission)
