@@ -7,6 +7,7 @@
 #include "texture.h"
 #include "triangle.h"
 #include "vector_type.h"
+#include "volume.h"
 
 #include "tinytiffreader.h"
 
@@ -145,6 +146,7 @@ void loadBrain(scg::Volume& volume, scg::Volume& temp, Scene &scene, scg::Settin
         }
     }
 
+    volume.octree.bb = BoundingBox(Vec3f(40 + V_EPS, 50 + V_EPS, 0 + V_EPS), Vec3f(230 - V_EPS, 220 - V_EPS, 135 - V_EPS));
     buildOctree(volume, volume.octree, settings.octreeLevels, settings);
 
     scene.volume = std::make_shared<Volume>(volume);
@@ -153,7 +155,7 @@ void loadBrain(scg::Volume& volume, scg::Volume& temp, Scene &scene, scg::Settin
     std::cout << "Done loadBrain." << std::endl;
 
     // Point lights
-    //scene.lights.emplace_back(std::make_shared<scg::PointLight>(scg::PointLight{{1.0f, 1.0f, 1.0f}, 20, {0.0f, -0.75f, 0.0f}}));
+    //scene.lights.emplace_back(std::make_shared<scg::PointLight>(scg::PointLight{{1.0f, 1.0f, 1.0f}, 20 * 80 * 80, {0, 0, 0}}));//Vec3f{0.0f, -0.75f, 0.0f} * 80}));
     // Directional lights
     scene.lights.emplace_back(std::make_shared<scg::DirectionalLight>(scg::DirectionalLight{{1.0f, 1.0f, 1.0f}, M_PI, {1.0f, 0.5f, 1.0f}}));
 }
@@ -163,26 +165,32 @@ void loadManix(scg::Volume& volume, scg::Volume& temp, Scene &scene, scg::Settin
     std::ifstream fin;
     fin.open("../data/Manix/manix.raw");
 
-    int width = 512;
+    int width = 460;
     int height = 512;
-    int depth = 460;
+    int depth = 512;
 
     char buf[2];
     uint16_t val;
 
-    for (int x = 0; x < 50; ++x)
+    uint64_t sum = 0;
+
+    for (int x = 0; x < width; ++x)
     {
         for (int y = 0; y < height; ++y)
         {
             for (int z = 0; z < depth; ++z)
             {
-                fin.read(buf, 2);
-                val = (((uint16_t)buf[0]) << 8) + (uint16_t)buf[1];
+                //fin.read(buf, 2);
+                //val = (((uint16_t)buf[0]) << 8) + (uint16_t)buf[1];
+                fin.read(reinterpret_cast<char*>(&val), 2);
+                sum += val;
 
-                temp.data[z][y][x] = val;
+                temp.data[z][y][x] = val * 1000;
             }
         }
     }
+
+    std::cout << "Sum is: "  << sum << std::endl;
 
     for (int x = 0; x < volume.width; ++x)
     {
@@ -195,6 +203,7 @@ void loadManix(scg::Volume& volume, scg::Volume& temp, Scene &scene, scg::Settin
         }
     }
 
+    volume.octree.bb = BoundingBox(Vec3f(0 + V_EPS, 0 + V_EPS, 0 + V_EPS), Vec3f(width - V_EPS, height - V_EPS, depth - V_EPS));
     buildOctree(volume, volume.octree, settings.octreeLevels, settings);
 
     scene.volume = std::make_shared<Volume>(volume);
