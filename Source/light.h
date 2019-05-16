@@ -101,7 +101,7 @@ public:
         lightHit.distance = lightHit.direction.length();
         lightHit.direction /= lightHit.distance;
 
-        lightHit.pdf = (float)(2.0f * M_1_PI * lightHit.distance * lightHit.distance);
+        lightHit.pdf = (float)(4.0f * M_1_PI * lightHit.distance * lightHit.distance);
 
         return lightHit;
     }

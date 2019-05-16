@@ -324,7 +324,7 @@ Scene loadTestModel(float size)
     // Extra
 
     // Point lights
-    scene.lights.emplace_back(std::make_shared<scg::PointLight>(scg::PointLight{{1.0f, 1.0f, 1.0f}, 20 * size * size, Vec3f{0.0f, -0.75f, 0.0f} * size}));
+    scene.lights.emplace_back(std::make_shared<scg::PointLight>(scg::PointLight{{1.0f, 1.0f, 1.0f}, 40 * size * size, Vec3f{0.0f, -0.75f, 0.0f} * size}));
     //scene.lights.emplace_back(std::make_shared<scg::PointLight>(scg::PointLight{{1.0f, 1.0f, 1.0f}, 10 * size, Vec3f{-0.5f, -0.75f, 0.0f} * size}));
     //scene.lights.emplace_back(std::make_shared<scg::PointLight>(scg::PointLight{{1.0f, 1.0f, 1.0f}, 10 * size, Vec3f{0.5f, -0.75f, 0.0f} * size}));
     // Directional lights
@@ -356,7 +356,7 @@ Scene loadTestModel(float size)
 //    });
     scene.objects.emplace_back(objectPtr);
     std::shared_ptr<scg::ObjectLight> lightPtr = std::make_shared<scg::ObjectLight>(scg::ObjectLight{
-        Vec3f{1.0f, 1.0f, 1.0f}, 40 * size * size,
+        Vec3f{1.0f, 1.0f, 1.0f}, 20 * size * size,
         objectPtr
     });
     scene.lights.emplace_back(lightPtr);
