@@ -83,7 +83,7 @@ Vec3f SampleOneLight(ScatterEvent& interaction, Scene const& scene, std::shared_
                     float pdf = material->pdf(interaction);
                     if (pdf != 0)
                     {
-                        float weight = 1.0f;//powerHeuristic(1, lightHit.pdf, 1, pdf);
+                        float weight = powerHeuristic(1, lightHit.pdf, 1, pdf);
                         directLight += material->evaluate(interaction) * lightHit.colour * weight / lightHit.pdf;
                     }
                 }
@@ -99,7 +99,6 @@ Vec3f SampleOneLight(ScatterEvent& interaction, Scene const& scene, std::shared_
 Vec3f trace(
     Scene const& scene,
     Ray ray,
-    int depth,
     Settings const& settings,
     Sampler &sampler)
 {
@@ -110,8 +109,8 @@ Vec3f trace(
     interaction.iorI = 1.0f; // Air
 
     int bounces = 0;
-    int minBounces = depth;
-    int maxBounces = 50;
+    int minBounces = settings.minDepth;
+    int maxBounces = settings.maxDepth;
 
     for (bounces = 0; bounces < maxBounces; ++bounces)
     {
@@ -184,7 +183,7 @@ Vec3f trace(
 
         // Add light
         auto const& hitLight = material->getLight(interaction.uv);
-        if (hitLight != nullptr)
+        if (hitLight != nullptr && (bounces == 0 || interaction.sampledLobe & BSDFLobe::Specular))
         {
             colour += throughput * hitLight->getEmittance(interaction);
         }
@@ -192,7 +191,7 @@ Vec3f trace(
         // Calculate direct light
         colour += throughput * SampleOneLight(interaction, scene, material, hitLight, settings, sampler);
 
-        if (bounces == minBounces - 1)
+        if (bounces == maxBounces - 1)
             break;
 
         // Sample next direction
@@ -214,7 +213,7 @@ Vec3f trace(
         ray.minT = RAY_EPS;
 
         // Russian Roulette
-        if (bounces > minBounces)
+        if (bounces >= minBounces - 1)
         {
             float p = std::max(throughput.x, std::max(throughput.y, throughput.z));
             if (sampler.nextFloat() > p) {

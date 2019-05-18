@@ -94,7 +94,7 @@ void Draw(screen *screen)
             ray.origin = scg::rotate(ray.origin, rotation);
             ray.direction = scg::rotate(ray.direction, rotation);
 
-            scg::Vec3f colour = scg::trace(scene, ray, settings.depth, settings, sampler[omp_get_thread_num()]);
+            scg::Vec3f colour = scg::trace(scene, ray, settings, sampler[omp_get_thread_num()]);
             buffer[y][x] += colour * settings.gamma; // TODO: clamp value
 
             PutPixelSDL(screen, x, y, buffer[y][x] / samples);

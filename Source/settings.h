@@ -14,10 +14,10 @@ class Settings
 {
 public:
     int renderType;
-    int depth;
+    int minDepth;
+    int maxDepth;
     float gamma;
 
-    Vec3f lightDir;
     Vec3f backgroundLight;
 
     float stepSize;

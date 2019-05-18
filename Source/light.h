@@ -49,6 +49,11 @@ public:
         return colour * intensity * std::max(0.0f, dot(interaction.normal, interaction.outputDir));
     }
 
+    virtual float getIntensity() const
+    {
+        return intensity;
+    }
+
     virtual LightType getType() const = 0;
 };
 

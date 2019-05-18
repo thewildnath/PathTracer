@@ -22,9 +22,9 @@ Settings loadSettings()
     Settings settings;
 
     settings.renderType = 2;
-    settings.depth = 1;
+    settings.minDepth = 1;
+    settings.maxDepth = 50;
     settings.gamma = 1.0f;
-    settings.lightDir = normalise(Vec3f{1.0f, 0.5f, 1.0f});
     settings.backgroundLight = Vec3f{0.0f, 0.0f, 0.0f};
     settings.stepSize = 0.1f;
     settings.octreeLevels = 5;
@@ -49,7 +49,8 @@ void loadTransferFunction(Settings &settings)
     fin >> settings.densityScale;
     fin >> settings.gradientFactor;
     fin >> settings.stepSize;
-    fin >> settings.depth;
+    fin >> settings.minDepth;
+    fin >> settings.maxDepth;
     fin >> settings.gamma;
 
     float intensity;
@@ -155,9 +156,9 @@ void loadBrain(scg::Volume& volume, scg::Volume& temp, Scene &scene, scg::Settin
     std::cout << "Done loadBrain." << std::endl;
 
     // Point lights
-    //scene.lights.emplace_back(std::make_shared<scg::PointLight>(scg::PointLight{{1.0f, 1.0f, 1.0f}, 20 * 80 * 80, {0, 0, 0}}));//Vec3f{0.0f, -0.75f, 0.0f} * 80}));
+    scene.lights.emplace_back(std::make_shared<scg::PointLight>(scg::PointLight{{1.0f, 1.0f, 1.0f}, 20 * 80 * 80, {0, 0, 0}}));//Vec3f{0.0f, -0.75f, 0.0f} * 80}));
     // Directional lights
-    scene.lights.emplace_back(std::make_shared<scg::DirectionalLight>(scg::DirectionalLight{{1.0f, 1.0f, 1.0f}, M_PI, {1.0f, 0.5f, 1.0f}}));
+    //scene.lights.emplace_back(std::make_shared<scg::DirectionalLight>(scg::DirectionalLight{{1.0f, 1.0f, 1.0f}, M_PI, {1.0f, 0.5f, 1.0f}}));
 }
 
 void loadManix(scg::Volume& volume, scg::Volume& temp, Scene &scene, scg::Settings const& settings)
