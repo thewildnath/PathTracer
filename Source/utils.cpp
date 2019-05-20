@@ -170,7 +170,6 @@ void loadManix(scg::Volume& volume, scg::Volume& temp, Scene &scene, scg::Settin
     int height = 512;
     int depth = 512;
 
-    char buf[2];
     uint16_t val;
 
     uint64_t sum = 0;
@@ -181,12 +180,12 @@ void loadManix(scg::Volume& volume, scg::Volume& temp, Scene &scene, scg::Settin
         {
             for (int z = 0; z < depth; ++z)
             {
-                //fin.read(buf, 2);
-                //val = (((uint16_t)buf[0]) << 8) + (uint16_t)buf[1];
-                fin.read(reinterpret_cast<char*>(&val), 2);
+                fin.read((char*)&val, 2);
                 sum += val;
 
-                temp.data[z][y][x] = val * 1000;
+                if (val != *((int16_t*)&val)) std::cout << "WTF";
+
+                temp.data[z][y][x] = val + 1000;
             }
         }
     }

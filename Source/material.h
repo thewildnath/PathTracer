@@ -264,6 +264,77 @@ public:
     }
 };
 
+class Glossy : public Material
+{
+public:
+    std::shared_ptr<Texture> texture;
+    float power;
+
+    Glossy(std::shared_ptr<Texture> const& texture, float power):
+        texture(texture), power(power) {};
+
+    Vec3f evaluate(ScatterEvent const& interaction) const override
+    {
+        //Vec3f reflected = glm::normalize(glm::reflect(ray.dir, normal));
+        //float specularLow  = std::pow(glm::dot(-ray.dir, reflected), 10);
+        //float specularHigh = std::pow(glm::dot(-ray.dir, reflected), 500);
+        Vec3f reflected = normalise(reflect(interaction.outputDir, interaction.normal));
+        float specular = std::pow(std::max(0.0f, dot(reflected, interaction.inputDir)), power);
+        return texture->evaluate(interaction.uv) * specular * (float)M_1_PI;
+    }
+
+    void sample(ScatterEvent &interaction, Sampler &sampler) const override
+    {
+        interaction.inputDir = sampleHemisphere(interaction.normal, sampler);
+        interaction.sampledLobe = BSDFLobe::Diffuse;
+    }
+
+    float pdf(ScatterEvent const& interaction) const override
+    {
+        Vec3f reflected = normalise(reflect(interaction.outputDir, interaction.normal));
+        float specular = std::pow(std::max(0.0f, dot(reflected, interaction.inputDir)), power);
+        return specular * (float)M_1_PI;
+    }
+
+    BSDFLobe getSupportedLobes(Vec2f const&) const override
+    {
+        return BSDFLobe::Diffuse;
+    }
+};
+
+class Phong : public Material
+{
+public:
+    std::shared_ptr<Lambert> lambert;
+    std::shared_ptr<Glossy> glossy;
+    float kd;
+    float ks;
+
+    Phong(std::shared_ptr<Lambert> const& lambert, std::shared_ptr<Glossy> glossy, float kd, float ks):
+        lambert(lambert), glossy(glossy), kd(kd), ks(ks) {};
+
+    Vec3f evaluate(ScatterEvent const& interaction) const override
+    {
+        return lambert->evaluate(interaction) * kd + glossy->evaluate(interaction) * ks;
+    }
+
+    void sample(ScatterEvent &interaction, Sampler &sampler) const override
+    {
+        interaction.inputDir = sampleHemisphere(interaction.normal, sampler);
+        interaction.sampledLobe = BSDFLobe::Diffuse;
+    }
+
+    float pdf(ScatterEvent const& interaction) const override
+    {
+        return lambert->pdf(interaction) * kd + glossy->pdf(interaction) * ks;
+    }
+
+    BSDFLobe getSupportedLobes(Vec2f const&) const override
+    {
+        return BSDFLobe::Diffuse;
+    }
+};
+
 /*
 class Blinn
 {

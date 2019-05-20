@@ -150,31 +150,21 @@ Vec3f trace(
             if (sampler.nextFloat() < probBRDF)
             {
                 interaction.position += interaction.normal * settings.stepSize;
-                //out = Vec4f{0.0f, 0.0f, 1.0f, out.w};
-                material = std::make_shared<Lambert>(Lambert{std::make_shared<ColourTexture>(ColourTexture{{out.x, out.y,  out.z}})});
 
-                /*
-                normal /= magnitude;
-
-                float light = 0.1f;
-
-                Ray lightRay(intersection.position, -settings.lightDir);
-
-                if (!getClosestIntersection(scene, lightRay, intersection, settings, sampler))
-                {
-                    light = std::max(light, dot(normal, settings.lightDir));
-                }
-
-                colour += (Vec3f(out.x, out.y,  out.z) * light * 1.0f);
-                break;
+                //material = std::make_shared<Lambert>(Lambert{std::make_shared<ColourTexture>(ColourTexture{{out.x, out.y,  out.z}})});
+                //material = std::make_shared<Glossy>(Glossy{std::make_shared<ColourTexture>(ColourTexture{{out.x, out.y,  out.z}}), 500.0f});
+                //*
+                auto lambert = std::make_shared<Lambert>(Lambert{std::make_shared<ColourTexture>(ColourTexture{{out.x, out.y,  out.z}})});
+                auto glossy = std::make_shared<Glossy>(Glossy{std::make_shared<ColourTexture>(ColourTexture{{out.x, out.y,  out.z}}), 50.0f});
+                material = std::make_shared<Phong>(Phong{lambert, glossy, 0.75f, 0.25f});
                 //*/
-            }//*
+            }
             // Isotropic
             else
             {
                 material = std::make_shared<Isotropic>(Isotropic{std::make_shared<ColourTexture>(ColourTexture{{out.x, out.y,  out.z}})});
 
-            }//*/
+            }
         }
         else
         {
