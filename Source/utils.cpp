@@ -12,6 +12,7 @@
 #include "tinytiffreader.h"
 
 #include <fstream>
+#include <map>
 #include <vector>
 
 namespace scg
@@ -72,6 +73,7 @@ void loadSettingsFile(Settings &settings)
     fin.open("transfer.txt");
 
     std::string type;
+    std::map<std::string, std::shared_ptr<Material>> materials;
 
     while (fin >> type)
     {
@@ -105,6 +107,16 @@ void loadSettingsFile(Settings &settings)
             fin >> intensity >> settings.backgroundLight.x >> settings.backgroundLight.y >> settings.backgroundLight.z;
             settings.backgroundLight *= intensity;
         }
+        else if (type == "mat")
+        {
+            std::string name;
+            fin >> name;
+
+            std::shared_ptr<ColourTexture> texture = std::make_shared<ColourTexture>(ColourTexture{Vec3f{1.0f, 1.0f, 1.0f}});
+            std::shared_ptr<Material> material = parseMaterial(fin, texture);
+
+            materials.emplace(name, material);
+        }
         else if (type == "transform")
         {
             break;
@@ -118,9 +130,9 @@ void loadSettingsFile(Settings &settings)
     while (fin >> x >> a >> r >> g >> b)
     {
         Vec3f colour = Vec3f{r, g, b} / 255.0f;
-        std::shared_ptr<ColourTexture> texture = std::make_shared<ColourTexture>(ColourTexture{Vec3f{1.0f, 1.0f, 1.0f}});
-
-        std::shared_ptr<Material> material = parseMaterial(fin, texture);
+        std::string name;
+        fin >> name;
+        std::shared_ptr<Material> material = materials.at(name);
         nodes.emplace_back(scg::Node{x, a, colour, material});
     }
 
