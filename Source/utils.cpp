@@ -37,6 +37,35 @@ Settings loadSettings()
     return settings;
 }
 
+std::shared_ptr<Material> parseMaterial(std::ifstream &fin, std::shared_ptr<Texture> const& texture)
+{
+    std::string type;
+    fin >> type;
+
+    if (type == "Lambert")
+    {
+        return std::make_shared<Lambert>(Lambert{texture});
+    } else if (type == "Glossy")
+    {
+        float power;
+        fin >> power;
+
+        return std::make_shared<Glossy>(Glossy{texture, power});
+    } else if (type == "Phong")
+    {
+        float kd;
+        float ks;
+        fin >> kd >> ks;
+
+        std::shared_ptr<Lambert> lambert = std::dynamic_pointer_cast<Lambert>(parseMaterial(fin, texture));
+        std::shared_ptr<Glossy> glossy = std::dynamic_pointer_cast<Glossy>(parseMaterial(fin, texture));
+
+        return std::make_shared<Phong>(lambert, glossy, kd, ks);
+    }
+
+    return nullptr;
+}
+
 void loadSettingsFile(Settings &settings)
 {
     std::ifstream fin;
@@ -88,7 +117,11 @@ void loadSettingsFile(Settings &settings)
 
     while (fin >> x >> a >> r >> g >> b)
     {
-        nodes.emplace_back(scg::Node{x, a, Vec3f{r, g, b} / 255.0f});
+        Vec3f colour = Vec3f{r, g, b} / 255.0f;
+        std::shared_ptr<ColourTexture> texture = std::make_shared<ColourTexture>(ColourTexture{Vec3f{1.0f, 1.0f, 1.0f}});
+
+        std::shared_ptr<Material> material = parseMaterial(fin, texture);
+        nodes.emplace_back(scg::Node{x, a, colour, material});
     }
 
     settings.transferFunction = scg::TransferFunction(nodes);
@@ -425,12 +458,12 @@ Scene loadTestModel(float size)
     // Directional lights
     //scene.lights.emplace_back(std::make_shared<scg::DirectionalLight>(scg::DirectionalLight{{1.0f, 1.0f, 1.0f}, 10, {0.2, 0.5, 0.5}}));
 
+/*
     size_t index = scene.materials.size();
     std::shared_ptr<scg::ColourTexture> texture = std::make_shared<scg::ColourTexture>(scg::ColourTexture{
         {1.0f, 1.0f, 1.0f}
     });
 
-/*
     // Ceiling light
     float eL = 0.5f * size;
     Vec3f eE(eL / 2, 0, -eL / 2);

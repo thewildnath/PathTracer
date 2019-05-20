@@ -1,6 +1,7 @@
 #ifndef RAYTRACER_TRANSFERFUNCTION_H
 #define RAYTRACER_TRANSFERFUNCTION_H
 
+#include "material.h"
 #include "math_utils.h"
 #include "vector_type.h"
 
@@ -19,12 +20,13 @@ public:
     float opacity;
 
     Vec3f colour;
+    std::shared_ptr<Material> material;
 
     friend class TransferFunction;
 
 public:
-    Node(float intensity, float opacity, Vec3f const& colour):
-        intensity(intensity), opacity(opacity), colour(colour) {};
+    Node(float intensity, float opacity, Vec3f const& colour, std::shared_ptr<Material> const& material):
+        intensity(intensity), opacity(opacity), colour(colour), material(material) {};
 };
 
 // Nice code design here...
@@ -59,6 +61,24 @@ public:
             lerp((*lower).opacity, (*upper).opacity, dist));
 
         return out;
+    }
+
+    inline std::shared_ptr<Material> getMaterial(float intensity, Sampler &sampler) const
+    {
+        auto const& upper = std::upper_bound(nodes.begin(), nodes.end(), intensity);
+        auto const& lower = upper - 1;
+
+        float dx = (*upper).intensity - (*lower).intensity;
+        float dist = (intensity - (*lower).intensity) / dx;
+
+        if (sampler.nextFloat() < dist)
+        {
+            return lower->material;
+        }
+        else
+        {
+            return upper->material;
+        }
     }
 };
 

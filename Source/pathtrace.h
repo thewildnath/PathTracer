@@ -151,9 +151,11 @@ Vec3f trace(
             {
                 interaction.position += interaction.normal * settings.stepSize;
 
+                throughput *= Vec3f{out.r, out.g, out.b};
+                material = settings.transferFunction.getMaterial(intensity, sampler);
                 //material = std::make_shared<Lambert>(Lambert{std::make_shared<ColourTexture>(ColourTexture{{out.x, out.y,  out.z}})});
                 //material = std::make_shared<Glossy>(Glossy{std::make_shared<ColourTexture>(ColourTexture{{out.x, out.y,  out.z}}), 500.0f});
-                //*
+                /*
                 auto lambert = std::make_shared<Lambert>(Lambert{std::make_shared<ColourTexture>(ColourTexture{{out.x, out.y,  out.z}})});
                 auto glossy = std::make_shared<Glossy>(Glossy{std::make_shared<ColourTexture>(ColourTexture{{out.x, out.y,  out.z}}), 50.0f});
                 material = std::make_shared<Phong>(Phong{lambert, glossy, 0.75f, 0.25f});
@@ -163,7 +165,6 @@ Vec3f trace(
             else
             {
                 material = std::make_shared<Isotropic>(Isotropic{std::make_shared<ColourTexture>(ColourTexture{{out.x, out.y,  out.z}})});
-
             }
         }
         else
