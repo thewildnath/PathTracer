@@ -12,7 +12,7 @@ namespace scg
 
 Settings loadSettings();
 
-void loadTransferFunction(Settings &settings);
+void loadSettingsFile(Settings &settings);
 
 void loadBrain(Volume& volume, Volume& temp, Scene &scene, Settings const& settings);
 

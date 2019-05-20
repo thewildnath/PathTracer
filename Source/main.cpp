@@ -59,7 +59,7 @@ int main(int argc, char *argv[])
 
     // Initialise scene
     settings = scg::loadSettings();
-    scg::loadTransferFunction(settings);
+    scg::loadSettingsFile(settings);
     //scene = scg::loadTestModel(80.0f);
     scg::loadBrain(volume, temp, scene, settings);
     //scg::loadManix(volume, temp, scene, settings);
@@ -156,7 +156,7 @@ bool Update()
                     break;
                 case SDLK_r:
                     InitialiseBuffer();
-                    scg::loadTransferFunction(settings);
+                    scg::loadSettingsFile(settings);
                     break;
                 case SDLK_UP:
                     rotation.x -= 5;

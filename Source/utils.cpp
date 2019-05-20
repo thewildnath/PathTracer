@@ -37,25 +37,54 @@ Settings loadSettings()
     return settings;
 }
 
-void loadTransferFunction(Settings &settings)
+void loadSettingsFile(Settings &settings)
 {
     std::ifstream fin;
     fin.open("transfer.txt");
 
+    std::string type;
+
+    while (fin >> type)
+    {
+        if (type ==  "densityScale")
+        {
+            fin >> settings.densityScale;
+        }
+        else if (type == "gradientFactor")
+        {
+            fin >> settings.gradientFactor;
+        }
+        else if (type == "stepSize")
+        {
+            fin >> settings.stepSize;
+        }
+        else if (type == "minDepth")
+        {
+            fin >> settings.minDepth;
+        }
+        else if (type == "maxDepth")
+        {
+            fin >> settings.maxDepth;
+        }
+        else if (type == "gamma")
+        {
+            fin >> settings.gamma;
+        }
+        else if (type == "background")
+        {
+            float intensity;
+            fin >> intensity >> settings.backgroundLight.x >> settings.backgroundLight.y >> settings.backgroundLight.z;
+            settings.backgroundLight *= intensity;
+        }
+        else if (type == "transform")
+        {
+            break;
+        }
+    }
+
+    // Read TransformFunction
     std::vector<scg::Node> nodes;
-
     float x, a, r, g, b;
-
-    fin >> settings.densityScale;
-    fin >> settings.gradientFactor;
-    fin >> settings.stepSize;
-    fin >> settings.minDepth;
-    fin >> settings.maxDepth;
-    fin >> settings.gamma;
-
-    float intensity;
-    fin >> intensity >> settings.backgroundLight.x >> settings.backgroundLight.y >> settings.backgroundLight.z;
-    settings.backgroundLight *= intensity;
 
     while (fin >> x >> a >> r >> g >> b)
     {
@@ -63,13 +92,13 @@ void loadTransferFunction(Settings &settings)
     }
 
     settings.transferFunction = scg::TransferFunction(nodes);
-//*
+
     for (int i = 0; i < (int)settings.minStepSize.size(); ++i)
     {
         settings.maxOpacity[i] = 0;
         settings.minStepSize[i] = 0;
     }
-//*/
+
     settings.mask = 0;
     for (size_t i = 0; i < nodes.size() - 1; ++i)
     {
@@ -83,24 +112,22 @@ void loadTransferFunction(Settings &settings)
                 if (minX < maxX)
                 {
                     settings.mask |= (1 << bracket);
-                    //*
+
                     float maxOpacity = std::fmaxf(settings.transferFunction.evaluate(minX).w, settings.transferFunction.evaluate(maxX).w);
                     if (maxOpacity > settings.maxOpacity[bracket])
                     {
                         settings.maxOpacity[bracket] = maxOpacity;
                     }
-                    //*/
                 }
             }
         }
     }
-//*
+
     for (int i = 0; i < (int)settings.minStepSize.size(); ++i)
     {
         settings.minStepSize[i] =
             1.0f * settings.maxOpacity[i] + 0.1f * (1 - settings.maxOpacity[i]);
     }
-//*/
 }
 
 void loadBrain(scg::Volume& volume, scg::Volume& temp, Scene &scene, scg::Settings const& settings)
