@@ -146,20 +146,13 @@ Vec3f trace(
             //float probBRDF = (1.0f - std::exp(-settings.gradientFactor * (magnitude * scene.invMaxGradient)));
             float probBRDF = (1.0f - std::exp(-settings.gradientFactor * (magnitude / intensity)));
 
-            // BRDF
+            // Surface
             if (sampler.nextFloat() < probBRDF)
             {
                 interaction.position += interaction.normal * settings.stepSize;
 
                 throughput *= Vec3f{out.r, out.g, out.b};
                 material = settings.transferFunction.getMaterial(intensity, sampler);
-                //material = std::make_shared<Lambert>(Lambert{std::make_shared<ColourTexture>(ColourTexture{{out.x, out.y,  out.z}})});
-                //material = std::make_shared<Glossy>(Glossy{std::make_shared<ColourTexture>(ColourTexture{{out.x, out.y,  out.z}}), 500.0f});
-                /*
-                auto lambert = std::make_shared<Lambert>(Lambert{std::make_shared<ColourTexture>(ColourTexture{{out.x, out.y,  out.z}})});
-                auto glossy = std::make_shared<Glossy>(Glossy{std::make_shared<ColourTexture>(ColourTexture{{out.x, out.y,  out.z}}), 50.0f});
-                material = std::make_shared<Phong>(Phong{lambert, glossy, 0.75f, 0.25f});
-                //*/
             }
             // Isotropic
             else
@@ -186,8 +179,12 @@ Vec3f trace(
             break;
 
         // Sample next direction
-        material->sample(interaction, sampler);
-        float pdf = material->pdf(interaction);
+        float pdf;
+        do
+        {
+            material->sample(interaction, sampler);
+            pdf = material->pdf(interaction);
+        } while(!std::isnormal(pdf)); // Sampler may return an impossible(parallel) direction
 
         // Accumulate
         if (!std::isnormal(pdf)) std::cout << "WTF";
