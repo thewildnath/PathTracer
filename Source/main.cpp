@@ -15,6 +15,7 @@
 #include <cstring>
 #include <memory>
 #include <omp.h>
+#include <string>
 
 #define RES 400
 #define SCREEN_WIDTH  RES
@@ -25,9 +26,10 @@
 #undef main // SDL2 compatibility with Windows
 
 // FUNCTIONS
-bool Update();
+bool Update(screen *screen);
 void Draw(screen *screen);
 void InitialiseBuffer();
+void saveScreenshot(screen *screen);
 
 scg::Sampler sampler[20]; // TODO: !!! find a better solution
 
@@ -65,14 +67,14 @@ int main(int argc, char *argv[])
     //scg::loadManix(volume, temp, scene, settings);
 
     // Start main loop
-    while (Update())
+    while (Update(screen))
     {
         Draw(screen);
         SDL_Renderframe(screen);
     }
 
     // Save and finish
-    SDL_SaveImage(screen, "screenshot.bmp");
+    saveScreenshot(screen);
     KillSDL(screen);
 
     return 0;
@@ -102,7 +104,7 @@ void Draw(screen *screen)
     }
 }
 
-bool Update()
+bool Update(screen *screen)
 {
     static int t = SDL_GetTicks();
     /* Compute frame time */
@@ -158,6 +160,9 @@ bool Update()
                     InitialiseBuffer();
                     scg::loadSettingsFile(settings);
                     break;
+                case SDLK_p:
+                    saveScreenshot(screen);
+                    break;
                 case SDLK_UP:
                     rotation.x -= 5;
                     if (rotation.x < 0)
@@ -192,4 +197,10 @@ void InitialiseBuffer()
 {
     samples = 0;
     memset(buffer, 0, sizeof(buffer));
+}
+
+void saveScreenshot(screen *screen)
+{
+    std::string fileName = "screenshot" + std::to_string(samples) + ".bmp";
+    SDL_SaveImage(screen, fileName.c_str());
 }
