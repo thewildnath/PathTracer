@@ -23,11 +23,6 @@ public:
 
     //Camera() = default;
 
-    Vec3f getCentre() const
-    {
-
-    }
-
     Ray getRay(int const x, int const y, Sampler &sampler) const
     {
         float dX = 0;
