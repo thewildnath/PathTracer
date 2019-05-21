@@ -28,6 +28,8 @@ Settings loadSettings()
     settings.gamma = 1.0f;
     settings.backgroundLight = Vec3f{0.0f, 0.0f, 0.0f};
     settings.stepSize = 0.1f;
+    settings.useBox = false;
+
     settings.octreeLevels = 5;
     settings.brackets = std::vector<float>{
         0, 1000, 1300, 1500, 1750, 1900, 2000, 2100, 2200, 2300, 2400, 2500, 2600, 2700, 2850, 3000, 3250, 3500, 99999 // 1 less than TF!
@@ -75,6 +77,8 @@ void loadSettingsFile(Settings &settings)
     std::string type;
     std::map<std::string, std::shared_ptr<Material>> materials;
 
+    settings.useBox = false;
+
     while (fin >> type)
     {
         if (type ==  "densityScale")
@@ -116,6 +120,21 @@ void loadSettingsFile(Settings &settings)
             std::shared_ptr<Material> material = parseMaterial(fin, texture);
 
             materials.emplace(name, material);
+        }
+        else if (type == "box")
+        {
+            float size;
+            float x;
+            float y;
+            float z;
+
+            fin >> settings.useBox;
+            fin >> size >> x >> y >> z;
+
+            Vec3f min{x - size, y - size, z - size};
+            Vec3f max{x + size, y + size, z + size};
+
+            settings.bb = BoundingBox{min, max};
         }
         else if (type == "transform")
         {
@@ -175,7 +194,7 @@ void loadSettingsFile(Settings &settings)
     }
 }
 
-void loadBrain(scg::Volume& volume, scg::Volume& temp, Scene &scene, scg::Settings const& settings)
+void loadBrain(scg::Volume& volume, scg::Volume& temp, Scene &scene, scg::Settings &settings)
 {
     char filename[50] = "../data/StanfordBrain/mrbrain-16bit000.tif";
     for (int x = 0; x < 99; ++x)
@@ -233,7 +252,7 @@ void loadBrain(scg::Volume& volume, scg::Volume& temp, Scene &scene, scg::Settin
     scene.lights.emplace_back(std::make_shared<scg::DirectionalLight>(scg::DirectionalLight{{1.0f, 1.0f, 1.0f}, M_PI, {1.0f, 0.5f, 1.0f}}));
 }
 
-void loadManix(scg::Volume& volume, scg::Volume& temp, Scene &scene, scg::Settings const& settings)
+void loadManix(scg::Volume& volume, scg::Volume& temp, Scene &scene, scg::Settings &settings)
 {
     std::ifstream fin;
     fin.open("../data/Manix/manix.raw");

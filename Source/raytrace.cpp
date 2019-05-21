@@ -13,6 +13,24 @@
 namespace scg
 {
 
+// Currently only works with a single plane, buggy
+inline void getBounds(Ray &ray, Settings const& settings)
+{
+    BBIntersection bbIntersection;
+    settings.bb.getIntersection(ray, bbIntersection);
+
+    if (bbIntersection.valid)
+    {
+        ray.minT = std::max(ray.minT, bbIntersection.nearT);
+        ray.maxT = std::min(ray.maxT, bbIntersection.farT);
+    }
+    else
+    {
+        ray.minT = std::numeric_limits<float>::max();
+        ray.maxT = std::numeric_limits<float>::min();
+    }
+}
+
 bool getClosestIntersection(
     Scene const& scene,
     Ray const& ray,
@@ -24,10 +42,16 @@ bool getClosestIntersection(
     int index = -1;
 
     Intersection intersection;
-//*
+
     if (scene.volume)
     {
-        Ray volumeRay{ray.origin - scene.volumePos, ray.direction};
+        Ray volumeRay = ray;
+        if (settings.useBox)
+        {
+            getBounds(volumeRay, settings);
+        }
+        volumeRay.origin -= scene.volumePos;
+
         if ((settings.renderType == 1 && castRayWoodcockFast(*scene.volume, volumeRay, intersection, settings, sampler)) ||
             (settings.renderType == 2 && castRayWoodcockFast2(*scene.volume, volumeRay, intersection, settings, sampler)))
         {
@@ -37,7 +61,7 @@ bool getClosestIntersection(
             closestIntersection.position += scene.volumePos;
         }
     }
-//*/
+
     for (int i = 0; i < (int)scene.objects.size(); ++i)
     {
         if (scene.objects[i]->getIntersection(ray, intersection))

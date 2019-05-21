@@ -20,11 +20,12 @@ public:
 
     Vec3f backgroundLight;
 
+    bool useBox;
+    BoundingBox bb;
+
     float stepSize;
     float densityScale;
     float gradientFactor;
-
-    //float slice;
 
     int octreeLevels;
 
