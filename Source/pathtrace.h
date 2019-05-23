@@ -157,6 +157,7 @@ Vec3f trace(
             // Isotropic
             else
             {
+                throughput *= 2.0f; // TODO: probably wrong, but looks better
                 material = std::make_shared<Isotropic>(Isotropic{std::make_shared<ColourTexture>(ColourTexture{{out.x, out.y,  out.z}})});
             }
         }
