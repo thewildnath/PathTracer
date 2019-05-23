@@ -3,7 +3,7 @@
 
 #include "object.h"
 #include "sampler.h"
-#include "surfaceinteraction.h"
+#include "scatterevent.h"
 #include "vector_type.h"
 
 #include <memory>
@@ -16,7 +16,7 @@ class LightHit
 {
 public:
     Vec3f colour;
-    float intensity;
+    float pdf;
 
     Vec3f direction; // Normalised vector pointing to the source. Equal to the normal in case of AbstractLight.
     float distance;
@@ -41,11 +41,17 @@ public:
     Light(Vec3f const& colour, float intensity):
         colour(colour), intensity(intensity) {};
 
-    virtual LightHit illuminate(SurfaceInteraction const&, Sampler &) const = 0;
+    virtual LightHit illuminate(ScatterEvent const&, Sampler &) const = 0;
 
-    virtual Vec3f getEmittance()
+    virtual Vec3f getEmittance(ScatterEvent const& interaction) const
     {
-        return colour * intensity;
+        // Do not illuminate on the back side
+        return colour * intensity * std::max(0.0f, dot(interaction.normal, interaction.outputDir));
+    }
+
+    virtual float getIntensity() const
+    {
+        return intensity;
     }
 
     virtual LightType getType() const = 0;
@@ -63,13 +69,41 @@ public:
     AbstractLight(Vec3f const& colour, float intensity):
         Light(colour, intensity) {};
 
-    LightHit illuminate(SurfaceInteraction const& interaction, Sampler&) const override
+    LightHit illuminate(ScatterEvent const& interaction, Sampler&) const override
     {
         LightHit lightHit;
 
-        lightHit.colour = colour;
-        lightHit.intensity = intensity;
+        lightHit.colour = colour * intensity;
+        lightHit.pdf = 1;
         lightHit.direction = interaction.normal;
+
+        return lightHit;
+    }
+
+    LightType getType() const override
+    {
+        return LightType_Abstract;
+    }
+};
+
+// Background light, comes from any direction
+// Should be used on the scene member variable, not the light list
+class BackgroundLight : public Light
+{
+private:
+    Vec3f colour;
+    float intensity;
+
+public:
+    BackgroundLight(Vec3f const& colour, float intensity):
+        Light(colour, intensity) {};
+
+    LightHit illuminate(ScatterEvent const&, Sampler&) const override
+    {
+        LightHit lightHit;
+
+        lightHit.colour = colour * intensity;
+        lightHit.pdf = 1;
 
         return lightHit;
     }
@@ -90,17 +124,17 @@ public:
     PointLight(Vec3f const& colour, float intensity, Vec3f const& position):
         Light(colour, intensity), position(position) {};
 
-    LightHit illuminate(SurfaceInteraction const& interaction, Sampler&) const override
+    LightHit illuminate(ScatterEvent const& interaction, Sampler&) const override
     {
         LightHit lightHit;
 
-        lightHit.colour = colour;
+        lightHit.colour = colour * intensity * (float)M_1_PI;
 
-        lightHit.direction = this->position - interaction.getSafePosition();
+        lightHit.direction = this->position - interaction.position;
         lightHit.distance = lightHit.direction.length();
         lightHit.direction /= lightHit.distance;
 
-        lightHit.intensity = intensity / (float)(4 * M_PI * lightHit.distance * lightHit.distance);
+        lightHit.pdf = (float)(4.0f * M_1_PI * lightHit.distance * lightHit.distance);
 
         return lightHit;
     }
@@ -121,16 +155,16 @@ public:
     DirectionalLight(Vec3f const& colour, float intensity, Vec3f const& direction):
         Light(colour, intensity), direction(normalise(direction)) {};
 
-    LightHit illuminate(SurfaceInteraction const&, Sampler&) const override
+    LightHit illuminate(ScatterEvent const&, Sampler&) const override
     {
         LightHit lightHit;
 
-        lightHit.colour = colour;
+        lightHit.colour = colour * intensity;
 
         lightHit.direction = -direction; // TODO: generate slightly random direction
         lightHit.distance = INF;
 
-        lightHit.intensity = intensity;
+        lightHit.pdf = 1.0f;
 
         return lightHit;
     }
@@ -141,7 +175,7 @@ public:
     }
 };
 
-class ObjectLight : public Light
+class ObjectLight : public Light // TODO: Add m_area for scaling luminosity with size
 {
 private:
     std::shared_ptr<Object> object;
@@ -150,20 +184,20 @@ public:
     ObjectLight(Vec3f const& colour, float intensity, std::shared_ptr<Object> object):
         Light(colour, intensity), object(object) {};
 
-    LightHit illuminate(SurfaceInteraction const& interaction, Sampler &sampler) const override
+    LightHit illuminate(ScatterEvent const& interaction, Sampler &sampler) const override
     {
         LightHit lightHit;
 
-        SurfaceInteraction source = object->sampleSurface(sampler);
+        ScatterEvent source = object->sampleSurface(sampler);
 
-        lightHit.colour = colour;
+        lightHit.colour = colour * intensity * (float)M_1_PI;
 
-        lightHit.direction = source.position - interaction.getSafePosition();
+        lightHit.direction = source.position - interaction.position;
         lightHit.distance = lightHit.direction.length();
         lightHit.direction /= lightHit.distance;
 
-        lightHit.intensity = intensity / (float)(4 * M_PI * lightHit.distance * lightHit.distance);
-        lightHit.intensity = lightHit.intensity * std::max(0.0f, dot(source.normal, -lightHit.direction));
+        lightHit.pdf = (float)M_1_PI * lightHit.distance * lightHit.distance;
+        lightHit.pdf /= std::max(0.0f, dot(source.normal, -lightHit.direction));
 
         return lightHit;
     }

@@ -1,12 +1,13 @@
 #ifndef RAYTRACER_OBJECT_H
 #define RAYTRACER_OBJECT_H
 
+#include "boundingbox.h"
 #include "intersection.h"
 #include "geometry.h"
 #include "math_utils.h"
 #include "ray.h"
 #include "sampler.h"
-#include "surfaceinteraction.h"
+#include "scatterevent.h"
 
 #include <memory>
 #include <vector>
@@ -21,16 +22,24 @@ public:
 
     std::shared_ptr<Geometry> geometry;
 
+    BoundingBox boundingBox;
+
     Object(
         Vec3f const& position,
-        std::shared_ptr<Geometry> geometry):
-        position(position), geometry(geometry) {};
+        std::shared_ptr<Geometry> const& geometry):
+        position(position), geometry(geometry)
+    {
+        //boundingBox = geometry->getBoundingBox();
+    };
 
     bool getIntersection(Ray ray, Intersection& intersection) const
     {
         ray.origin -= position;
 
-        if (!geometry->getIntersection(ray, intersection))
+        //BBIntersection bbIntersection;
+        //boundingBox.getIntersection(ray, bbIntersection);
+
+        if (/*!bbIntersection.valid ||*/ !geometry->getIntersection(ray, intersection))
         {
             return false;
         }
@@ -40,9 +49,9 @@ public:
         return true;
     }
 
-    SurfaceInteraction sampleSurface(Sampler &sampler)
+    ScatterEvent sampleSurface(Sampler &sampler)
     {
-        SurfaceInteraction interaction = geometry->sampleSurface(sampler);
+        ScatterEvent interaction = geometry->sampleSurface(sampler);
         interaction.position += position;
 
         return interaction;

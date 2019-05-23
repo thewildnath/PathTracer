@@ -1,6 +1,7 @@
 #ifndef RAYTRACER_INTERSECTION_H
 #define RAYTRACER_INTERSECTION_H
 
+#include "enums.h"
 #include "vector_type.h"
 
 namespace scg
@@ -17,6 +18,7 @@ struct Intersection
     Vec3f normal;
 
     // Material information
+    SurfaceType surfaceType;
     size_t materialID;
     Vec2f uv;
 };

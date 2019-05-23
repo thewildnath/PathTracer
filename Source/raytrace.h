@@ -2,10 +2,9 @@
 #define RAYTRACE_H
 
 #include "intersection.h"
-#include "object.h"
 #include "sampler.h"
 #include "scene.h"
-#include "triangle.h"
+#include "settings.h"
 #include "vector_type.h"
 #include "ray.h"
 
@@ -17,13 +16,10 @@ namespace scg
 bool getClosestIntersection(
     Scene const& scene,
     Ray const& ray,
-    Intersection &closestIntersection);
-
-Vec3f trace(
-    Scene const& scene,
-    Ray const& ray,
-    int depth,
+    Intersection& closestIntersection,
+    Settings const& settings,
     Sampler &sampler);
+
 }
 
 #endif //RAYTRACE_H

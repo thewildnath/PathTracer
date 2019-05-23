@@ -10,14 +10,16 @@ namespace scg
 class Triangle
 {
 public:
-    Vec3f v0;
-    Vec3f v1;
-    Vec3f v2;
+    Vec3f v0; Vec2f uv0;
+    Vec3f v1; Vec2f uv1;
+    Vec3f v2; Vec2f uv2;
     Vec3f normal;
 
     size_t materialID;
 
     Triangle(Vec3f v0, Vec3f v1, Vec3f v2, size_t materialID);
+
+    Triangle(Vec3f v0, Vec2f uv0, Vec3f v1, Vec2f uv1, Vec3f v2, Vec2f uv2, size_t materialID);
 
     void ComputeNormal();
 };

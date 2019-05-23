@@ -282,6 +282,7 @@ public:
 typedef Vector<2, int> Vec2i;
 typedef Vector<2, float> Vec2f;
 typedef Vector<3, float> Vec3f;
+typedef Vector<4, float> Vec4f;
 
 // Vector methods
 template<int DIM, typename T>
@@ -370,7 +371,25 @@ inline Vector<3, T> rotateZ(Vector<3, T> const& a, float radians)
 template<typename T>
 inline Vector<3, T> rotate(Vector<3, T> const& a, Vector<3, T> const& rot)
 {
-    return rotateZ(rotateX(rotateY(a, toRadians(rot.y)), toRadians(rot.x)), toRadians(rot.z));
+    return rotateZ(rotateY(rotateX(a, toRadians(rot.x)), toRadians(rot.y)), toRadians(rot.z));
+}
+
+inline Vec3f minV(Vec3f const& v1, Vec3f const& v2)
+{
+    return Vec3f(
+        fminf(v1.x, v2.x),
+        fminf(v1.y, v2.y),
+        fminf(v1.z, v2.z)
+    );
+}
+
+inline Vec3f maxV(Vec3f const& v1, Vec3f const& v2)
+{
+    return Vec3f(
+        fmaxf(v1.x, v2.x),
+        fmaxf(v1.y, v2.y),
+        fmaxf(v1.z, v2.z)
+    );
 }
 
 }

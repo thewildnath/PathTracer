@@ -1,0 +1,25 @@
+densityScale 0.4
+gradientFactor 7.5
+stepSize 0.2
+minDepth 5
+maxDepth 50
+gamma 1.75
+background 0.5 1.0 1.0 1.0
+box 0 100 100 0 0
+
+mat Lambert Lambert
+mat Meat Phong 0.9 0.1 Lambert Glossy 100
+mat Bone Phong 0.8 0.4 Lambert Glossy 30
+
+transform
+0 0 0 0 0 Meat
+1400 0 255 191 127 Meat
+1500 1 255 191 127 Meat
+1500 1 255 191 127 Meat
+1800 1 180 100 100 Meat
+2000 1 180 100 100 Meat
+2000 1 255 80 65 Meat
+2300 1 255 80 65 Meat
+2400 1 227 218 201 Bone
+2400 100000 227 218 201 Bone
+100000 10000 227 218 201 Bone
