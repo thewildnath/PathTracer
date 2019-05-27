@@ -29,6 +29,8 @@ public:
         int py = (int)(pos.y - 0.5f);
         int pz = (int)(pos.z - 0.5f);
 
+        //return data[px][py][pz];
+
         float dx = pos.x - px - 0.5f;
         float dy = pos.y - py - 0.5f;
         float dz = pos.z - pz - 0.5f;

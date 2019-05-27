@@ -52,7 +52,8 @@ bool getClosestIntersection(
         }
         volumeRay.origin -= scene.volumePos;
 
-        if ((settings.renderType == 1 && castRayWoodcockFast(*scene.volume, volumeRay, intersection, settings, sampler)) ||
+        if ((settings.renderType == 0 && castRayWoodcock(*scene.volume, volumeRay, intersection, settings, sampler)) ||
+            (settings.renderType == 1 && castRayWoodcockFast(*scene.volume, volumeRay, intersection, settings, sampler)) ||
             (settings.renderType == 2 && castRayWoodcockFast2(*scene.volume, volumeRay, intersection, settings, sampler)))
         {
             minDistance = intersection.distance;
