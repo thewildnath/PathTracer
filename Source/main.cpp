@@ -65,6 +65,7 @@ int main(int argc, char *argv[])
     //scene = scg::loadTestModel(80.0f);
     scg::loadBrain(volume, temp, scene, settings);
     //scg::loadManix(volume, temp, scene, settings);
+    //scg::loadBunny(volume, temp, scene, settings);
 
     // Start main loop
     while (Update(screen))
@@ -74,7 +75,7 @@ int main(int argc, char *argv[])
     }
 
     // Save and finish
-    saveScreenshot(screen);
+    //saveScreenshot(screen);
     KillSDL(screen);
 
     return 0;

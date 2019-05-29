@@ -252,7 +252,7 @@ void loadBrain(scg::Volume& volume, scg::Volume& temp, Scene &scene, scg::Settin
     scene.lights.emplace_back(std::make_shared<scg::DirectionalLight>(scg::DirectionalLight{{1.0f, 1.0f, 1.0f}, M_PI, {1.0f, 0.5f, 1.0f}}));
 }
 
-void loadManix(scg::Volume& volume, scg::Volume& temp, Scene &scene, scg::Settings &settings)
+void loadManix(Volume& volume, Volume& temp, Scene &scene, Settings &settings)
 {
     std::ifstream fin;
     fin.open("../data/Manix/manix.raw");
@@ -307,6 +307,64 @@ void loadManix(scg::Volume& volume, scg::Volume& temp, Scene &scene, scg::Settin
     // Directional lights
     scene.lights.emplace_back(std::make_shared<scg::DirectionalLight>(scg::DirectionalLight{{1.0f, 1.0f, 1.0f}, M_PI, {1.0f, 0.5f, 1.0f}}));
 }
+
+void loadBunny(Volume& volume, Volume& temp, Scene &scene, Settings &settings)
+{
+    char filename[50] = "../data/StanfordBunny/";
+
+    std::ifstream fin;
+
+    int width = 360;
+    int height = 512;
+    int depth = 512;
+
+    uint16_t val;
+
+    for (int x = 0; x < width; ++x)
+    {
+        sprintf(filename + 22, "%d", x + 1);
+        std::cout << "Loading: " << filename << std::endl;
+
+        fin.open(filename);
+
+        for (int y = 0; y < height; ++y)
+        {
+            for (int z = 0; z < depth; ++z)
+            {
+                fin.read((char*)&val, 2);
+
+                temp.data[z][y][x] = val + 1000;
+            }
+        }
+
+        fin.close();
+    }
+
+    for (int x = 0; x < volume.width; ++x)
+    {
+        for (int y = 0; y < volume.height; ++y)
+        {
+            for (int z = 0; z < volume.height; ++z)
+            {
+                volume.data[z][y][x] = temp.sampleVolume(Vec3f(z, y, x / 1.3f));
+            }
+        }
+    }
+
+    volume.octree.bb = BoundingBox(Vec3f(0 + V_EPS, 0 + V_EPS, 0 + V_EPS), Vec3f(512 - V_EPS, 512 - V_EPS, 512 - V_EPS));
+    buildOctree(volume, volume.octree, settings.octreeLevels, settings);
+
+    scene.volume = std::make_shared<Volume>(volume);
+    scene.volumePos = Vec3f{-255, -255, -255};
+
+    std::cout << "Done loadBrain." << std::endl;
+
+    // Point lights
+    //scene.lights.emplace_back(std::make_shared<scg::PointLight>(scg::PointLight{{1.0f, 1.0f, 1.0f}, 20 * 80 * 80, {0, 0, 0}}));//Vec3f{0.0f, -0.75f, 0.0f} * 80}));
+    // Directional lights
+    scene.lights.emplace_back(std::make_shared<scg::DirectionalLight>(scg::DirectionalLight{{1.0f, 1.0f, 1.0f}, M_PI, {1.0f, 0.5f, 1.0f}}));
+}
+
 
 Scene loadTestModel(float size)
 {

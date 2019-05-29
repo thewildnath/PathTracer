@@ -4,7 +4,7 @@
 #include "octree.h"
 #include "settings.h"
 
-#define VOLUME_SIZE 256
+#define VOLUME_SIZE 512
 #define V_EPS 2
 
 namespace scg
