@@ -1,15 +1,18 @@
-densityScale 0.4
+densityScale 100
 gradientFactor 7.5
 stepSize 0.2
-minDepth 10
-maxDepth 50
-gamma 1.75
-background 0.5 1.0 1.0 1.0
-box 0 100 0 0 80
+minDepth 5
+maxDepth 20
+gamma 1.1
+background 1.5 1.0 1.0 1.0
+box 0 100 -100 0 0
 
 mat Lambert Lambert
 mat Meat Phong 0.9 0.1 Lambert Glossy 100
 mat Bone Phong 0.8 0.4 Lambert Glossy 30
+
+mat Meat1 Mirror
+mat Bone1 Mirror
 
 transform
 0 0 0 0 0 Meat

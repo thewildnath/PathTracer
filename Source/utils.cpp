@@ -64,6 +64,9 @@ std::shared_ptr<Material> parseMaterial(std::ifstream &fin, std::shared_ptr<Text
         std::shared_ptr<Glossy> glossy = std::dynamic_pointer_cast<Glossy>(parseMaterial(fin, texture));
 
         return std::make_shared<Phong>(lambert, glossy, kd, ks);
+    } else if (type == "Mirror")
+    {
+        return std::make_shared<Mirror>(texture);
     }
 
     return nullptr;
@@ -242,7 +245,7 @@ void loadBrain(scg::Volume& volume, scg::Volume& temp, Scene &scene, scg::Settin
     buildOctree(volume, volume.octree, settings.octreeLevels, settings);
 
     scene.volume = std::make_shared<Volume>(volume);
-    scene.volumePos = Vec3f{-135, -141, -75};
+    scene.volumePos = Vec3f{-135, -141, -75};// scene.volumePos.x += 50.0f;
 
     std::cout << "Done loadBrain." << std::endl;
 
@@ -579,7 +582,7 @@ Scene loadTestModel(float size)
     scene.lights.emplace_back(lightPtr);
     scene.materials.emplace_back(std::make_shared<scg::Lambert>(scg::Lambert{texture, lightPtr}));
 //*/
-//*
+/*
     std::shared_ptr<scg::Object> sphere = std::make_shared<scg::Object>(scg::Object{
         Vec3f{ -0.4, 0.1, 0.2} * size,
         std::make_shared<scg::Sphere>(0.35 * size, 7)

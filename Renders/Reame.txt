@@ -1,0 +1,14 @@
+The folder 'Thesis' contains the exact renders used in the thesis.
+Here I included some higher resolution renders that should better demonstrate the algorithm. Most of them are rendered with 300 iterations using the submitted code.
+
+The files 'TF#' use the same transfer function conffiguration but with different transparency values for the tissues.
+Note the different materials types (e.g. bone vs skin). Also note the shadow that the nose casts on the check in picture TF5 vs TF6.
+
+Pictures 'Indirect-without' and 'Indirect-with' show the same image traced with 1, respectively 50 rays per sample.
+Indirect light contributes greatly to the image quality and depth perception.
+Similarity, 'Subsurface-without' and 'Subsurface-with' show the same image traced with 1, respectively 50 rays per sample.
+
+The file 'Mirror' shows the volume rendered with a mirror BRDF inside the Cornell box.
+In this case, a more sophisticated interpolation algorithm would make a large difference (trilinear interpolation's main advantage is its performance).
+
+Finally, the file 'Cornell' shows the standard volume inside the Cornell box. This scene presents a nice mix of direct and indirect lighting, colour bleeding, volumetric shadows and specular highlights.
