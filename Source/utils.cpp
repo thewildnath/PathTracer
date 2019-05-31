@@ -64,6 +64,9 @@ std::shared_ptr<Material> parseMaterial(std::ifstream &fin, std::shared_ptr<Text
         std::shared_ptr<Glossy> glossy = std::dynamic_pointer_cast<Glossy>(parseMaterial(fin, texture));
 
         return std::make_shared<Phong>(lambert, glossy, kd, ks);
+    } else if (type == "Mirror")
+    {
+        return std::make_shared<Mirror>(texture);
     }
 
     return nullptr;
@@ -242,7 +245,7 @@ void loadBrain(scg::Volume& volume, scg::Volume& temp, Scene &scene, scg::Settin
     buildOctree(volume, volume.octree, settings.octreeLevels, settings);
 
     scene.volume = std::make_shared<Volume>(volume);
-    scene.volumePos = Vec3f{-135, -141, -75};
+    scene.volumePos = Vec3f{-135, -141, -75};// scene.volumePos.x += 50.0f;
 
     std::cout << "Done loadBrain." << std::endl;
 
@@ -252,7 +255,7 @@ void loadBrain(scg::Volume& volume, scg::Volume& temp, Scene &scene, scg::Settin
     scene.lights.emplace_back(std::make_shared<scg::DirectionalLight>(scg::DirectionalLight{{1.0f, 1.0f, 1.0f}, M_PI, {1.0f, 0.5f, 1.0f}}));
 }
 
-void loadManix(scg::Volume& volume, scg::Volume& temp, Scene &scene, scg::Settings &settings)
+void loadManix(Volume& volume, Volume& temp, Scene &scene, Settings &settings)
 {
     std::ifstream fin;
     fin.open("../data/Manix/manix.raw");
@@ -307,6 +310,64 @@ void loadManix(scg::Volume& volume, scg::Volume& temp, Scene &scene, scg::Settin
     // Directional lights
     scene.lights.emplace_back(std::make_shared<scg::DirectionalLight>(scg::DirectionalLight{{1.0f, 1.0f, 1.0f}, M_PI, {1.0f, 0.5f, 1.0f}}));
 }
+
+void loadBunny(Volume& volume, Volume& temp, Scene &scene, Settings &settings)
+{
+    char filename[50] = "../data/StanfordBunny/";
+
+    std::ifstream fin;
+
+    int width = 360;
+    int height = 512;
+    int depth = 512;
+
+    uint16_t val;
+
+    for (int x = 0; x < width; ++x)
+    {
+        sprintf(filename + 22, "%d", x + 1);
+        std::cout << "Loading: " << filename << std::endl;
+
+        fin.open(filename);
+
+        for (int y = 0; y < height; ++y)
+        {
+            for (int z = 0; z < depth; ++z)
+            {
+                fin.read((char*)&val, 2);
+
+                temp.data[z][y][x] = val + 1000;
+            }
+        }
+
+        fin.close();
+    }
+
+    for (int x = 0; x < volume.width; ++x)
+    {
+        for (int y = 0; y < volume.height; ++y)
+        {
+            for (int z = 0; z < volume.height; ++z)
+            {
+                volume.data[z][y][x] = temp.sampleVolume(Vec3f(z, y, x / 1.3f));
+            }
+        }
+    }
+
+    volume.octree.bb = BoundingBox(Vec3f(0 + V_EPS, 0 + V_EPS, 0 + V_EPS), Vec3f(512 - V_EPS, 512 - V_EPS, 512 - V_EPS));
+    buildOctree(volume, volume.octree, settings.octreeLevels, settings);
+
+    scene.volume = std::make_shared<Volume>(volume);
+    scene.volumePos = Vec3f{-255, -255, -255};
+
+    std::cout << "Done loadBrain." << std::endl;
+
+    // Point lights
+    //scene.lights.emplace_back(std::make_shared<scg::PointLight>(scg::PointLight{{1.0f, 1.0f, 1.0f}, 20 * 80 * 80, {0, 0, 0}}));//Vec3f{0.0f, -0.75f, 0.0f} * 80}));
+    // Directional lights
+    scene.lights.emplace_back(std::make_shared<scg::DirectionalLight>(scg::DirectionalLight{{1.0f, 1.0f, 1.0f}, M_PI, {1.0f, 0.5f, 1.0f}}));
+}
+
 
 Scene loadTestModel(float size)
 {
@@ -521,7 +582,7 @@ Scene loadTestModel(float size)
     scene.lights.emplace_back(lightPtr);
     scene.materials.emplace_back(std::make_shared<scg::Lambert>(scg::Lambert{texture, lightPtr}));
 //*/
-//*
+/*
     std::shared_ptr<scg::Object> sphere = std::make_shared<scg::Object>(scg::Object{
         Vec3f{ -0.4, 0.1, 0.2} * size,
         std::make_shared<scg::Sphere>(0.35 * size, 7)

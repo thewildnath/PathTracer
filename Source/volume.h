@@ -4,7 +4,7 @@
 #include "octree.h"
 #include "settings.h"
 
-#define VOLUME_SIZE 256
+#define VOLUME_SIZE 512
 #define V_EPS 2
 
 namespace scg
@@ -28,6 +28,8 @@ public:
         int px = (int)(pos.x - 0.5f);
         int py = (int)(pos.y - 0.5f);
         int pz = (int)(pos.z - 0.5f);
+
+        //return data[px][py][pz];
 
         float dx = pos.x - px - 0.5f;
         float dy = pos.y - py - 0.5f;

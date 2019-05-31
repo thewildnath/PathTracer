@@ -17,7 +17,7 @@
 #include <omp.h>
 #include <string>
 
-#define RES 400
+#define RES 650
 #define SCREEN_WIDTH  RES
 #define SCREEN_HEIGHT RES
 
@@ -62,9 +62,10 @@ int main(int argc, char *argv[])
     // Initialise scene
     settings = scg::loadSettings();
     scg::loadSettingsFile(settings);
-    //scene = scg::loadTestModel(80.0f);
+    //scene = scg::loadTestModel(150.0f);
     scg::loadBrain(volume, temp, scene, settings);
     //scg::loadManix(volume, temp, scene, settings);
+    //scg::loadBunny(volume, temp, scene, settings);
 
     // Start main loop
     while (Update(screen))
@@ -74,7 +75,7 @@ int main(int argc, char *argv[])
     }
 
     // Save and finish
-    saveScreenshot(screen);
+    //saveScreenshot(screen);
     KillSDL(screen);
 
     return 0;
@@ -125,6 +126,10 @@ bool Update(screen *screen)
             int key_code = e.key.keysym.sym;
             switch (key_code)
             {
+                case SDLK_0:
+                    settings.renderType = 0;
+                    InitialiseBuffer();
+                    break;
                 case SDLK_1:
                     settings.renderType = 1;
                     InitialiseBuffer();
