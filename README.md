@@ -10,4 +10,4 @@ This project is based on [Exposure Render](https://github.com/ThomasKroes/exposu
 ![Transparent](Renders/TF7.bmp?raw=true "Transparent")
 ![Skin](Renders/TF4.bmp?raw=true "Skin")
 
-While the algorithm is optimised, the code was written is far from it. Written in C++ 17 and parallelised on the CPU using OpenMP. Depending on the rendering parameters, it runs between 2-10 FPS in 400x400 on an Intel Core i7-6700HQ.
+Although the algorithm is optimised, the code is not due to time constraints. Written in C++ 17 and parallelised on the CPU using OpenMP. Depending on the rendering parameters, it runs between 2-10 FPS in 400x400 on an Intel Core i7-6700HQ.
