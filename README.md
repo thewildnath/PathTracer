@@ -1,6 +1,6 @@
 ![Cornell box](Renders/Cornell.bmp?raw=true "Cornell box")
 
-"A Physically Based Lighting Model for Interactive Direct Volume Rendering" was the name of my dissertation for BSc of Computer Science at the University of Bristol. This repo contains the source code for my project plus some interesting renders that provide a good example of what the program is capable of.
+"A Physically Based Lighting Model for Interactive Direct Volume Rendering" was the title of my dissertation for BSc of Computer Science at the University of Bristol. This repo contains the source code for my project plus some interesting renders that provide a good example of what the program is capable of.
 
 # Path Tracer
 
